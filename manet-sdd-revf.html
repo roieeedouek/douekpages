@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SDD Rev F — Dual-Realm MANET Platforms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<style>
+:root{
+  /* Rev E readable palette: dark text everywhere, saturated borders/lines, white diagram fills */
+  --paper:#F3F5F6; --sheet:#FFFFFF; --ink:#101820; --rule:#8FA3B1; --faint:#E7EDF1;
+  --data:#1257B8;   /* data plane — strong blue   */
+  --ctrl:#D9530B;   /* control plane — strong orange */
+  --mesh:#1E7A37;   /* radio / air — strong green */
+  --name:#7A1FA2;   /* name service — strong purple */
+  --nat:#C62828;    /* NAT boundary — strong red  */
+  --t-data:#0A3D85; --t-ctrl:#9C3B05; --t-mesh:#145726; --t-name:#581572; --t-nat:#8E1B1B; /* text-safe darks */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);
+  background-image:linear-gradient(var(--faint) 1px,transparent 1px),linear-gradient(90deg,var(--faint) 1px,transparent 1px);
+  background-size:28px 28px;color:var(--ink);
+  font-family:'Source Sans 3',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:16.5px;line-height:1.62;padding:18px 12px 80px}
+.sheet{max-width:920px;margin:0 auto 26px;background:var(--sheet);border:2px solid var(--ink);
+  box-shadow:4px 4px 0 rgba(16,24,32,.15);padding:26px 22px 30px;position:relative}
+@media(min-width:700px){.sheet{padding:34px 40px 40px}}
+h1,h2,h3,h4,.tb-label,.eyebrow{font-family:'Barlow Condensed','Arial Narrow',sans-serif}
+.eyebrow{display:flex;align-items:center;gap:10px;font-size:.84rem;font-weight:700;letter-spacing:.22em;
+  text-transform:uppercase;margin-bottom:8px}
+.eyebrow::after{content:"";flex:1;height:1.5px;background:var(--ink);opacity:.4}
+.eyebrow .no{border:1.5px solid var(--ink);padding:1px 8px;font-size:.8rem}
+h2{font-size:1.85rem;font-weight:700;letter-spacing:.02em;line-height:1.1;margin-bottom:14px}
+h3{font-size:1.2rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:26px 0 8px}
+p{margin-bottom:13px}
+strong{font-weight:600}
+mark{background:none;color:var(--t-ctrl);font-weight:600}
+code,.mono{font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em}
+code{background:var(--faint);padding:.08em .35em;border:1px solid var(--rule)}
+pre{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.8rem;line-height:1.58;background:#15222D;
+  color:#EAF2F8;padding:14px 16px;overflow-x:auto;margin:12px 0;border-left:5px solid var(--data)}
+pre .c{color:#9DBACD}pre .k{color:#FFB077}
+.titleblock{border:2px solid var(--ink)}
+.titleblock .row{display:flex;flex-wrap:wrap;border-bottom:2px solid var(--ink)}
+.titleblock .row:last-child{border-bottom:none}
+.tb-cell{padding:8px 12px;border-right:2px solid var(--ink);flex:1;min-width:118px}
+.tb-cell:last-child{border-right:none}
+.tb-label{display:block;font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;opacity:.7;margin-bottom:1px}
+.tb-val{font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:500}
+.tb-title{font-family:'Barlow Condensed',sans-serif;font-size:1.55rem;font-weight:700;line-height:1.08;letter-spacing:.02em;padding:14px 12px}
+@media(min-width:700px){.tb-title{font-size:2.15rem}}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:10px 0 4px;font-family:'IBM Plex Mono',monospace;font-size:.74rem;letter-spacing:.04em;font-weight:600}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:24px;height:0;border-top:4px solid}
+.lg-data i{border-color:var(--data)} .lg-ctrl i{border-color:var(--ctrl)}
+.lg-mesh i{border-top-style:dashed;border-color:var(--mesh)}
+.lg-name i{border-color:var(--name)} .lg-nat i{border-color:var(--nat);border-top-style:double;border-top-width:5px}
+.diagram{border:1.5px solid var(--ink);background:#fff;margin:14px 0 6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:10px 6px}
+.diagram .mermaid{min-width:640px}
+.diagram.svgwrap{padding:0}
+.diagram.svgwrap svg{display:block;min-width:680px;width:100%;height:auto}
+.caption{font-size:.82rem;font-family:'IBM Plex Mono',monospace;color:#2B3947;margin:4px 0 18px;padding-left:2px}
+.caption b{color:var(--t-ctrl)}
+.cards{display:grid;gap:12px;grid-template-columns:1fr;margin:16px 0}
+@media(min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+@media(min-width:880px){.cards.three{grid-template-columns:1fr 1fr 1fr}}
+.card{border:1.5px solid var(--ink);background:#fff;padding:14px 16px}
+.card h5{font-family:'Barlow Condensed',sans-serif;font-size:1.04rem;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:6px;display:flex;gap:8px;align-items:baseline}
+.card h5 .pin{font-family:'IBM Plex Mono',monospace;font-size:.74rem;color:var(--t-ctrl)}
+.card p{font-size:.92rem;margin:0}
+.note{border-left:6px solid var(--ctrl);background:#FFF2E8;padding:12px 16px;margin:16px 0;font-size:.94rem}
+.note.blue{border-color:var(--data);background:#EAF1FB}
+.note.green{border-color:var(--mesh);background:#EAF5ED}
+.note.purple{border-color:var(--name);background:#F5EBFA}
+.note.red{border-color:var(--nat);background:#FBEAEA}
+.note b:first-child{font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;font-size:.88rem;display:block;margin-bottom:3px}
+.twrap{overflow-x:auto;margin:12px 0 6px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.87rem;background:#fff}
+th{font-family:'Barlow Condensed',sans-serif;font-size:.84rem;letter-spacing:.1em;text-transform:uppercase;
+  text-align:left;background:var(--ink);color:#fff;padding:7px 10px;font-weight:600}
+td{border:1px solid var(--rule);padding:7px 10px;vertical-align:top}
+td.mono,th.mono{font-family:'IBM Plex Mono',monospace;font-size:.79rem;white-space:nowrap}
+tr.inj td{background:#FFF2E8} tr.ospf td{background:#EAF1FB} tr.dns td{background:#F5EBFA} tr.natr td{background:#FBEAEA}
+.src{font-family:'IBM Plex Mono',monospace;font-size:.7rem;font-weight:600;padding:1px 6px;border:1.5px solid;white-space:nowrap}
+.src.s-inj{color:var(--t-ctrl);border-color:var(--ctrl)} .src.s-ospf{color:var(--t-data);border-color:var(--data)}
+.src.s-conn{color:var(--t-mesh);border-color:var(--mesh)} .src.s-dns{color:var(--t-name);border-color:var(--name)}
+.src.s-nat{color:var(--t-nat);border-color:var(--nat)}
+.bars{margin:14px 0}
+.bar{display:grid;grid-template-columns:170px 1fr 96px;gap:10px;align-items:center;margin-bottom:9px;font-size:.83rem}
+.bar .lbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:.82rem;line-height:1.2}
+.bar .track{background:var(--faint);height:18px;position:relative;border:1.5px solid var(--ink)}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;background:var(--ctrl)}
+.bar .fill.d{background:var(--data)} .bar .fill.p{background:var(--name)}
+.bar .val{font-family:'IBM Plex Mono',monospace;font-size:.77rem;text-align:right;font-weight:600}
+.foot{font-size:.8rem;font-family:'IBM Plex Mono',monospace;color:#2B3947;margin-top:8px}
+.lt{margin:14px 0}
+.lt .row{display:grid;grid-template-columns:160px 1fr 76px;gap:10px;align-items:center;margin-bottom:10px;font-size:.8rem}
+.lt .lbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;line-height:1.2}
+.lt .stackbar{display:flex;height:24px;border:1.5px solid var(--ink);background:var(--faint)}
+.lt .seg{height:100%;position:relative}
+.lt .seg span{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:600;color:#fff;white-space:nowrap;text-shadow:0 1px 1px rgba(0,0,0,.45)}
+.sg-mesh{background:var(--mesh)} .sg-lan{background:#5B6B78} .sg-dns{background:var(--name)} .sg-tcp{background:#8C6D1F}
+.lt .tot{font-family:'IBM Plex Mono',monospace;font-size:.8rem;text-align:right;font-weight:700}
+ol.walk{counter-reset:s;list-style:none;margin:10px 0}
+ol.walk li{position:relative;padding:0 0 14px 44px;font-size:.95rem}
+ol.walk li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;
+  border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;background:#fff}
+ol.walk li::after{content:"";position:absolute;left:14px;top:30px;bottom:0;width:1.5px;background:var(--rule)}
+ol.walk li:last-child::after{display:none}
+ul{margin:0 0 13px 22px} li{margin-bottom:5px}
+.stacks{display:flex;gap:12px;overflow-x:auto;padding:6px 2px 10px;margin:12px 0}
+.stk{min-width:150px;border:2px solid var(--ink);background:#fff;flex:1}
+.stk h6{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;text-align:center;padding:6px 4px;background:var(--ink);color:#fff}
+.stk div{font-family:'IBM Plex Mono',monospace;font-size:.7rem;text-align:center;padding:7px 4px;border-top:1px solid var(--rule);color:var(--ink)}
+.stk .l-dns{background:#F5EBFA;font-weight:600} .stk .l-ip{background:#EAF1FB;font-weight:600}
+.stk .l-mac{background:#EAF5ED;font-weight:600} .stk .l-phy{background:var(--faint)}
+.stk .l-nat{background:#FBEAEA;font-weight:600} .stk .l-x{opacity:.35}
+.toc{columns:2;column-gap:30px;font-size:.9rem}
+.toc li{break-inside:avoid;margin-bottom:4px;font-family:'IBM Plex Mono',monospace;font-size:.82rem}
+@media(max-width:620px){.toc{columns:1}}
+.pn{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:2px solid var(--ink);background:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;margin-right:6px}
+.uc h3{display:flex;align-items:center}
+</style>
+</head>
+<body>
+
+<!-- ================= §0 COVER ================= -->
+<div class="sheet">
+  <div class="titleblock">
+    <div class="row"><div class="tb-title">SYSTEM DESIGN DESCRIPTION<br>
+      <span style="font-size:.62em;font-weight:600;letter-spacing:.04em">DUAL-REALM MANET PLATFORMS — SINGLE- &amp; DUAL-HOMED, CALLSIGN-NAMED</span><br>
+      <span style="font-size:.42em;font-weight:500;letter-spacing:.07em;opacity:.85">PER-MANET WAN REALMS · ANY DUAL-HOMED PLATFORM = GATEWAY · STATIC CALLSIGNS, REALM-AWARE DNS · THE WAY OF A PACKET, PER USE CASE</span></div></div>
+    <div class="row">
+      <div class="tb-cell"><span class="tb-label">Document No</span><span class="tb-val">SDD-MANET-IX-001</span></div>
+      <div class="tb-cell"><span class="tb-label">Rev</span><span class="tb-val">F</span></div>
+      <div class="tb-cell"><span class="tb-label">Air budget</span><span class="tb-val">1–2 kbps per radio</span></div>
+      <div class="tb-cell"><span class="tb-label">WAN realms</span><span class="tb-val">A: 172.20/16 · B: 172.21/16 (HW /32s)</span></div>
+    </div>
+    <div class="row">
+      <div class="tb-cell"><span class="tb-label">Supersedes</span><span class="tb-val">Rev E</span></div>
+      <div class="tb-cell"><span class="tb-label">Status</span><span class="tb-val">FOR REVIEW</span></div>
+      <div class="tb-cell" style="flex:2"><span class="tb-label">Rev F changes</span><span class="tb-val">distinct WAN realm per MANET · platforms single- or dual-homed (every dual = potential gateway) · gateway selection via member list · static platform callsigns with realm-aware DNS · §7 "Way of a Packet" use-case diagrams</span></div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:22px">Platform roster used throughout (callsign = static DNS identity)</h3>
+  <div class="twrap"><table>
+    <tr><th>Callsign</th><th>Homing</th><th class="mono">Realm-A addr (172.20/16)</th><th class="mono">Realm-B addr (172.21/16)</th><th class="mono">App LAN</th><th>Role</th></tr>
+    <tr><td class="mono">RHINO7</td><td>dual</td><td class="mono">172.20.250.1</td><td class="mono">172.21.250.1</td><td class="mono">192.168.10.0/24</td><td>TOC: primary gateway, authoritative DNS, HQ reach-back PAT</td></tr>
+    <tr><td class="mono">BADGER2</td><td>dual</td><td class="mono">172.20.77.40</td><td class="mono">172.21.90.15</td><td class="mono">192.168.4.0/24</td><td>mobile relay: secondary gateway</td></tr>
+    <tr><td class="mono">VIPER1</td><td>A only</td><td class="mono">172.20.14.7</td><td class="mono">—</td><td class="mono">192.168.1.0/24 (app .20)</td><td>member platform</td></tr>
+    <tr><td class="mono">OWL4</td><td>A only</td><td class="mono">172.20.203.55</td><td class="mono">—</td><td class="mono">192.168.2.0/24 (app .25)</td><td>member platform</td></tr>
+    <tr><td class="mono">KESTREL3</td><td>B only</td><td class="mono">—</td><td class="mono">172.21.8.211</td><td class="mono">192.168.3.0/24 (app .30)</td><td>member platform</td></tr>
+    <tr><td class="mono">HERON9</td><td>B only</td><td class="mono">—</td><td class="mono">172.21.66.9</td><td class="mono">—</td><td>member platform</td></tr>
+  </table></div>
+  <p class="caption">Addresses remain HW-derived /32s — but each radio is provisioned from ITS mesh's realm, so the destination prefix alone (172.20/16 vs 172.21/16) tells every router which MANET a packet must reach. Callsigns are static; the callsign→address map is provisioning data, while reachability stays dynamic.</p>
+
+  <h3>Contents</h3>
+  <ol class="toc">
+    <li>§1 Introduction &amp; the Rev F model</li>
+    <li>§2 Context &amp; design drivers</li>
+    <li>§3 Architecture — realms, homing, gateways</li>
+    <li>§4 Data design — FIBs, callsign zone, NAT</li>
+    <li>§5 Interface design (IF-0 … IF-9)</li>
+    <li>§6 Name service — callsigns, realm views</li>
+    <li>§7 THE WAY OF A PACKET — use cases UC-1…7</li>
+    <li>§8 NAT / PAT design</li>
+    <li>§9 Cost sharing, gateway scoring &amp; QoS</li>
+    <li>§10 Accounting · §11 Failures · §12 RTM · §13 Rules</li>
+  </ol>
+</div>
+
+<!-- ================= §1 MODEL ================= -->
+<div class="sheet">
+  <div class="eyebrow"><span class="no">§1</span>INTRODUCTION — THE REV F MODEL</div>
+  <h2>Realms, homing, callsigns</h2>
+
+  <p><strong>1.1 Distinct WAN realms.</strong> Each MANET constitutes its own WAN address realm: radios in
+  MANET A carry HW-derived /32s from <code>172.20.0.0/16</code>, radios in MANET B from
+  <code>172.21.0.0/16</code>. Consequences: (a) inter-mesh address collisions are impossible by plan (the Rev E
+  shadow-alias machinery is demoted to a misprovisioning safeguard, §8.4); (b) <em>the realm prefix is the
+  routing decision</em> — any router can classify a destination as "my mesh / other mesh / external" by prefix
+  alone, with zero protocol exchange.</p>
+
+  <p><strong>1.2 Homing.</strong> A platform carries one radio (single-homed, member of one realm) or two
+  (dual-homed, one radio per realm, joined by its internal platform link). <strong>Every dual-homed platform is
+  structurally a gateway</strong> — RR-A⇄RR-B forwarding across its platform link — whether or not it also hosts
+  DNS or reach-back. Multiple dual-homed platforms may exist simultaneously; §3.3 and UC-6 define how
+  single-homed platforms select among them and why transit is loop-free.</p>
+
+  <p><strong>1.3 Callsigns.</strong> Each platform owns a static callsign (<code>viper1</code>,
+  <code>rhino7</code>, …) which is its DNS name in the flat zone <code>tac.</code>. The callsign↔addresses map is
+  static provisioning (both are fixed properties of the hardware); what stays dynamic is <em>which</em> of a
+  platform's addresses is currently reachable — and therefore which one DNS answers with (§6). A dual-homed
+  platform has one name and up to two answers, chosen realm-aware.</p>
+
+  <div class="note green"><b>What survives from Rev E unchanged</b>
+  Radio-embedded routers; app LANs behind every RR with GW = DNS = router IP (one DHCP option set); edge PAT onto
+  the radio /32; injector damping; OSPF only on platform links; QoS at every radio egress; all latency physics.</div>
+</div>
+
+<!-- ================= §2 DRIVERS ================= -->
+<div class="sheet">
+  <div class="eyebrow"><span class="no">§2</span>DESIGN DRIVERS</div>
+  <h2>Constraints → requirements (Rev F deltas bold)</h2>
+  <div class="twrap"><table>
+    <tr><th>ID</th><th>Driver</th><th>Derived requirement</th></tr>
+    <tr><td class="mono">DR-1..4</td><td>1–2 kbps/radio · HW /32s · MAC member feed · churn</td><td class="mono">SR-01..04 as Rev E (no IGP on air, /32 transit, MAC truth, damping)</td></tr>
+    <tr><td class="mono"><strong>DR-5</strong></td><td><strong>Each MANET is a distinct WAN realm</strong></td><td class="mono">SR-05: prefix-based realm classification at every RR; realm-disjoint addressing enforced at provisioning</td></tr>
+    <tr><td class="mono"><strong>DR-6</strong></td><td><strong>Platforms are single- or dual-homed; any dual may relay</strong></td><td class="mono">SR-06: loop-free inter-realm transit via any dual platform; gateway selection from the member list, damped</td></tr>
+    <tr><td class="mono"><strong>DR-7</strong></td><td><strong>Callsign is the platform's static, shared name</strong></td><td class="mono">SR-07: flat zone tac.; static callsign→addr provisioning; realm-aware, reachability-gated answers</td></tr>
+    <tr><td class="mono">DR-8</td><td>App LANs locally numbered; HQ is foreign</td><td class="mono">SR-08: edge PAT to radio /32; reach-back PAT at RHINO7; nothing on transit</td></tr>
+    <tr><td class="mono">DR-9</td><td>Variable link quality; multiple gateways</td><td class="mono">SR-09: radio metrics feed both OSPF cost and gateway scoring (damped 30 s)</td></tr>
+    <tr><td class="mono">DR-10</td><td>App classes compete for air</td><td class="mono">SR-10: 35/15/50 DSCP budget at every radio egress; per-platform policing</td></tr>
+  </table></div>
+</div>
+
+<!-- ================= §3 ARCHITECTURE ================= -->
+<div class="sheet">
+  <div class="eyebrow"><span class="no">§3</span>ARCHITECTURE</div>
+  <h2>Two realms, mixed homing, gateways by construction</h2>
+
+  <div class="legend">
+    <span class="lg-data"><i></i>DATA PLANE</span>
+    <span class="lg-ctrl"><i></i>CONTROL PLANE</span>
+    <span class="lg-mesh"><i></i>RADIO MESH (AIR)</span>
+    <span class="lg-name"><i></i>NAME SERVICE</span>
+    <span class="lg-nat"><i></i>NAT / PAT</span>
+  </div>
+
+  <div class="diagram svgwrap">
+  <svg viewBox="0 0 980 540" xmlns="http://www.w3.org/2000/svg" font-family="'IBM Plex Mono',monospace">
+    <ellipse cx="250" cy="200" rx="225" ry="165" fill="#EAF5ED" stroke="#1E7A37" stroke-width="2.5" stroke-dasharray="9 6"/>
+    <text x="250" y="58" text-anchor="middle" font-size="15" font-weight="700" fill="#145726" letter-spacing="2">MANET A · realm 172.20/16</text>
+    <ellipse cx="730" cy="200" rx="225" ry="165" fill="#EAF5ED" stroke="#1E7A37" stroke-width="2.5" stroke-dasharray="9 6"/>
+    <text x="730" y="58" text-anchor="middle" font-size="15" font-weight="700" fill="#145726" letter-spacing="2">MANET B · realm 172.21/16</text>
+
+    <!-- single-homed A -->
+    <rect x="80" y="110" width="128" height="56" fill="#fff" stroke="#101820" stroke-width="2"/>
+    <text x="144" y="130" text-anchor="middle" font-size="11.5" font-weight="700" fill="#101820">VIPER1</text>
+    <text x="144" y="146" text-anchor="middle" font-size="9.5" fill="#101820">A: 172.20.14.7</text>
+    <text x="144" y="159" text-anchor="middle" font-size="9.5" fill="#101820">LAN 192.168.1.0/24</text>
+    <rect x="80" y="250" width="128" height="44" fill="#fff" stroke="#101820" stroke-width="2"/>
+    <text x="144" y="269" text-anchor="middle" font-size="11.5" font-weight="700" fill="#101820">OWL4</text>
+    <text x="144" y="284" text-anchor="middle" font-size="9.5" fill="#101820">A: 172.20.203.55</text>
+
+    <!-- single-homed B -->
+    <rect x="772" y="110" width="138" height="56" fill="#fff" stroke="#101820" stroke-width="2"/>
+    <text x="841" y="130" text-anchor="middle" font-size="11.5" font-weight="700" fill="#101820">KESTREL3</text>
+    <text x="841" y="146" text-anchor="middle" font-size="9.5" fill="#101820">B: 172.21.8.211</text>
+    <text x="841" y="159" text-anchor="middle" font-size="9.5" fill="#101820">LAN 192.168.3.0/24</text>
+    <rect x="772" y="250" width="138" height="44" fill="#fff" stroke="#101820" stroke-width="2"/>
+    <text x="841" y="269" text-anchor="middle" font-size="11.5" font-weight="700" fill="#101820">HERON9</text>
+    <text x="841" y="284" text-anchor="middle" font-size="9.5" fill="#101820">B: 172.21.66.9</text>
+
+    <!-- RHINO7 dual, straddling -->
+    <rect x="388" y="330" width="204" height="120" fill="#fff" stroke="#101820" stroke-width="3"/>
+    <text x="490" y="352" text-anchor="middle" font-size="13" font-weight="700" font-family="'Barlow Condensed',sans-serif" letter-spacing="1.5" fill="#101820">RHINO7 · DUAL (TOC)</text>
+    <rect x="398" y="362" width="88" height="44" fill="#fff" stroke="#1E7A37" stroke-width="2.5"/>
+    <text x="442" y="379" text-anchor="middle" font-size="9.5" font-weight="700" fill="#145726">RR-A</text>
+    <text x="442" y="393" text-anchor="middle" font-size="8.5" fill="#101820">172.20.250.1</text>
+    <rect x="494" y="362" width="88" height="44" fill="#fff" stroke="#1E7A37" stroke-width="2.5"/>
+    <text x="538" y="379" text-anchor="middle" font-size="9.5" font-weight="700" fill="#145726">RR-B</text>
+    <text x="538" y="393" text-anchor="middle" font-size="8.5" fill="#101820">172.21.250.1</text>
+    <line x1="486" y1="384" x2="494" y2="384" stroke="#1257B8" stroke-width="4"/>
+    <text x="490" y="424" text-anchor="middle" font-size="9" font-weight="600" fill="#581572">DNS zone tac. (both views)</text>
+    <text x="490" y="438" text-anchor="middle" font-size="9" font-weight="600" fill="#8E1B1B">HQ reach-back PAT · LAN .10.0/24</text>
+    <line x1="430" y1="362" x2="350" y2="300" stroke="#1E7A37" stroke-width="2.5" stroke-dasharray="6 4"/>
+    <line x1="550" y1="362" x2="630" y2="300" stroke="#1E7A37" stroke-width="2.5" stroke-dasharray="6 4"/>
+
+    <!-- BADGER2 dual, straddling top -->
+    <rect x="398" y="96" width="184" height="96" fill="#fff" stroke="#101820" stroke-width="2.5"/>
+    <text x="490" y="116" text-anchor="middle" font-size="12" font-weight="700" font-family="'Barlow Condensed',sans-serif" letter-spacing="1.2" fill="#101820">BADGER2 · DUAL</text>
+    <rect x="406" y="126" width="80" height="40" fill="#fff" stroke="#1E7A37" stroke-width="2.5"/>
+    <text x="446" y="142" text-anchor="middle" font-size="9" font-weight="700" fill="#145726">RR-A</text>
+    <text x="446" y="155" text-anchor="middle" font-size="8.5" fill="#101820">172.20.77.40</text>
+    <rect x="494" y="126" width="80" height="40" fill="#fff" stroke="#1E7A37" stroke-width="2.5"/>
+    <text x="534" y="142" text-anchor="middle" font-size="9" font-weight="700" fill="#145726">RR-B</text>
+    <text x="534" y="155" text-anchor="middle" font-size="8.5" fill="#101820">172.21.90.15</text>
+    <line x1="486" y1="146" x2="494" y2="146" stroke="#1257B8" stroke-width="4"/>
+    <text x="490" y="182" text-anchor="middle" font-size="9" font-weight="600" fill="#101820">relay only (no DNS, no PAT)</text>
+    <line x1="420" y1="166" x2="330" y2="200" stroke="#1E7A37" stroke-width="2.5" stroke-dasharray="6 4"/>
+    <line x1="560" y1="166" x2="650" y2="200" stroke="#1E7A37" stroke-width="2.5" stroke-dasharray="6 4"/>
+
+    <!-- mesh links inside clouds -->
+    <g stroke="#1E7A37" stroke-width="2" stroke-dasharray="5 4">
+      <line x1="208" y1="140" x2="330" y2="200"/><line x1="208" y1="270" x2="330" y2="200"/>
+      <line x1="208" y1="140" x2="350" y2="300"/><line x1="208" y1="270" x2="350" y2="300"/>
+      <line x1="772" y1="140" x2="650" y2="200"/><line x1="772" y1="270" x2="650" y2="200"/>
+      <line x1="772" y1="140" x2="630" y2="300"/><line x1="772" y1="270" x2="630" y2="300"/>
+    </g>
+
+    <!-- reachback -->
+    <line x1="388" y1="430" x2="250" y2="492" stroke="#C62828" stroke-width="3" stroke-dasharray="3 4"/>
+    <circle cx="318" cy="461" r="9" fill="#fff" stroke="#C62828" stroke-width="2.5"/>
+    <text x="318" y="465" text-anchor="middle" font-size="9" font-weight="700" fill="#8E1B1B">N</text>
+    <rect x="120" y="478" width="130" height="44" fill="#fff" stroke="#C62828" stroke-width="2.5"/>
+    <text x="185" y="497" text-anchor="middle" font-size="10.5" font-weight="700" fill="#8E1B1B">HQ / EXTERNAL</text>
+    <text x="185" y="513" text-anchor="middle" font-size="9.5" fill="#101820">ext 203.0.113.5</text>
+
+    <rect x="640" y="468" width="290" height="58" fill="#fff" stroke="#101820" stroke-width="1.5"/>
+    <text x="785" y="490" text-anchor="middle" font-size="11" font-weight="700" fill="#101820">REALM RULE (every RR, zero protocol):</text>
+    <text x="785" y="510" text-anchor="middle" font-size="10" fill="#101820">172.20/16→via mesh A · 172.21/16→via mesh B · else→RHINO7</text>
+  </svg>
+  </div>
+  <p class="caption">FIG 3-1 · Rev F topology. Dual-homed RHINO7 and BADGER2 straddle the realms; their internal platform links (blue) are the only inter-realm crossings and the only OSPF segments. Single-homed platforms see gateways simply as members of their own mesh.</p>
+
+  <h3>3.1 Forwarding logic per homing class</h3>
+  <div class="twrap"><table>
+    <tr><th>At</th><th>dst ∈ own realm</th><th>dst ∈ other realm</th><th>dst external</th></tr>
+    <tr><td><strong>Single-homed RR</strong> (e.g. VIPER1)</td><td class="mono">member /32 on-link (injector) — direct in-mesh; else HoldDown/absent → local drop+ICMP</td><td class="mono">→ selected gateway's same-realm /32, on-link (IF-9, §9.1)</td><td class="mono">→ RHINO7 same-realm /32</td></tr>
+    <tr><td><strong>Dual-homed RR pair</strong> (BADGER2/RHINO7)</td><td class="mono">on-link via that realm's radio</td><td class="mono">across own platform link → sibling RR → on-link</td><td class="mono">RHINO7: ext IF (PAT) · BADGER2: → RHINO7</td></tr>
+  </table></div>
+  <p><strong>Loop-freedom by construction:</strong> realms are disjoint, every inter-realm packet crosses exactly
+  one platform link (the first gateway it reaches), and on the far side the destination is on-link — there is no
+  rule under which a second gateway is ever consulted for the same packet. OSPF runs independently inside each
+  dual platform (between its own RR pair) purely so each sibling learns the other realm's live /32 set; the two
+  gateways' OSPF processes never peer with each other, and don't need to.</p>
+</div>
+
+<!-- ================= §4 DATA DESIGN ================= -->
+<div class="sheet">
+  <div class="eyebrow"><span class="no">§4</span>DATA DESIGN</div>
+  <h2>FIBs, the callsign zone, translation state</h2>
+
+  <h3>4.1 FIB @ VIPER1's RR (single-homed A) — realm rule made concrete</h3>
+  <div class="twrap"><table>
+    <tr><th>Prefix</th><th>Source</th><th>Next hop / IF</th><th>Meaning</th></tr>
+    <tr><td class="mono">192.168.1.0/24</td><td><span class="src s-conn">CONNECTED</span></td><td class="mono">LAN</td><td>own app hosts</td></tr>
+    <tr><td class="mono">172.20.14.7/32</td><td><span class="src s-conn">CONNECTED</span></td><td class="mono">mesh-A IF</td><td>own radio /32</td></tr>
+    <tr class="inj"><td class="mono">172.20.203.55/32, .77.40/32, .250.1/32 …</td><td><span class="src s-inj">INJECTOR</span></td><td class="mono">mesh-A on-link</td><td>current A-members (incl. both gateways' A-faces)</td></tr>
+    <tr><td class="mono">172.21.0.0/16</td><td><span class="src s-conn">STATIC realm</span></td><td class="mono">via GW_SELECTED (172.20.250.1) on-link</td><td>other realm → chosen gateway (IF-9 keeps this fresh)</td></tr>
+    <tr><td class="mono">0.0.0.0/0</td><td><span class="src s-conn">STATIC</span></td><td class="mono">via 172.20.250.1 on-link</td><td>external → RHINO7</td></tr>
+    <tr class="natr"><td colspan="4" class="mono">edge PAT 192.168.1.0/24 ⇄ 172.20.14.7 (EIM/EIF) · static map :4060 → 192.168.1.20:4060</td></tr>
+  </table></div>
+  <p class="caption">TBL 4-1 · One realm route replaces per-/32 knowledge of the other mesh — a single-homed RR never needs the B-side member list at all.</p>
+
+  <h3>4.2 FIB @ RHINO7 RR-A (dual-homed)</h3>
+  <div class="twrap"><table>
+    <tr><th>Prefix</th><th>Source</th><th>Next hop / IF</th><th>Meaning</th></tr>
+    <tr><td class="mono">192.168.10.0/24 · plat /30 · 203.0.113.5</td><td><span class="src s-conn">CONNECTED</span></td><td class="mono">LAN · Plat0 · Ext0</td><td>onboard, sibling, reach-back</td></tr>
+    <tr class="inj"><td class="mono">172.20.14.7/32, .203.55/32, .77.40/32 …</td><td><span class="src s-inj">INJECTOR</span></td><td class="mono">mesh-A on-link</td><td>live A-realm members</td></tr>
+    <tr class="ospf"><td class="mono">172.21.8.211/32, .66.9/32, .90.15/32 …</td><td><span class="src s-ospf">OSPF E2</span></td><td class="mono">via Plat0 (RR-B)</td><td>live B-realm members, learned from sibling</td></tr>
+    <tr><td class="mono">0.0.0.0/0</td><td><span class="src s-conn">STATIC</span></td><td class="mono">Ext0 (PAT)</td><td>HQ-bound</td></tr>
+  </table></div>
+
+  <h3>4.3 The callsign zone tac. — static names, dynamic, realm-aware answers</h3>
+  <div class="twrap"><table>
+    <tr><th>Name</th><th class="mono">Provisioned addresses</th><th>Answer to an A-realm querier</th><th>Answer to a B-realm querier</th></tr>
+    <tr class="dns"><td class="mono">viper1.tac</td><td class="mono">A=172.20.14.7</td><td class="mono">172.20.14.7 (if Advertised/HoldDown, else NXDOMAIN)</td><td class="mono">172.20.14.7 — routed via a gateway</td></tr>
+    <tr class="dns"><td class="mono">kestrel3.tac</td><td class="mono">B=172.21.8.211</td><td class="mono">172.21.8.211 — via gateway</td><td class="mono">172.21.8.211 (gated)</td></tr>
+    <tr class="dns"><td class="mono">badger2.tac</td><td class="mono">A=172.20.77.40 · B=172.21.90.15</td><td class="mono">prefer 172.20.77.40; if its A radio is down → 172.21.90.15</td><td class="mono">prefer 172.21.90.15; fallback A-addr</td></tr>
+    <tr class="dns"><td class="mono">rhino7.tac</td><td class="mono">A=172.20.250.1 · B=172.21.250.1</td><td class="mono">172.20.250.1</td><td class="mono">172.21.250.1</td></tr>
+  </table></div>
+  <p class="caption">TBL 4-3 · The map is provisioning (callsigns and HW addresses are both static); the injectors gate WHICH provisioned address is answerable, and the view (selected by querier source realm) orders same-realm first. One name, correct answer from anywhere.</p>
+
+  <h3>4.4 Configuration skeleton — single-homed RR (VIPER1)</h3>
+<pre><span class="c">! realm + gateway plumbing — the entire "routing config" of a member platform</span>
+interface Mesh0
+ ip address 172.20.14.7 255.255.255.255
+ service-policy output AIR-OUT
+interface LAN0
+ ip address 192.168.1.1 255.255.255.0      <span class="c">! DHCP hands out GW=DNS=.1</span>
+!
+<span class="c">! injector writes member /32s on-link; gateway-select (IF-9) maintains:</span>
+ip route 172.21.0.0 255.255.0.0 Mesh0 <span class="k">172.20.250.1</span>   <span class="c">! other realm → chosen GW</span>
+ip route 0.0.0.0 0.0.0.0       Mesh0 <span class="k">172.20.250.1</span>   <span class="c">! external → RHINO7</span>
+!
+ip nat inside source list LAN interface Mesh0 overload   <span class="c">! edge PAT → own /32</span>
+ip nat inside source static udp 192.168.1.20 4060 172.20.14.7 4060
+ip nat translation udp-timeout 600 tcp-timeout 3600
+ip dns forwarder 172.20.250.1               <span class="c">! resolver-cache → rhino7's A face</span>
+ip tcp adjust-mss 512</pre>
+</div>
+
+<!-- ================= §5 INTERFACES ================= -->
+<div class="sheet">
+  <div class="eyebrow"><span class="no">§5</span>INTERFACE DESIGN</div>
+  <h2>IF-0 … IF-9</h2>
+  <div class="twrap"><table>
+    <tr><th>ID</th><th>Between</th><th>Mechanism</th><th>Payload / size</th><th>Trigger · cost</th></tr>
+    <tr><td class="mono">IF-0</td><td>App host → its RR</td><td class="mono">DHCP opt 3 = opt 6 = RR LAN IP</td><td>—</td><td>boot/renew · LAN only</td></tr>
+    <tr><td class="mono">IF-1</td><td>Radio MAC → injector</td><td class="mono">internal API</td><td>member ±, metrics</td><td>event · zero wire</td></tr>
+    <tr><td class="mono">IF-2/3</td><td>Injector → RIB / → zone (GW only)</td><td class="mono">route API / zone API, atomic pair</td><td>/32 on-link · answerability flag per provisioned addr</td><td>post-damping</td></tr>
+    <tr><td class="mono">IF-4</td><td>RR ↔ sibling RR (each dual platform)</td><td class="mono">OSPF on its platform link</td><td>LSU ~100 B per changed /32</td><td>change-driven · ≈free</td></tr>
+    <tr><td class="mono">IF-5</td><td>App stub → its RR :53</td><td class="mono">DNS/UDP on LAN</td><td>~70/86 B</td><td>per name · LAN</td></tr>
+    <tr><td class="mono">IF-5m</td><td>Node RR ↔ RHINO7 DNS (same realm)</td><td class="mono">DNS/UDP over MESH, CS6</td><td>~70/86 B</td><td>cache miss · <strong>costs air</strong></td></tr>
+    <tr><td class="mono">IF-6</td><td>RHINO7 RR-A ↔ RR-B views</td><td class="mono">shared zone, realm-tagged views</td><td>—</td><td>internal</td></tr>
+    <tr><td class="mono">IF-7</td><td>RHINO7 ⇄ HQ</td><td class="mono">via reach-back PAT</td><td>translated flows</td><td>app-driven</td></tr>
+    <tr><td class="mono">IF-8</td><td>Radio MAC → OSPF cost</td><td class="mono">internal DLEP semantics</td><td>CDR/latency → mesh-IF cost</td><td>damped 30 s</td></tr>
+    <tr><td class="mono"><strong>IF-9</strong></td><td><strong>Injector → gateway selector</strong></td><td class="mono">member-list scan vs provisioned GW table</td><td>rewrite realm + default next-hop</td><td>damped 30 s · zero wire (§9.1)</td></tr>
+  </table></div>
+  <div class="note blue"><b>IF-9 in one sentence</b>
+  Because gateways are just mesh members, "which gateway is up" is already in every RR's member list — selection
+  is a local, damped computation over data the radio delivers for free.</div>
+</div>
+
+<!-- ================= §6 DNS ================= -->
+<div class="sheet">
+  <div class="eyebrow"><span class="no">§6</span>NAME SERVICE</div>
+  <h2>Callsigns: static identity, realm-aware answers</h2>
+
+  <p>Resolution chain is unchanged from Rev E (stub → local RR cache → RHINO7, one ~156 B mesh round trip on a
+  miss). What changed is the zone model: one flat zone <code>tac.</code>, records provisioned per callsign,
+  answers computed per query from <em>(provisioned addresses) × (injector answerability) × (querier's realm)</em>:</p>
+
+  <div class="diagram"><pre class="mermaid">
+%%{init:{'theme':'base','themeVariables':{'primaryColor':'#FFFFFF','primaryBorderColor':'#7A1FA2','primaryTextColor':'#101820','actorLineColor':'#7A1FA2','signalColor':'#581572','signalTextColor':'#101820','noteBkgColor':'#F5EBFA','noteBorderColor':'#7A1FA2','noteTextColor':'#101820','fontFamily':'IBM Plex Mono','fontSize':'14px'}}}%%
+sequenceDiagram
+    participant K as KESTREL3 RR resolver (realm B)
+    participant D as RHINO7 DNS (zone tac.)
+    K->>D: Q badger2.tac A? — mesh B, ~70 B, src 172.21.8.211
+    Note over D: src ∈ 172.21/16 ⇒ B-view<br/>provisioned: A=.20.77.40 · B=.21.90.15<br/>injector: BOTH currently Advertised<br/>⇒ same-realm first
+    D-->>K: A 172.21.90.15 · TTL 60
+    Note over K,D: if BADGER2's B radio were in Absent:<br/>answer 172.20.77.40 instead — reachable<br/>cross-realm via RHINO7 itself.<br/>If both absent ⇒ NXDOMAIN, neg-TTL 30 s
+  </pre></div>
+  <p class="caption">FIG 6-1 · One callsign, the right address for where you're asking from, gated by live reachability. The provisioned map costs zero protocol — it ships with the mission data load.</p>
+</div>
+
+<!-- ================= §7 WAY OF A PACKET ================= -->
+<div class="sheet">
+  <div class="eyebrow"><span class="no">§7</span>THE WAY OF A PACKET</div>
+  <h2>Seven journeys, one realm rule</h2>
+
+  <div class="diagram svgwrap">
+  <svg viewBox="0 0 980 330" xmlns="http://www.w3.org/2000/svg" font-family="'IBM Plex Mono',monospace">
+    <defs><marker id="arF" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#1257B8"/></marker></defs>
+    <ellipse cx="240" cy="150" rx="200" ry="120" fill="#EAF5ED" stroke="#1E7A37" stroke-width="2" stroke-dasharray="8 5"/>
+    <text x="240" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#145726">REALM A · 172.20/16</text>
+    <ellipse cx="740" cy="150" rx="200" ry="120" fill="#EAF5ED" stroke="#1E7A37" stroke-width="2" stroke-dasharray="8 5"/>
+    <text x="740" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#145726">REALM B · 172.21/16</text>
+
+    <rect x="90" y="90" width="100" height="38" fill="#fff" stroke="#101820" stroke-width="2"/>
+    <text x="140" y="113" text-anchor="middle" font-size="11" font-weight="700" fill="#101820">VIPER1</text>
+    <rect x="90" y="185" width="100" height="38" fill="#fff" stroke="#101820" stroke-width="2"/>
+    <text x="140" y="208" text-anchor="middle" font-size="11" font-weight="700" fill="#101820">OWL4</text>
+    <rect x="790" y="90" width="110" height="38" fill="#fff" stroke="#101820" stroke-width="2"/>
+    <text x="845" y="113" text-anchor="middle" font-size="11" font-weight="700" fill="#101820">KESTREL3</text>
+    <rect x="790" y="185" width="110" height="38" fill="#fff" stroke="#101820" stroke-width="2"/>
+    <text x="845" y="208" text-anchor="middle" font-size="11" font-weight="700" fill="#101820">HERON9</text>
+
+    <rect x="430" y="200" width="120" height="46" fill="#fff" stroke="#101820" stroke-width="2.5"/>
+    <text x="490" y="219" text-anchor="middle" font-size="11" font-weight="700" fill="#101820">RHINO7</text>
+    <text x="490" y="236" text-anchor="middle" font-size="9" fill="#101820">dual · DNS · PAT</text>
+    <rect x="430" y="84" width="120" height="40" fill="#fff" stroke="#101820" stroke-width="2.5"/>
+    <text x="490" y="102" text-anchor="middle" font-size="11" font-weight="700" fill="#101820">BADGER2</text>
+    <text x="490" y="117" text-anchor="middle" font-size="9" fill="#101820">dual · relay</text>
+
+    <rect x="80" y="285" width="110" height="36" fill="#fff" stroke="#C62828" stroke-width="2.5"/>
+    <text x="135" y="307" text-anchor="middle" font-size="10.5" font-weight="700" fill="#8E1B1B">HQ 198.51.100.0</text>
+
+    <!-- UC-2 -->
+    <path d="M140 128 L140 185" fill="none" stroke="#1257B8" stroke-width="3" marker-end="url(#arF)"/>
+    <circle cx="123" cy="156" r="11" fill="#fff" stroke="#101820" stroke-width="2"/><text x="123" y="160" text-anchor="middle" font-size="10" font-weight="700">2</text>
+    <!-- UC-3 -->
+    <path d="M190 118 C 320 150, 360 200, 430 218 M550 218 C 650 200, 720 150, 790 115" fill="none" stroke="#1257B8" stroke-width="3" marker-end="url(#arF)"/>
+    <circle cx="310" cy="165" r="11" fill="#fff" stroke="#101820" stroke-width="2"/><text x="310" y="169" text-anchor="middle" font-size="10" font-weight="700">3</text>
+    <circle cx="676" cy="166" r="11" fill="#fff" stroke="#101820" stroke-width="2"/><text x="676" y="170" text-anchor="middle" font-size="10" font-weight="700">3</text>
+    <!-- UC-4 -->
+    <path d="M550 232 C 690 240, 780 232, 845 223" fill="none" stroke="#1257B8" stroke-width="3" stroke-dasharray="8 5" marker-end="url(#arF)"/>
+    <circle cx="700" cy="237" r="11" fill="#fff" stroke="#101820" stroke-width="2"/><text x="700" y="241" text-anchor="middle" font-size="10" font-weight="700">4</text>
+    <!-- UC-5 -->
+    <path d="M170 90 C 260 50, 360 70, 430 96 M550 100 C 660 110, 760 160, 800 185" fill="none" stroke="#1257B8" stroke-width="3" stroke-dasharray="3 5" marker-end="url(#arF)"/>
+    <circle cx="300" cy="62" r="11" fill="#fff" stroke="#101820" stroke-width="2"/><text x="300" y="66" text-anchor="middle" font-size="10" font-weight="700">5</text>
+    <circle cx="688" cy="128" r="11" fill="#fff" stroke="#101820" stroke-width="2"/><text x="688" y="132" text-anchor="middle" font-size="10" font-weight="700">5</text>
+    <!-- UC-7 -->
+    <path d="M168 223 C 250 270, 360 270, 430 238 M430 246 C 330 300, 250 300, 192 300" fill="none" stroke="#C62828" stroke-width="3" stroke-dasharray="2 4" marker-end="url(#arF)"/>
+    <circle cx="300" cy="276" r="11" fill="#fff" stroke="#C62828" stroke-width="2"/><text x="300" y="280" text-anchor="middle" font-size="10" font-weight="700" fill="#8E1B1B">7</text>
+  </svg>
+  </div>
+  <p class="caption">FIG 7-0 · Route map of the use cases. ② in-mesh · ③ cross-realm via RHINO7 · ④ from a dual platform's own apps · ⑤ cross-realm via BADGER2 · ⑦ reach-back. (① is inside one platform; ⑥ is ③ re-routing after gateway loss.)</p>
+
+  <div class="uc">
+  <h3><span class="pn">1</span>UC-1 · Same platform: app → app behind VIPER1</h3>
+  <p>Two hosts on 192.168.1.0/24 talk directly on the LAN — or, if one addressed the other by callsign-derived
+  /32 (<code>172.20.14.7:port</code>), the RR <strong>hairpins</strong>: edge PAT translates and loops the packet
+  back onto the LAN. <strong>Air cost: 0. The mesh never hears about it.</strong> This is why hairpinning is a
+  hard requirement in §8.2.</p>
+
+  <h3><span class="pn">2</span>UC-2 · Same mesh: VIPER1 app → OWL4 app (no gateway involved)</h3>
+  <div class="diagram"><pre class="mermaid">
+%%{init:{'theme':'base','themeVariables':{'primaryColor':'#FFFFFF','primaryBorderColor':'#1257B8','primaryTextColor':'#101820','actorLineColor':'#1257B8','signalColor':'#0A3D85','signalTextColor':'#101820','noteBkgColor':'#FFF2E8','noteBorderColor':'#D9530B','noteTextColor':'#101820','fontFamily':'IBM Plex Mono','fontSize':'14px'}}}%%
+sequenceDiagram
+    participant AP as app .1.20
+    participant V as VIPER1 RR
+    participant O as OWL4 RR
+    participant BP as app .2.25
+    AP->>V: UDP → owl4.tac:4060 (resolved: 172.20.203.55)
+    Note over V: PAT src⇒172.20.14.7 · dst is an<br/>INJECTOR on-link member ⇒ direct,<br/>no gateway, no realm crossing
+    V->>O: 172.20.14.7 → 172.20.203.55 — mesh A only
+    Note over O: static map :4060 ⇒ 192.168.2.25
+    O->>BP: deliver on LAN
+  </pre></div>
+  <p class="caption">FIG 7-1 · Way of the packet ②: LAN → PAT → on-link /32 across mesh A → PAT → LAN. ~3.7 s for 228 B at 3 air hops. Gateways idle.</p>
+
+  <h3><span class="pn">3</span>UC-3 · Cross-realm via RHINO7: VIPER1 app → kestrel3.tac (primary case)</h3>
+  <div class="diagram"><pre class="mermaid">
+%%{init:{'theme':'base','themeVariables':{'primaryColor':'#FFFFFF','primaryBorderColor':'#1257B8','primaryTextColor':'#101820','actorLineColor':'#1257B8','signalColor':'#0A3D85','signalTextColor':'#101820','noteBkgColor':'#FFF2E8','noteBorderColor':'#D9530B','noteTextColor':'#101820','fontFamily':'IBM Plex Mono','fontSize':'14px'}}}%%
+sequenceDiagram
+    autonumber
+    participant AP as app .1.20
+    participant V as VIPER1 RR
+    participant RA as RHINO7 RR-A
+    participant RB as RHINO7 RR-B
+    participant K as KESTREL3 RR
+    participant BP as app .3.30
+    AP->>V: DNS kestrel3.tac (LAN)
+    V->>RA: IF-5m query — mesh A (cache miss)
+    RA-->>V: A 172.21.8.211 (B-realm addr, gated live)
+    AP->>V: UDP → 172.21.8.211:4060
+    Note over V: PAT src⇒172.20.14.7 ·<br/>dst∈172.21/16 ⇒ realm route →<br/>GW_SELECTED = 172.20.250.1
+    V->>RA: pkt — mesh A, 3 hops
+    Note over RA: dst∈172.21/16 ⇒ across plat link
+    RA->>RB: platform link (~ms)
+    Note over RB: injector on-link /32 → mesh B
+    RB->>K: pkt — mesh B, 3 hops
+    Note over K: static map ⇒ 192.168.3.30
+    K->>BP: deliver · reply mirrors exactly
+  </pre></div>
+  <p class="caption">FIG 7-2 · Way of the packet ③. Transit identity on every air frame: 172.20.14.7 → 172.21.8.211 — the realm prefixes themselves narrate the journey. Warm-cache latency ≈ 7.3 s; cold +2.5 s DNS (§ Rev E physics unchanged).</p>
+
+  <h3><span class="pn">4</span>UC-4 · From a dual platform's own apps: RHINO7 onboard host → kestrel3.tac</h3>
+  <div class="diagram"><pre class="mermaid">
+%%{init:{'theme':'base','themeVariables':{'primaryColor':'#FFFFFF','primaryBorderColor':'#1257B8','primaryTextColor':'#101820','actorLineColor':'#1257B8','signalColor':'#0A3D85','signalTextColor':'#101820','noteBkgColor':'#F5EBFA','noteBorderColor':'#7A1FA2','noteTextColor':'#101820','fontFamily':'IBM Plex Mono','fontSize':'14px'}}}%%
+sequenceDiagram
+    participant AP as onboard app .10.20
+    participant RA as RR-A (its GW+DNS)
+    participant RB as RR-B
+    participant K as KESTREL3 RR
+    AP->>RA: DNS kestrel3.tac → A 172.21.8.211 (local auth, 0 air)
+    AP->>RA: UDP → 172.21.8.211:4060 (LAN)
+    Note over RA: PAT src⇒172.20.250.1? NO —<br/>dst∈172.21/16 ⇒ hand to sibling FIRST —<br/>egress realm = B ⇒ PAT src⇒172.21.250.1
+    RA->>RB: plat link
+    RB->>K: 172.21.250.1 → 172.21.8.211 — mesh B only, 3 hops
+    Note over AP,K: a dual platform is its own gateway:<br/>ONE mesh crossed, ≈3.7 s, realm-correct source
+  </pre></div>
+  <p class="caption">FIG 7-3 · Way of the packet ④ — and the edge-PAT subtlety it exposes: on dual platforms the PAT source address is chosen by EGRESS realm, so replies route back natively without crossing realms twice.</p>
+
+  <h3><span class="pn">5</span>UC-5 · Cross-realm via the secondary: OWL4 app → heron9.tac through BADGER2</h3>
+  <div class="diagram"><pre class="mermaid">
+%%{init:{'theme':'base','themeVariables':{'primaryColor':'#FFFFFF','primaryBorderColor':'#1257B8','primaryTextColor':'#101820','actorLineColor':'#1257B8','signalColor':'#0A3D85','signalTextColor':'#101820','noteBkgColor':'#FFF2E8','noteBorderColor':'#D9530B','noteTextColor':'#101820','fontFamily':'IBM Plex Mono','fontSize':'14px'}}}%%
+sequenceDiagram
+    participant O as OWL4 RR
+    participant BA as BADGER2 RR-A
+    participant BB as BADGER2 RR-B
+    participant H as HERON9 RR
+    Note over O: IF-9 scored BADGER2 above RHINO7<br/>(closer / better radio metrics, §9.1) ⇒<br/>realm route → 172.20.77.40
+    O->>BA: 172.20.203.55 → 172.21.66.9 — mesh A
+    BA->>BB: plat link
+    BB->>H: — mesh B, on-link
+    Note over O,H: ANY dual platform relays identically —<br/>loop-free: exactly one plat-link crossing,<br/>far side is always on-link (§3.1)
+  </pre></div>
+  <p class="caption">FIG 7-4 · Way of the packet ⑤. Different platforms may legitimately use different gateways at the same time — selection is local, per-platform, damped.</p>
+
+  <h3><span class="pn">6</span>UC-6 · Gateway failover: RHINO7's A radio fades mid-mission</h3>
+  <div class="diagram"><pre class="mermaid">
+%%{init:{'theme':'base','themeVariables':{'primaryColor':'#FFFFFF','primaryBorderColor':'#D9530B','primaryTextColor':'#101820','actorLineColor':'#D9530B','signalColor':'#9C3B05','signalTextColor':'#101820','noteBkgColor':'#EAF1FB','noteBorderColor':'#1257B8','noteTextColor':'#101820','fontFamily':'IBM Plex Mono','fontSize':'14px'}}}%%
+sequenceDiagram
+    participant RM as VIPER1 radio MAC
+    participant IJ as VIPER1 injector + IF-9
+    participant FIB as VIPER1 FIB
+    RM->>IJ: member −172.20.250.1 (RHINO7-A gone)
+    Note over IJ: HoldDown 90 s — realm route UNTOUCHED<br/>(in-flight UC-3 traffic blackholes briefly,<br/>by design)
+    RM--xIJ: …no return by expiry…
+    IJ->>IJ: rescore candidates: BADGER2 present ✓
+    IJ->>FIB: 172.21/16 → via 172.20.77.40 on-link<br/>0/0 → 172.20.77.40 (relay toward RHINO7-B side)
+    Note over RM,FIB: switchover cost on air: 0 bytes —<br/>the trigger was knowledge the radio<br/>already delivered. DNS for tac. now<br/>reaches RHINO7 via its B face through BADGER2.
+  </pre></div>
+  <p class="caption">FIG 7-5 · Way of the packet ⑥ = ③ with a re-pointed first arrow. Failover is a local FIB edit driven by the member list; nothing is signalled, nothing floods.</p>
+
+  <h3><span class="pn">7</span>UC-7 · Reach-back: OWL4 app → HQ server (double translation, by design)</h3>
+  <div class="diagram"><pre class="mermaid">
+%%{init:{'theme':'base','themeVariables':{'primaryColor':'#FFFFFF','primaryBorderColor':'#C62828','primaryTextColor':'#101820','actorLineColor':'#C62828','signalColor':'#8E1B1B','signalTextColor':'#101820','noteBkgColor':'#FBEAEA','noteBorderColor':'#C62828','noteTextColor':'#101820','fontFamily':'IBM Plex Mono','fontSize':'14px'}}}%%
+sequenceDiagram
+    participant AP as app .2.25
+    participant O as OWL4 RR (edge PAT)
+    participant RA as RHINO7 RR-A (reach-back PAT)
+    participant HQ as HQ 198.51.100.10
+    AP->>O: TCP 192.168.2.25:49000 → 100.10:443
+    Note over O: dst external ⇒ default → RHINO7<br/>edge PAT: src ⇒ 172.20.203.55:49152
+    O->>RA: mesh A — src 172.20.203.55
+    Note over RA: realm? external ⇒ Ext0<br/>reach-back PAT: src ⇒ 203.0.113.5:62144
+    RA->>HQ: SYN from 203.0.113.5
+    HQ-->>RA: SYN-ACK :62144
+    Note over RA,O: each PAT unwinds at its own border —<br/>two tables, two realms, zero ambiguity
+    RA-->>O: dst back to 172.20.203.55:49152
+    O-->>AP: dst back to 192.168.2.25:49000
+  </pre></div>
+  <p class="caption">FIG 7-6 · Way of the packet ⑦: LAN-realm → mesh-realm → external-realm, one translation per border. HQ sees a single IP for the entire force.</p>
+  </div>
+
+  <p>The name-resolution journey itself (the eighth packet) is FIG 6-1. Every case above reduces to the same
+  three questions asked at each router: <em>is dst my LAN? my realm (on-link member)? the other realm or
+  external (which next hop did IF-9 last bless)?</em> — answered entirely from local, radio-delivered state.</p>
+</div>
+
+<!-- ================= §8 NAT/PAT ================= -->
+<div class="sheet">
+  <div class="eyebrow"><span class="no">§8</span>NAT / PAT DESIGN</div>
+  <h2>One translator per realm border — and only there</h2>
+  <div class="twrap"><table>
+    <tr><th>Boundary</th><th>Translator</th><th>Behaviour</th><th>Seen in</th></tr>
+    <tr class="natr"><td>App LAN ⇄ own mesh (every platform)</td><td><strong>Edge PAT</strong></td><td>src ⇒ radio /32 of the <em>egress realm</em> (UC-4 rule); static port maps inbound; EIM/EIF; hairpin ON</td><td class="mono">UC-1…5</td></tr>
+    <tr><td>Realm A ⇄ realm B transit</td><td><strong>NONE</strong></td><td>/32→/32 forwarded untouched across any dual platform</td><td class="mono">UC-3, UC-5</td></tr>
+    <tr class="natr"><td>Meshes ⇄ HQ</td><td><strong>Reach-back PAT</strong> @ RHINO7 Ext0</td><td>overload onto 203.0.113.5; static maps for inbound services</td><td class="mono">UC-7</td></tr>
+  </table></div>
+  <div class="twrap"><table>
+    <tr><th>Behavioural requirement</th><th>Value</th><th>Why</th></tr>
+    <tr><td>UDP mapping</td><td class="mono">EIM + EIF</td><td>one keepalive stream per app, not per peer</td></tr>
+    <tr><td>UDP / TCP idle timeout</td><td class="mono">600 s / ≥3600 s</td><td>keepalives cost ~0.4 bps of air vs 8 bps at defaults; re-handshakes cost ~3.8 s</td></tr>
+    <tr><td>Dual-platform source selection</td><td class="mono">PAT src = egress-realm radio /32</td><td>replies route home natively, never crossing realms twice (UC-4)</td></tr>
+    <tr><td>ALGs / per-pkt logging</td><td class="mono">OFF / transitions only</td><td>RR CPU and air are shared scarce resources</td></tr>
+  </table></div>
+  <div class="note red"><b>Collision aliasing — demoted to safeguard</b>
+  Disjoint realms (172.20/16 vs 172.21/16) make inter-mesh /32 collisions impossible by plan. The Rev E
+  deterministic 100.64-shadow + DNS-doctoring mechanism is retained in the conflict handler purely as a
+  misprovisioning alarm-and-bridge: if the impossible appears, ops hear about it and traffic still flows.</div>
+</div>
+
+<!-- ================= §9 COST SHARING ================= -->
+<div class="sheet">
+  <div class="eyebrow"><span class="no">§9</span>COST SHARING</div>
+  <h2>Gateway scoring, radio metrics into routing, the air budget</h2>
+
+  <h3>9.1 Gateway selection (IF-9) — metrics the radio already paid for</h3>
+  <p>Each single-homed RR holds the provisioned gateway table {RHINO7: prio 100, BADGER2: prio 80, …}. Every
+  30 s (damped, hysteresis 20 %), it scores the candidates that currently appear in its member list:</p>
+  <pre>score(GW) = priority
+           + w1 · normalized(link_quality to GW)     <span class="c">! from radio MAC (IF-1)</span>
+           − w2 · hop_estimate(GW)                   <span class="c">! if the MAC exposes path length</span>
+switch only if best ≥ current · 1.2                  <span class="c">! hysteresis — no oscillation</span></pre>
+  <p>The same radio-measured link metrics also drive OSPF mesh-interface cost inside each dual platform
+  (IF-8, damped 30 s) so a dual platform with a degrading radio becomes less attractive in BOTH mechanisms at
+  once — without one byte of signalling: <strong>the cost information is shared from the MAC layer outward, free,
+  because the router lives inside the radio.</strong></p>
+
+  <h3>9.2 The air budget (normative, per radio egress — unchanged Rev E values)</h3>
+  <div class="twrap"><table>
+    <tr><th>Class</th><th>DSCP</th><th>Share of 1 800 bps</th><th>Carries</th></tr>
+    <tr><td>C2 / chat / PLI</td><td class="mono">EF, CS5</td><td class="mono">35 % ≈ 630 bps · LLQ</td><td>operational traffic</td></tr>
+    <tr><td>CONTROL</td><td class="mono">CS6</td><td class="mono">15 % ≈ 270 bps</td><td>IF-5m DNS, ARP, NAT keepalive</td></tr>
+    <tr><td>BULK</td><td class="mono">0, AF11</td><td class="mono">50 % ≈ 900 bps · FQ</td><td>transfers; first to yield</td></tr>
+  </table></div>
+  <p><strong>Fairness across realms:</strong> on every dual platform, transit from one mesh competes only inside
+  the BULK/C2 shares of the <em>other</em> mesh's egress policy — symmetric by construction, so neither MANET can
+  starve the other's local traffic through any gateway. Per-platform ingress policing (≈1 200 bps/platform)
+  remains the sharing contract for the air as a commons. MSS 512 and ROHC/IPHC as Rev E.</p>
+</div>
+
+<!-- ================= §10 ACCOUNTING ================= -->
+<div class="sheet">
+  <div class="eyebrow"><span class="no">§10</span>ACCOUNTING</div>
+  <h2>Every event, priced — air column first</h2>
+  <div class="bars">
+    <div class="bar"><span class="lbl">Join / leave / flap (damped)</span><span class="track"></span><span class="val">0 B air</span></div>
+    <div class="bar"><span class="lbl">Gateway failover (IF-9)</span><span class="track"></span><span class="val">0 B air</span></div>
+    <div class="bar"><span class="lbl">DNS hit @ local RR cache</span><span class="track"></span><span class="val">0 B air</span></div>
+    <div class="bar"><span class="lbl">NAT keepalive (600 s TO)</span><span class="track"><span class="fill" style="width:2%"></span></span><span class="val">~0.4 bps air</span></div>
+    <div class="bar"><span class="lbl">DNS miss (IF-5m RTT)</span><span class="track"><span class="fill p" style="width:8%"></span></span><span class="val">~156 B air</span></div>
+    <div class="bar"><span class="lbl">TCP handshake</span><span class="track"><span class="fill d" style="width:9%"></span></span><span class="val">~180 B · 3.8 s</span></div>
+    <div class="bar"><span class="lbl">Chat 200 B in-mesh (UC-2/4)</span><span class="track"><span class="fill d" style="width:6%"></span></span><span class="val">228 B · ~3.7 s</span></div>
+    <div class="bar"><span class="lbl">Chat 200 B cross-realm (UC-3/5)</span><span class="track"><span class="fill d" style="width:12%"></span></span><span class="val">2×228 B · ~7.3 s</span></div>
+    <div class="bar"><span class="lbl">OSPF full sync (per dual plat)</span><span class="track"><span class="fill d" style="width:100%"></span></span><span class="val">~4 KB — plat link, ≈free</span></div>
+  </div>
+  <p class="foot">Bars to scale in bytes. The control plane's AIR column is zero except the budgeted DNS-miss trickle and NAT keepalives — both inside CONTROL's 15 % cap with two orders of magnitude to spare.</p>
+</div>
+
+<!-- ================= §11 SCENARIOS ================= -->
+<div class="sheet">
+  <div class="eyebrow"><span class="no">§11</span>CONTROL &amp; FAILURE SCENARIOS</div>
+  <h2>State lifecycle and what breaks how</h2>
+  <p>Node join/leave and the damping state machine are unchanged from Rev E (atomic route+record transitions,
+  zero air cost — the LSU rides the dual platform's internal link). New and changed failure rows:</p>
+  <div class="twrap"><table>
+    <tr><th>Failure</th><th>Detection</th><th>Routing effect</th><th>DNS effect</th></tr>
+    <tr><td>RHINO7 A-radio lost</td><td class="mono">member list, everywhere, ≤ poll interval</td><td>A-side platforms re-score → BADGER2 (UC-6, ≤120 s incl. hold-down); RHINO7 still serves realm B + HQ via its B face</td><td>A-side resolvers re-path to rhino7's reachable face via BADGER2; cached answers bridge the gap</td></tr>
+    <tr><td>BADGER2 lost entirely</td><td class="mono">member lists</td><td>platforms using it re-score → RHINO7; ≤120 s</td><td>none (relay had no DNS role)</td></tr>
+    <tr><td>ALL dual platforms out of a mesh</td><td class="mono">candidate list empty</td><td>realm route + default withdrawn → fast local ICMP unreachable for cross-realm/external; in-mesh traffic unaffected</td><td>cross-realm names: cached ≤60 s, then SERVFAIL — apps fail fast, air spared</td></tr>
+    <tr><td>One dual platform's plat link cut</td><td class="mono">OSPF dead / carrier &lt;1 s</td><td>its sibling pair stops relaying; both its radios remain ordinary members; other platforms' IF-9 unaffected unless they used it — then UC-6 path</td><td>if RHINO7: realm views still served per face; cross-realm forwarding of answers re-routes like data</td></tr>
+    <tr><td>Member platform fades</td><td class="mono">HoldDown at every RR in its mesh</td><td>≤120 s deliberate blackhole, then withdraw; names answer through HoldDown — consistent with routes</td><td>then NXDOMAIN, neg-TTL 30 s</td></tr>
+  </table></div>
+</div>
+
+<!-- ================= §12 RTM ================= -->
+<div class="sheet">
+  <div class="eyebrow"><span class="no">§12</span>REQUIREMENTS TRACEABILITY</div>
+  <h2>Drivers → design → verification</h2>
+  <div class="twrap"><table>
+    <tr><th>Req</th><th>Statement</th><th>Satisfied by</th><th>Verify</th></tr>
+    <tr><td class="mono">SR-01..04</td><td>No IGP on air · /32 transit · MAC truth · damping</td><td>as Rev E (§3–§5, FIG 11 machine)</td><td>mesh capture: no proto-89; FIB audits; flap test ⇒ 0 change</td></tr>
+    <tr><td class="mono">SR-05</td><td>Prefix-based realm classification</td><td>realm routes in every FIB (TBL 4-1); provisioning rule 172.20 vs 172.21</td><td>inject foreign-realm dst at any RR ⇒ correct egress, zero lookups beyond FIB</td></tr>
+    <tr><td class="mono">SR-06</td><td>Loop-free multi-gateway transit + local selection</td><td>§3.1 forwarding logic; IF-9 scoring with hysteresis; UC-5/6</td><td>TTL trace: exactly one plat-link crossing on every cross-realm path; kill RHINO7-A ⇒ re-route ≤120 s, 0 air bytes</td></tr>
+    <tr><td class="mono">SR-07</td><td>Static callsigns, realm-aware gated answers</td><td>zone tac. provisioned map × injector gating × source-realm views (§6)</td><td>query badger2.tac from both realms ⇒ same-realm addr; kill one radio ⇒ other addr; kill both ⇒ NXDOMAIN ≤60 s</td></tr>
+    <tr><td class="mono">SR-08</td><td>Translation only at borders</td><td>§8.1; UC-4 egress-realm PAT rule; FIG 7-2 transit constancy</td><td>mesh capture: only 172.20/21 addresses; replies of UC-4 traffic never transit twice</td></tr>
+    <tr><td class="mono">SR-09</td><td>Radio metrics → OSPF cost + GW scoring, damped</td><td>IF-8 + IF-9 from one MAC feed (§9.1)</td><td>degrade a dual's radio ⇒ its OSPF cost rises AND its selection score falls, ≤30 s, no signalling</td></tr>
+    <tr><td class="mono">SR-10</td><td>QoS budget at every radio egress</td><td>AIR-OUT 35/15/50; per-platform police</td><td>saturate BULK ⇒ C2 bound holds; CONTROL ≤15 % under churn</td></tr>
+  </table></div>
+</div>
+
+<!-- ================= §13 RULES ================= -->
+<div class="sheet">
+  <div class="eyebrow"><span class="no">§13</span>DESIGN RULES</div>
+  <h2>Twelve rules that define this system</h2>
+  <ol class="walk">
+    <li><strong>No routing protocol on any mesh interface</strong> — OSPF lives only inside dual platforms, on their own platform links.</li>
+    <li><strong>The radio MAC layer is the single source of truth</strong> for membership, names' answerability, link costs, and gateway liveness.</li>
+    <li><strong>One realm per MANET; the prefix is the routing decision.</strong> 172.20/16 ⇒ mesh A, 172.21/16 ⇒ mesh B, else external.</li>
+    <li><strong>The radio /32 is the platform's transit identity;</strong> app LANs hide behind edge PAT, services are callsign + port.</li>
+    <li><strong>On dual platforms, PAT source = egress-realm /32</strong> so replies route home without double transit.</li>
+    <li><strong>Any dual-homed platform is a gateway;</strong> transit crosses exactly one platform link, far side always on-link — loop-free by construction.</li>
+    <li><strong>Gateway selection is local, scored, damped:</strong> provisioned priorities × radio metrics, 20 % hysteresis, zero signalling.</li>
+    <li><strong>Callsigns are static identity;</strong> the zone is provisioning data; answers are realm-aware and reachability-gated (resolvable ⇔ routable).</li>
+    <li><strong>Apps configure one thing:</strong> GW = DNS = their router's LAN IP.</li>
+    <li><strong>Damp, then act</strong> — routes, records, gateway switches, OSPF costs: every reaction waits out the radio's noise.</li>
+    <li><strong>NAT timeouts are air policy:</strong> UDP 600 s, TCP 3600 s, EIM/EIF, hairpin on.</li>
+    <li><strong>Serialization is the latency:</strong> UDP-first, MSS 512, PDUs ≤ ~250 B, caches load-bearing; budget 35/15/50 at every radio egress.</li>
+  </ol>
+  <div class="note green"><b>Net result</b>
+  Any app, behind any platform, reaches any callsign — the realm rule routes it, the nearest healthy dual
+  platform relays it, DNS answers with the right face of the right radio, and the only things the air ever
+  carries are application data and a budgeted trickle of name lookups.</div>
+</div>
+
+<script>
+mermaid.initialize({ startOnLoad: true, securityLevel: 'loose',
+  themeVariables: { fontSize: '14px' },
+  sequence: { mirrorActors:false, actorMargin: 26, messageMargin: 32, noteMargin: 9, boxMargin: 6, width: 132 },
+  flowchart: { useMaxWidth: true }
+});
+</script>
+</body>
+</html>
