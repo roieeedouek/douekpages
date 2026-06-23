@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Relay Selection — Mesh Reach Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0C1420; --panel:#111C2B; --panel-2:#15212F; --line:#243348;
+    --line-faint:#1A2638;
+    --ink:#E9EEF6; --ink-dim:#8597AF; --ink-faint:#566681;
+    --source:#F4B53F; --source-edge:#FFD27A; --source-ink:#1A1304;
+    --relay:#2CD4C5; --relay-edge:#8BFFF0; --relay-ink:#04221F;
+    --covered:#6FE08A; --target:#52647E; --silent:#2A3A52;
+    --active:#39E0D0;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--disp);}
+  body{
+    min-height:100vh;
+    display:flex;justify-content:center;
+    padding:18px 14px 40px;
+    background:
+      radial-gradient(120% 80% at 50% -10%, #14253a 0%, var(--bg) 55%);
+  }
+  .wrap{width:100%;max-width:540px;}
+
+  header{margin-bottom:14px;}
+  .kicker{
+    font-family:var(--mono);font-size:11px;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--relay);margin:0 0 6px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .kicker::before{content:"";width:7px;height:7px;border-radius:50%;
+    background:var(--relay);box-shadow:0 0 10px var(--relay);}
+  h1{font-size:26px;font-weight:700;letter-spacing:-.02em;margin:0 0 6px;line-height:1.1;}
+  .sub{font-size:13.5px;color:var(--ink-dim);margin:0;line-height:1.5;}
+
+  /* segmented preset control */
+  .seg{
+    display:flex;flex-wrap:wrap;gap:4px;margin:16px 0 12px;padding:4px;
+    background:var(--panel);border:1px solid var(--line);border-radius:11px;
+  }
+  .seg button{
+    flex:1 1 64px;border:0;cursor:pointer;border-radius:8px;padding:9px 4px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.02em;
+    background:transparent;color:var(--ink-dim);transition:.2s;
+    text-transform:uppercase;white-space:nowrap;
+  }
+  .seg button[aria-pressed="true"]{background:var(--panel-2);color:var(--ink);
+    box-shadow:inset 0 0 0 1px var(--line);}
+
+  /* stage */
+  .stage{
+    position:relative;background:var(--panel);
+    border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    box-shadow:0 18px 40px -24px #000;
+  }
+  svg{display:block;width:100%;height:auto;}
+
+  .band{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;
+    fill:var(--ink-faint);text-transform:uppercase;}
+  .bandline{stroke:var(--line-faint);stroke-width:1;stroke-dasharray:2 5;}
+
+  .edge{stroke:#2A3a52;stroke-width:1.6;fill:none;transition:.4s;}
+  .edge.dim{stroke:#1B2638;opacity:.5;}
+  .edge.active1,.edge.active2{stroke:var(--active);stroke-width:2.4;
+    filter:drop-shadow(0 0 5px rgba(57,224,208,.55));}
+
+  .node circle{stroke-width:2.2;transition:fill .4s,stroke .4s,opacity .4s;}
+  .node text{font-family:var(--mono);font-weight:600;font-size:18px;
+    fill:var(--ink);text-anchor:middle;dominant-baseline:central;
+    pointer-events:none;transition:fill .4s;}
+
+  .node.source circle{fill:var(--source);stroke:var(--source-edge);
+    filter:drop-shadow(0 0 12px rgba(244,181,63,.5));}
+  .node.source text{fill:var(--source-ink);}
+
+  .node.relay circle{fill:var(--relay);stroke:var(--relay-edge);}
+  .node.relay text{fill:var(--relay-ink);}
+
+  .node.candidate circle{fill:#1C293B;stroke:#3A4B66;}
+  .node.candidate text{fill:var(--ink-dim);}
+
+  .node.silent circle{fill:#161F2C;stroke:#2A3A52;
+    stroke-dasharray:3 3;opacity:.55;}
+  .node.silent text{fill:var(--ink-faint);}
+
+  .node.target circle{fill:#19222F;stroke:var(--target);}
+  .node.target text{fill:#A9B8CC;}
+
+  .node.covered circle{fill:#142A1E;stroke:var(--covered);
+    filter:drop-shadow(0 0 8px rgba(111,224,138,.35));}
+  .node.covered text{fill:#D6EBDD;}
+
+  .glow{fill:url(#cov);pointer-events:none;}
+  .packet{fill:#CFFBF4;}
+
+  /* status chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
+  .chip{font-family:var(--mono);font-size:11px;letter-spacing:.03em;
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    padding:7px 10px;color:var(--ink-dim);display:flex;gap:7px;align-items:center;}
+  .chip b{color:var(--ink);font-weight:600;}
+  .chip .dot{width:8px;height:8px;border-radius:50%;}
+
+  /* controls */
+  .controls{display:flex;gap:8px;margin:6px 0 14px;align-items:center;}
+  .controls button{
+    font-family:var(--mono);font-size:12.5px;cursor:pointer;
+    background:var(--panel-2);color:var(--ink);border:1px solid var(--line);
+    border-radius:9px;padding:11px 12px;transition:.18s;flex:0 0 auto;
+  }
+  .controls button:hover:not(:disabled){border-color:var(--relay);color:#fff;}
+  .controls button:disabled{opacity:.35;cursor:default;}
+  #play{flex:1;background:var(--relay);color:var(--relay-ink);border-color:var(--relay);
+    font-weight:600;letter-spacing:.03em;}
+  #play:hover{filter:brightness(1.08);}
+  .stepcount{font-family:var(--mono);font-size:12px;color:var(--ink-faint);
+    margin-left:auto;flex:0 0 auto;}
+
+  /* decision panel */
+  .decision{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px;margin-bottom:12px;}
+  .dbanner{font-family:var(--mono);font-size:11.5px;color:var(--covered);
+    background:rgba(111,224,138,.08);border:1px solid rgba(111,224,138,.25);
+    border-radius:8px;padding:8px 10px;margin-bottom:11px;}
+  .dtitle{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-dim);margin-bottom:9px;
+    display:flex;align-items:center;gap:7px;}
+  .dtitle::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ink-faint);}
+  .dtitle.mand{color:var(--source);} .dtitle.mand::before{background:var(--source);box-shadow:0 0 8px var(--source);}
+  .dtitle.greedy{color:var(--relay);} .dtitle.greedy::before{background:var(--relay);box-shadow:0 0 8px var(--relay);}
+  .dtitle.prune{color:#F08A6B;} .dtitle.prune::before{background:#F08A6B;box-shadow:0 0 8px #F08A6B;}
+  .dbody{font-size:13.5px;color:var(--ink);line-height:1.55;margin-bottom:8px;}
+  .dhint{font-size:12.5px;color:var(--ink-dim);line-height:1.55;margin-top:9px;}
+  .tag{display:inline-flex;font-family:var(--mono);font-size:11.5px;font-weight:600;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:5px;
+    padding:1px 6px;margin:2px 3px 2px 0;color:var(--ink);}
+
+  .cov{display:flex;flex-direction:column;gap:4px;margin-bottom:4px;}
+  .covrow{display:flex;align-items:center;flex-wrap:wrap;gap:2px;
+    padding:5px 0;border-bottom:1px solid var(--line-faint);}
+  .covrow .who{font-family:var(--mono);font-weight:600;color:var(--source);
+    width:22px;flex:0 0 22px;}
+  .covrow .arrow{color:var(--ink-faint);margin-right:6px;}
+
+  .score{display:flex;flex-direction:column;border:1px solid var(--line);
+    border-radius:8px;overflow:hidden;margin:2px 0 2px;}
+  .scorehead,.scorerow{display:grid;grid-template-columns:1fr 1fr 1.4fr 1.2fr;
+    align-items:center;font-family:var(--mono);font-size:12px;padding:7px 11px;}
+  .scorehead{font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-faint);background:#0C1622;}
+  .scorerow{color:var(--ink-dim);border-top:1px solid var(--line-faint);}
+  .scorerow .sn{color:var(--ink);font-weight:600;}
+  .scorerow.win{background:rgba(44,212,197,.10);color:var(--ink);}
+  .scorerow.win .sn{color:var(--relay);}
+  .scorerow.win .sg{color:var(--relay);font-weight:600;}
+  .schk{color:var(--relay);font-size:11px;text-align:right;}
+
+  /* log */
+  .log{background:#0A1119;border:1px solid var(--line);border-radius:12px;
+    padding:14px 14px 16px;font-family:var(--mono);font-size:12.5px;
+    line-height:1.7;color:var(--ink-dim);min-height:120px;}
+  .log .ln{opacity:.55;transition:.3s;white-space:pre-wrap;}
+  .log .ln.live{opacity:1;color:var(--ink);}
+  .log .ln.mand{color:#F4B53F;}
+  .log .ln.greedy{color:var(--relay);}
+  .log .ln.prune{color:#F08A6B;}
+  .log .ln.done{color:var(--covered);}
+  .log .ln.intro{color:var(--ink-faint);}
+
+  @media (max-width:380px){ h1{font-size:22px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kicker">mesh reach console</p>
+    <h1>Relay selection, step by step</h1>
+    <p class="sub">From the source, pick the fewest direct neighbors to act as relays so every node lands within two hops. Watch which neighbors are chosen — and which fall silent.</p>
+  </header>
+
+  <div class="seg" role="group" aria-label="Topology">
+    <button id="p-mandatory" aria-pressed="false">Forced</button>
+    <button id="p-redundant" aria-pressed="false">Greedy</button>
+    <button id="p-complex" aria-pressed="false">Complex</button>
+    <button id="p-trap" aria-pressed="true">Trap</button>
+  </div>
+
+  <div class="stage">
+    <svg id="svg" viewBox="0 0 720 640" role="img" aria-label="Mesh relay diagram">
+      <defs>
+        <radialGradient id="cov">
+          <stop offset="0%" stop-color="rgba(44,212,197,.30)"/>
+          <stop offset="60%" stop-color="rgba(44,212,197,.10)"/>
+          <stop offset="100%" stop-color="rgba(44,212,197,0)"/>
+        </radialGradient>
+      </defs>
+      <g id="bands"></g>
+      <g id="glows"></g>
+      <g id="edges"></g>
+      <g id="packets"></g>
+      <g id="nodes"></g>
+    </svg>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="controls">
+    <button id="prev" aria-label="Previous step">◀</button>
+    <button id="play">▶ Play</button>
+    <button id="next" aria-label="Next step">▶</button>
+    <span class="stepcount" id="stepcount">0 / 0</span>
+  </div>
+
+  <div class="decision" id="decision"></div>
+
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---- topologies ---------------------------------------------------------
+  // pos: vertical bands -> source (top), neighbors (middle), targets (bottom)
+  const PRESETS = {
+    mandatory: {
+      source: "S", vb:"0 0 480 620", r:26, rows:{src:70,nbr:300,tgt:540},
+      pos: { S:[240,70], A:[120,300], B:[240,300], C:[360,300],
+             D:[70,540], E:[200,540], F:[320,540], G:[440,540] },
+      links: [["S","A"],["S","B"],["S","C"],
+              ["A","D"],["A","E"],["B","E"],["B","F"],["C","F"],["C","G"]]
+    },
+    redundant: {
+      source: "S", vb:"0 0 480 620", r:26, rows:{src:70,nbr:300,tgt:540},
+      pos: { S:[240,70], A:[120,300], B:[240,300], C:[360,300],
+             P:[70,540], Q:[195,540], R:[320,540], T:[445,540] },
+      links: [["S","A"],["S","B"],["S","C"],
+              ["A","P"],["A","Q"],["A","R"],
+              ["B","P"],["B","T"],
+              ["C","Q"],["C","R"],["C","T"]]
+    },
+    // 6 neighbors, 8 targets, heavy overlap.
+    // coverage: A{P,Q,R,U} B{Q,R,T} C{T,U,V} D{V,W} E{W,X} F{U,X}
+    complex: {
+      source: "S", vb:"0 0 720 640", r:22, rows:{src:70,nbr:320,tgt:560},
+      pos: { S:[360,70],
+             A:[60,320], B:[180,320], C:[300,320], D:[420,320], E:[540,320], F:[660,320],
+             P:[50,560], Q:[139,560], R:[227,560], T:[316,560],
+             U:[404,560], V:[493,560], W:[581,560], X:[670,560] },
+      links: [["S","A"],["S","B"],["S","C"],["S","D"],["S","E"],["S","F"],
+              ["A","P"],["A","Q"],["A","R"],["A","U"],
+              ["B","Q"],["B","R"],["B","T"],
+              ["C","T"],["C","U"],["C","V"],
+              ["D","V"],["D","W"],
+              ["E","W"],["E","X"],
+              ["F","U"],["F","X"]]
+    },
+    // 7 neighbors, 12 targets. No single-providers among t1..t8, so greedy runs
+    // free and falls for the big straddling set G — then phase 3 prunes it.
+    // mandatory: H1{z1,z2} H2{z3,z4}
+    // trap: L1{t1,t2,t3,t4} L2{t5,t6,t7,t8} G{t3,t4,t5,t6,t7} M1{t1,t2} M2{t8}
+    trap: {
+      source: "S", vb:"0 0 920 660", r:20, rows:{src:70,nbr:330,tgt:560},
+      pos: { S:[460,70],
+             H1:[70,330], H2:[200,330], M1:[330,330], L1:[460,330],
+             G:[590,330], L2:[720,330], M2:[850,330],
+             z1:[40,560], z2:[116,560], z3:[193,560], z4:[269,560],
+             t1:[345,560], t2:[422,560], t3:[498,560], t4:[575,560],
+             t5:[651,560], t6:[727,560], t7:[804,560], t8:[880,560] },
+      links: [["S","H1"],["S","H2"],["S","M1"],["S","L1"],["S","G"],["S","L2"],["S","M2"],
+              ["H1","z1"],["H1","z2"],
+              ["H2","z3"],["H2","z4"],
+              ["M1","t1"],["M1","t2"],
+              ["L1","t1"],["L1","t2"],["L1","t3"],["L1","t4"],
+              ["G","t3"],["G","t4"],["G","t5"],["G","t6"],["G","t7"],
+              ["L2","t5"],["L2","t6"],["L2","t7"],["L2","t8"],
+              ["M2","t8"]]
+    }
+  };
+
+  // ---- algorithm + trace --------------------------------------------------
+  function adjFromLinks(links){
+    const adj = {};
+    const add = (a,b)=>{ (adj[a] ||= new Set()).add(b); };
+    for(const [a,b] of links){ add(a,b); add(b,a); }
+    return adj;
+  }
+
+  function computeTrace(source, adj){
+    const n1 = new Set(adj[source] || []); n1.delete(source);
+    const n2 = new Set();
+    for(const n of n1) for(const x of (adj[n]||[])) n2.add(x);
+    for(const n of n1) n2.delete(n);
+    n2.delete(source);
+
+    const deg = n => (adj[n]||new Set()).size;
+    const coverage = {};
+    for(const n of n1) coverage[n] = new Set([...(adj[n]||[])].filter(x=>n2.has(x)));
+
+    const steps = [], mpr = new Set(), covered = new Set();
+    // every step carries a snapshot of the relay set + coverage after it runs,
+    // so the renderer can step forward (selections) AND backward (prune).
+    const push = obj => steps.push(Object.assign(obj,
+      { selectedAfter:[...mpr].sort(), coveredAfter:[...covered] }));
+
+    // phase 1 — mandatory relays (a target with a single provider)
+    const providersOf = t => [...n1].filter(n => coverage[n].has(t));
+    const mandatory = new Set();
+    for(const t of n2){ const p = providersOf(t); if(p.length === 1) mandatory.add(p[0]); }
+    for(const n of mandatory){
+      const forced = [...n2].filter(t => { const p = providersOf(t); return p.length===1 && p[0]===n; });
+      mpr.add(n); for(const x of coverage[n]) covered.add(x);
+      push({ type:"mandatory", node:n, forced, cover:[...coverage[n]] });
+    }
+
+    // phase 2 — greedy: repeatedly take the neighbor adding the most new coverage
+    let remaining = [...n2].filter(x=>!covered.has(x)), round = 0;
+    while(remaining.length){
+      round++;
+      const remainingBefore = [...remaining];
+      const candidates = [...n1].filter(n=>!mpr.has(n)).map(n=>({
+        node:n, gain:[...coverage[n]].filter(x=>!covered.has(x)).length, deg:deg(n)
+      })).sort((a,b)=> b.gain-a.gain || b.deg-a.deg || (a.node<b.node?-1:1));
+
+      const best = candidates[0];
+      if(!best || best.gain<=0) break;
+      const tie = candidates.filter(c=>c.gain===best.gain).length > 1;
+      const newly = [...coverage[best.node]].filter(x=>!covered.has(x));
+      mpr.add(best.node); for(const x of coverage[best.node]) covered.add(x);
+      push({ type:"greedy", node:best.node, gain:best.gain, deg:best.deg, newly,
+             cover:[...coverage[best.node]], round, remainingBefore, candidates, tie });
+      remaining = [...n2].filter(x=>!covered.has(x));
+    }
+
+    const greedyCount = mpr.size;
+
+    // phase 3 — prune relays whose coverage is fully redundant given the others
+    const order = [...mpr].sort((a,b)=> deg(a)-deg(b) || (a<b?-1:1));
+    for(const r of order){
+      const others = [...mpr].filter(x=>x!==r);
+      const union = new Set(); for(const o of others) for(const x of coverage[o]) union.add(x);
+      if([...coverage[r]].every(x=>union.has(x))){
+        const by = others.filter(o => [...coverage[r]].some(x=>coverage[o].has(x)));
+        mpr.delete(r);
+        push({ type:"prune", node:r, cover:[...coverage[r]], by });
+      }
+    }
+
+    return { n1:[...n1], n2:[...n2], coverage, steps, relays:[...mpr].sort(), greedyCount };
+  }
+
+  // ---- state --------------------------------------------------------------
+  const $ = id => document.getElementById(id);
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let key = "mandatory";
+  let step = 0;
+  let trace = null;
+  let raf = null, playTimer = null;
+  let packetDots = [];
+
+  const P = () => PRESETS[key];
+  const center = id => { const p = P().pos[id]; return { x:p[0], y:p[1] }; };
+  const covHas = (relay, target) => trace.coverage[relay].has(target);
+
+  // ---- scene construction (once per preset) -------------------------------
+  function el(name, attrs){ const e = document.createElementNS(SVGNS, name);
+    for(const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+
+  function buildScene(){
+    const cfg = P();
+    const svg = $("svg");
+    svg.setAttribute("viewBox", cfg.vb);
+    const W = parseFloat(cfg.vb.split(" ")[2]);
+
+    const bands = $("bands"), edges = $("edges"), nodes = $("nodes");
+    bands.replaceChildren(); edges.replaceChildren(); nodes.replaceChildren();
+    $("glows").replaceChildren(); $("packets").replaceChildren();
+
+    const labels = [[cfg.rows.src,"source"],
+                    [cfg.rows.nbr,"1 hop · neighbors"],
+                    [cfg.rows.tgt,"2 hops · targets"]];
+    for(const [rowY,txt] of labels){
+      const y = rowY - 26;
+      bands.appendChild(el("line",{class:"bandline",x1:24,y1:y+8,x2:W-24,y2:y+8}));
+      const t = el("text",{class:"band",x:24,y:y}); t.textContent = txt;
+      bands.appendChild(t);
+    }
+
+    for(const [a,b] of cfg.links){
+      const ca = center(a), cb = center(b);
+      const ln = el("line",{class:"edge",x1:ca.x,y1:ca.y,x2:cb.x,y2:cb.y});
+      ln.dataset.a = a; ln.dataset.b = b;
+      edges.appendChild(ln);
+    }
+
+    const fs = Math.round(cfg.r * 0.72);
+    for(const id in cfg.pos){
+      const c = center(id);
+      const g = el("g",{class:"node","data-id":id});
+      g.appendChild(el("circle",{r:cfg.r,cx:c.x,cy:c.y}));
+      const t = el("text",{x:c.x,y:c.y,"font-size":fs}); t.textContent = id;
+      g.appendChild(t);
+      nodes.appendChild(g);
+    }
+  }
+
+  // ---- per-step helpers ---------------------------------------------------
+  const selectedAt = k => k === 0 ? [] : trace.steps[k-1].selectedAfter;
+  const coveredAt  = k => new Set(k === 0 ? [] : trace.steps[k-1].coveredAfter);
+
+  function roleOf(id, k, sel, cov){
+    if(id === P().source) return "source";
+    if(trace.n1.includes(id))
+      return sel.includes(id) ? "relay" : (k >= trace.steps.length ? "silent" : "candidate");
+    return cov.has(id) ? "covered" : "target";
+  }
+
+  // ---- render -------------------------------------------------------------
+  function render(){
+    const N = trace.steps.length;
+    const sel = selectedAt(step);
+    const cov = coveredAt(step);
+    const final = step >= N;
+
+    // nodes
+    $("nodes").querySelectorAll(".node").forEach(g=>{
+      g.setAttribute("class", "node " + roleOf(g.dataset.id, step, sel, cov));
+    });
+
+    // edges + collect active forwarding segments
+    const segs = [];
+    $("edges").querySelectorAll(".edge").forEach(ln=>{
+      const a = ln.dataset.a, b = ln.dataset.b, src = P().source;
+      let cls = "edge", from = null, to = null, hop = 0;
+
+      if(a===src && sel.includes(b))       { cls="edge active1"; from=a; to=b; hop=1; }
+      else if(b===src && sel.includes(a))  { cls="edge active1"; from=b; to=a; hop=1; }
+      else if(sel.includes(a) && trace.n2.includes(b) && covHas(a,b)) { cls="edge active2"; from=a; to=b; hop=2; }
+      else if(sel.includes(b) && trace.n2.includes(a) && covHas(b,a)) { cls="edge active2"; from=b; to=a; hop=2; }
+      else if(final){
+        const sil = id => trace.n1.includes(id) && !sel.includes(id);
+        if(sil(a) || sil(b)) cls = "edge dim";
+      }
+      ln.setAttribute("class", cls);
+      if(from){ const f=center(from), t=center(to);
+        segs.push({x1:f.x,y1:f.y,x2:t.x,y2:t.y,off:hop===1?0:0.5}); }
+    });
+
+    // coverage glows behind selected relays
+    const glows = $("glows"); glows.replaceChildren();
+    const glowR = P().r * 2.7;
+    for(const r of sel){ const c = center(r);
+      glows.appendChild(el("circle",{class:"glow",cx:c.x,cy:c.y,r:glowR})); }
+
+    // packets
+    buildPackets(segs);
+
+    renderChips(sel, cov, final);
+    renderDecision();
+    renderLog();
+    $("stepcount").textContent = step + " / " + N;
+    $("prev").disabled = step <= 0;
+    $("next").disabled = step >= N;
+  }
+
+  function renderChips(sel, cov, final){
+    const coveredTargets = trace.n2.filter(t=>cov.has(t)).length;
+    const silent = trace.n1.length - sel.length;
+    const chip = (color,label,val) =>
+      `<span class="chip"><span class="dot" style="background:${color}"></span>${label} <b>${val}</b></span>`;
+    $("chips").innerHTML =
+      chip("var(--relay)","RELAYS", sel.length ? sel.join(",") : "—") +
+      chip("var(--covered)","COVERED", coveredTargets + "/" + trace.n2.length) +
+      chip("var(--source)","HOPS", "≤2") +
+      chip("var(--ink-faint)", final ? "SILENT" : "PENDING", silent);
+  }
+
+  const tagSet = arr => arr.map(x=>`<span class="tag">${x}</span>`).join("");
+
+  function renderDecision(){
+    const N = trace.steps.length;
+    const box = $("decision");
+
+    if(step === 0){
+      const rows = trace.n1.map(n=>
+        `<div class="covrow"><span class="who">${n}</span><span class="arrow">→</span>${tagSet([...trace.coverage[n]])}</div>`
+      ).join("");
+      box.innerHTML =
+        `<div class="dtitle">Coverage map · who reaches what</div>
+         <div class="cov">${rows}</div>
+         <div class="dhint">Cover all ${trace.n2.length} targets with the fewest neighbors. Press ▶ to step.</div>`;
+      return;
+    }
+
+    const s = trace.steps[step-1];
+    const solved = step >= N;
+    const banner = solved
+      ? `<div class="dbanner">✓ solved — relays {${trace.relays.join(", ")}} · every node ≤2 hops</div>` : "";
+
+    if(s.type === "mandatory"){
+      box.innerHTML = banner +
+        `<div class="dtitle mand">Phase 1 · forced</div>
+         <div class="dbody"><b>${s.node}</b> is the only neighbor reaching ${tagSet(s.forced)} — it must relay.</div>
+         <div class="dhint">covers ${tagSet(s.cover)}</div>`;
+      return;
+    }
+
+    if(s.type === "prune"){
+      box.innerHTML = banner +
+        `<div class="dtitle prune">Phase 3 · prune</div>
+         <div class="dbody"><b>${s.node}</b> turned out redundant — everything it covered (${tagSet(s.cover)}) is already reached by ${tagSet(s.by)}. Drop it.</div>
+         <div class="dhint">relays ${trace.greedyCount} → ${trace.relays.length} · greedy overshot, pruning recovers the minimum</div>`;
+      return;
+    }
+
+    const rows = s.candidates.map(c=>{
+      const win = c.node === s.node ? " win" : "";
+      return `<div class="scorerow${win}">
+        <span class="sn">${c.node}</span><span class="sg">+${c.gain}</span><span class="sd">deg ${c.deg}</span>
+        <span class="schk">${c.node===s.node?'◀ pick':''}</span></div>`;
+    }).join("");
+    const why = s.tie
+      ? `tie at +${s.gain} → broken by degree`
+      : `most new coverage wins`;
+    box.innerHTML = banner +
+      `<div class="dtitle greedy">Phase 2 · greedy · round ${s.round}</div>
+       <div class="dbody">remaining ${tagSet(s.remainingBefore)}</div>
+       <div class="score">
+         <div class="scorehead"><span class="sn">node</span><span class="sg">new</span><span class="sd">degree</span><span class="schk"></span></div>
+         ${rows}
+       </div>
+       <div class="dhint">${why} → <b>${s.node}</b> adds ${tagSet(s.newly)}</div>`;
+  }
+
+  function renderLog(){
+    const N = trace.steps.length;
+    const lines = [];
+    lines.push({cls:"intro", txt:`// ${P().source}: ${trace.n1.length} neighbors · ${trace.n2.length} targets within 2 hops`});
+    trace.steps.slice(0, step).forEach(s=>{
+      if(s.type==="mandatory")
+        lines.push({cls:"mand", txt:`+ ${s.node}   mandatory · sole path to ${s.forced.join(" ")}`});
+      else if(s.type==="prune")
+        lines.push({cls:"prune", txt:`− ${s.node}   prune · redundant, covered by ${s.by.join(" ")}`});
+      else
+        lines.push({cls:"greedy", txt:`+ ${s.node}   greedy · +${s.newly.length} new (${s.newly.join(" ")})`});
+    });
+    if(step >= N)
+      lines.push({cls:"done", txt:`= done · relays {${trace.relays.join(", ")}} · all nodes ≤2 hops`});
+
+    const liveIdx = lines.length - 1;
+    $("log").innerHTML = lines.map((l,i)=>
+      `<div class="ln ${l.cls} ${i===liveIdx && step>0 ? "live":""}">${l.txt}</div>`).join("");
+  }
+
+  // ---- packets ------------------------------------------------------------
+  function buildPackets(segs){
+    const g = $("packets"); g.replaceChildren(); packetDots = [];
+    const pr = Math.max(3, Math.round(P().r * 0.17));
+    for(const s of segs){
+      const dot = el("circle",{class:"packet",r:pr,cx:s.x1,cy:s.y1,opacity:0});
+      dot.dataset.x1=s.x1; dot.dataset.y1=s.y1; dot.dataset.x2=s.x2; dot.dataset.y2=s.y2; dot.dataset.off=s.off;
+      g.appendChild(dot); packetDots.push(dot);
+    }
+    if(reduceMotion){
+      for(const d of packetDots){
+        const t=0.5;
+        d.setAttribute("cx", +d.dataset.x1 + (+d.dataset.x2 - +d.dataset.x1)*t);
+        d.setAttribute("cy", +d.dataset.y1 + (+d.dataset.y2 - +d.dataset.y1)*t);
+        d.setAttribute("opacity", .9);
+      }
+    } else if(!raf && packetDots.length){
+      raf = requestAnimationFrame(animate);
+    }
+  }
+
+  function animate(now){
+    const dur = 1500;
+    if(!packetDots.length){ raf = null; return; }
+    for(const d of packetDots){
+      const off = +d.dataset.off;
+      const t = ((now/dur) + off) % 1;
+      d.setAttribute("cx", +d.dataset.x1 + (+d.dataset.x2 - +d.dataset.x1)*t);
+      d.setAttribute("cy", +d.dataset.y1 + (+d.dataset.y2 - +d.dataset.y1)*t);
+      d.setAttribute("opacity", Math.sin(t*Math.PI)*0.85 + 0.12);
+    }
+    raf = requestAnimationFrame(animate);
+  }
+
+  // ---- controls -----------------------------------------------------------
+  function setPreset(k){
+    key = k; step = 0; stopPlay();
+    trace = computeTrace(P().source, adjFromLinks(P().links));
+    $("p-mandatory").setAttribute("aria-pressed", String(k==="mandatory"));
+    $("p-redundant").setAttribute("aria-pressed", String(k==="redundant"));
+    $("p-complex").setAttribute("aria-pressed", String(k==="complex"));
+    $("p-trap").setAttribute("aria-pressed", String(k==="trap"));
+    buildScene(); render();
+  }
+  function next(){ if(step < trace.steps.length){ step++; render(); } }
+  function prev(){ if(step > 0){ step--; render(); } }
+
+  function stopPlay(){ if(playTimer){ clearInterval(playTimer); playTimer=null; }
+    $("play").textContent = "▶ Play"; }
+  function togglePlay(){
+    if(playTimer){ stopPlay(); return; }
+    if(step >= trace.steps.length) step = 0, render();
+    $("play").textContent = "❚❚ Pause";
+    playTimer = setInterval(()=>{
+      if(step >= trace.steps.length){ stopPlay(); return; }
+      next();
+    }, 1300);
+  }
+
+  $("p-mandatory").addEventListener("click", ()=>setPreset("mandatory"));
+  $("p-redundant").addEventListener("click", ()=>setPreset("redundant"));
+  $("p-complex").addEventListener("click", ()=>setPreset("complex"));
+  $("p-trap").addEventListener("click", ()=>setPreset("trap"));
+  $("next").addEventListener("click", ()=>{ stopPlay(); next(); });
+  $("prev").addEventListener("click", ()=>{ stopPlay(); prev(); });
+  $("play").addEventListener("click", togglePlay);
+
+  setPreset("trap");
+})();
+</script>
+</body>
+</html>
