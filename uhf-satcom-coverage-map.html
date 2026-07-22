@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UHF SATCOM — GEO Coverage Map</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070b0c; --bg2:#0c1314; --panel:#0e1718; --line:#1d2b2c;
+    --ink:#c9e8df; --dim:#5f7d78; --green:#39ffa6; --amber:#ffb000;
+    --glow:rgba(57,255,166,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'JetBrains Mono',monospace;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* layout */
+  #app{display:grid;grid-template-columns:1fr 340px;grid-template-rows:auto 1fr var(--chh,300px);height:100vh}
+  header{
+    grid-column:1/-1;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+    padding:12px 18px;background:linear-gradient(180deg,#0c1314,#080d0e);
+    border-bottom:1px solid var(--line);z-index:500;
+  }
+  header .badge{
+    font-family:'Chakra Petch';font-weight:700;font-size:13px;letter-spacing:2px;
+    color:var(--green);text-shadow:0 0 12px var(--glow);
+    border:1px solid #1f4138;padding:5px 10px;border-radius:3px;background:#0a1614;
+  }
+  header h1{font-family:'Chakra Petch';font-weight:600;font-size:18px;letter-spacing:1px;white-space:nowrap}
+  header h1 span{color:var(--dim);font-weight:400;font-size:12px;letter-spacing:1px}
+  header .stats{margin-left:auto;display:flex;gap:22px;font-size:11px;color:var(--dim);letter-spacing:.5px}
+  header .stats b{display:block;font-size:19px;color:var(--ink);font-family:'Chakra Petch';font-weight:700;letter-spacing:0}
+  header .stats .g b{color:var(--green)}
+
+  #map{grid-column:1;grid-row:2;background:#060a0b;position:relative}
+  /* radar grid overlay */
+  #map::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:401;
+    background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.10) 3px 4px);mix-blend-mode:multiply}
+
+  aside{
+    grid-column:2;grid-row:2/span 2;background:var(--panel);border-left:1px solid var(--line);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .controls{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+  .ctl-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim);letter-spacing:.5px;flex-wrap:wrap}
+  .ctl-row .lbl{min-width:74px;text-transform:uppercase}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .seg button{
+    background:transparent;color:var(--dim);border:0;font-family:inherit;font-size:11px;
+    padding:4px 9px;cursor:pointer;border-right:1px solid var(--line)}
+  .seg button:last-child{border-right:0}
+  .seg button.on{background:var(--green);color:#04130d;font-weight:700}
+  .toggle{cursor:pointer;user-select:none;color:var(--ink)}
+  .toggle input{accent-color:var(--green);vertical-align:-2px;margin-right:5px}
+
+  .listhead{padding:9px 14px;font-size:10px;letter-spacing:1.5px;color:var(--dim);
+    text-transform:uppercase;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+  .list{overflow-y:auto;flex:1}
+  .sat{
+    padding:10px 14px;border-bottom:1px solid #131f20;cursor:pointer;display:flex;gap:10px;align-items:center;
+    transition:background .12s}
+  .sat:hover{background:#11201f}
+  .sat.sel{background:#10231d;box-shadow:inset 3px 0 0 var(--green)}
+  .dot{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor}
+  .sat .nm{font-family:'Chakra Petch';font-weight:600;font-size:13px;letter-spacing:.3px}
+  .sat .meta{font-size:10px;color:var(--dim);margin-top:1px}
+  .sat .ch{margin-left:auto;text-align:right}
+  .sat .ch b{font-family:'Chakra Petch';font-size:15px;color:var(--ink)}
+  .sat .ch span{display:block;font-size:9px;color:var(--dim);letter-spacing:.5px}
+  .tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:2px;margin:2px 3px 0 0;
+    border:1px solid #3a2a12;color:var(--amber);background:#1a1206;letter-spacing:.3px}
+  .inactive .dot{color:#6b3a3a!important;background:#6b3a3a!important}
+
+  /* legend */
+  .legend{position:absolute;left:12px;bottom:12px;z-index:420;background:rgba(8,16,16,.86);
+    border:1px solid var(--line);border-radius:4px;padding:10px 12px;backdrop-filter:blur(4px);font-size:10px;letter-spacing:.4px}
+  .legend h4{font-family:'Chakra Petch';font-size:10px;letter-spacing:1.5px;color:var(--dim);margin-bottom:7px;text-transform:uppercase}
+  .legend .row{display:flex;align-items:center;gap:7px;margin:3px 0;color:var(--ink)}
+  .legend .sw{width:11px;height:11px;border-radius:2px;flex:none}
+
+  /* leaflet skin */
+  .leaflet-container{background:#060a0b;font-family:'JetBrains Mono',monospace}
+  .leaflet-popup-content-wrapper{background:#0c1718;color:var(--ink);border:1px solid #20413a;border-radius:5px;box-shadow:0 0 24px rgba(57,255,166,.18)}
+  .leaflet-popup-tip{background:#0c1718;border:1px solid #20413a}
+  .leaflet-popup-content{margin:11px 13px;font-size:11px;line-height:1.55}
+  .leaflet-popup-content h3{font-family:'Chakra Petch';font-size:15px;letter-spacing:.5px;margin-bottom:4px}
+  .leaflet-popup-content .op{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+  .leaflet-popup-content .kv{display:flex;justify-content:space-between;gap:18px;border-top:1px solid #18302b;padding:3px 0}
+  .leaflet-popup-content .kv span:first-child{color:var(--dim)}
+  .leaflet-bar a,.leaflet-control-attribution{background:#0c1718!important;color:var(--dim)!important;border-color:var(--line)!important}
+  .leaflet-control-attribution a{color:var(--green)!important}
+  .satlabel{font-family:'Chakra Petch';font-weight:600;font-size:11px;color:#dffaf0;
+    text-shadow:0 0 5px #000,0 0 9px var(--glow);white-space:nowrap;letter-spacing:.3px}
+  .satdiv{display:flex;flex-direction:column;align-items:center;transform:translateY(-3px)}
+  .satdiv .pulse{width:13px;height:13px;border-radius:50%;border:2px solid #04130d;box-shadow:0 0 10px currentColor,0 0 3px #000}
+
+  /* channel table panel */
+  #chan{grid-column:1;grid-row:3;background:var(--panel);border-top:1px solid var(--line);
+    display:flex;flex-direction:column;overflow:hidden;min-height:0}
+  #chan.collapsed{--x:0}
+  .chead{display:flex;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#101b1c,#0d1617);flex-wrap:wrap}
+  .chead h2{font-family:'Chakra Petch';font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink)}
+  .chead h2 em{font-style:normal;color:var(--green)}
+  .chead .cnt{font-size:10px;color:var(--dim);letter-spacing:.5px}
+  .chead .spacer{margin-left:auto}
+  .chead .seg button{padding:3px 8px;font-size:10px}
+  .chead input[type=search]{background:#08110f;border:1px solid var(--line);border-radius:3px;color:var(--ink);
+    font-family:inherit;font-size:11px;padding:4px 8px;width:130px;outline:none}
+  .chead input[type=search]:focus{border-color:#2b6b58;box-shadow:0 0 0 2px rgba(57,255,166,.08)}
+  .chead button.act{background:transparent;border:1px solid var(--line);color:var(--dim);border-radius:3px;
+    font-family:inherit;font-size:10px;padding:4px 9px;cursor:pointer;letter-spacing:.5px}
+  .chead button.act:hover{color:var(--green);border-color:#2b6b58}
+  .cwrap{overflow:auto;flex:1;min-height:0}
+  table.freq{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
+  table.freq thead th{position:sticky;top:0;z-index:2;background:#0e1a1b;color:var(--dim);
+    font-family:'Chakra Petch';font-weight:600;font-size:10px;letter-spacing:1px;text-transform:uppercase;
+    text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;
+    user-select:none}
+  table.freq thead th:hover{color:var(--green)}
+  table.freq thead th .ar{opacity:.35;margin-left:4px;font-size:9px}
+  table.freq thead th.s .ar{opacity:1;color:var(--green)}
+  table.freq thead th.s{color:var(--ink)}
+  table.freq td{padding:5px 10px;border-bottom:1px solid #121e1f;white-space:nowrap}
+  table.freq tbody tr:hover{background:#11201f}
+  table.freq tbody tr.hit{background:#12241d}
+  .fq{font-weight:700;color:#dffaf0;letter-spacing:.3px}
+  .fq.rx{color:var(--green)}
+  .satcell{display:flex;align-items:center;gap:6px}
+  .satcell i{width:7px;height:7px;border-radius:50%;display:inline-block;box-shadow:0 0 6px currentColor}
+  .sens{font-size:9px;padding:1px 6px;border-radius:2px;letter-spacing:.5px;text-transform:uppercase}
+  .sens.Strong{background:#0c2c1e;color:#39ffa6;border:1px solid #1d5940}
+  .sens.Medium{background:#2c2408;color:#ffb000;border:1px solid #56430f}
+  .sens.Weak{background:#2a1414;color:#ff7a7a;border:1px solid #5a2a2a}
+  .sens.none{color:#3f5652}
+  .stat{font-size:9px;letter-spacing:.5px}
+  .stat.on{color:var(--green)} .stat.off{color:#a35555}
+  .empty{padding:26px;text-align:center;color:var(--dim);font-size:11px}
+
+  #burger{display:none}
+  @media(max-width:820px){
+    #app{grid-template-columns:1fr;grid-template-rows:auto 42vh 30vh auto}
+    aside{grid-column:1;grid-row:4;border-left:0;border-top:1px solid var(--line);max-height:40vh}
+    #map{grid-column:1;grid-row:2}
+    #chan{grid-column:1;grid-row:3}
+    .chead input[type=search]{width:96px}
+    header .stats{gap:14px}
+    header h1 span{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <span class="badge">UHF SATCOM</span>
+    <h1>GEO Coverage Map <span>// 240–270 MHz · Noise Floor Nomad DB</span></h1>
+    <div class="stats">
+      <div class="g"><b id="st-sat">0</b>SATELLITES</div>
+      <div class="g"><b id="st-ch">0</b>CHANNELS</div>
+      <div><b id="st-act">0</b>ACTIVE</div>
+    </div>
+  </header>
+
+  <div id="map">
+    <div class="legend">
+      <h4>Operator / Nation</h4>
+      <div id="leg"></div>
+      <h4 style="margin-top:9px">Footprint = horizon visibility (0° elev)</h4>
+    </div>
+  </div>
+
+  <div id="chan">
+    <div class="chead">
+      <h2>Channels · <em id="ch-scope">UFO 11</em></h2>
+      <span class="cnt" id="ch-count">0 shown</span>
+      <div class="seg" id="cscope">
+        <button data-s="sel" class="on">This sat</button>
+        <button data-s="all">All sats</button>
+      </div>
+      <input type="search" id="ch-find" placeholder="find 249.3 / RU…" autocomplete="off">
+      <span class="spacer"></span>
+      <button class="act" id="ch-csv">Export CSV</button>
+    </div>
+    <div class="cwrap"><table class="freq">
+      <thead><tr id="ch-head"></tr></thead>
+      <tbody id="ch-body"></tbody>
+    </table></div>
+  </div>
+
+  <aside>
+    <div class="controls">
+      <div class="ctl-row">
+        <span class="lbl">Coverage</span>
+        <div class="seg" id="cov">
+          <button data-c="sel" class="on">Selected</button>
+          <button data-c="all">All</button>
+        </div>
+        <span style="color:var(--dim)">footprint shown</span>
+      </div>
+      <div class="ctl-row">
+        <span class="lbl">Bandwidth</span>
+        <div class="seg" id="bw">
+          <button data-b="all" class="on">All</button>
+          <button data-b="6">6</button>
+          <button data-b="25">25</button>
+          <button data-b="28">28</button>
+          <button data-b="38">38</button>
+          <button data-b="575">575</button>
+        </div>
+        <span style="color:var(--dim)">kHz</span>
+      </div>
+      <div class="ctl-row">
+        <span class="lbl">Min Elev</span>
+        <div class="seg" id="elev">
+          <button data-e="0" class="on">0°</button>
+          <button data-e="5">5°</button>
+          <button data-e="10">10°</button>
+        </div>
+        <label class="toggle" style="margin-left:auto"><input type="checkbox" id="tg-active">Active only</label>
+      </div>
+    </div>
+    <div class="listhead"><span>Satellites · W → E</span><span>Channels</span></div>
+    <div class="list" id="list"></div>
+  </aside>
+</div>
+
+<script>
+const RE=6378.137, H=35786, RATIO=RE/(RE+H);
+
+// operators / nations
+const OP={
+  US:{name:"US Navy (UFO / FltSatCom)",c:"#39ffa6"},
+  UK:{name:"UK MoD (Skynet)",c:"#4dd2ff"},
+  IT:{name:"Italy (SICRAL)",c:"#ffb000"},
+  DE:{name:"Germany (ComSatBw)",c:"#ff6fb5"},
+  INT:{name:"Intelsat 22 (hosted UHF)",c:"#b78cff"},
+};
+const ofSat=n=>{
+  if(/^UFO|FltSat/.test(n))return"US";
+  if(/^Skynet/.test(n))return"UK";
+  if(/^SICRAL/.test(n))return"IT";
+  if(/^ComSatBw/.test(n))return"DE";
+  return"INT";
+};
+
+const SATS=[
+ {name:"FltSatCom F8",pos:"125.7°W",lon:-125.7,ch:2,active:2,inactive:0,bw:{"6":1,"575":1},traffic:["575 kHz wideband ch @262.3"]},
+ {name:"UFO 10",pos:"22.9°W",lon:-22.9,ch:11,active:11,inactive:0,bw:{"6":1,"25":8,"28":2},traffic:["Brazil","Brazil Music"]},
+ {name:"UFO 7",pos:"22°W",lon:-22.0,ch:7,active:7,inactive:0,bw:{"25":6,"28":1},traffic:[]},
+ {name:"Skynet 5C",pos:"17.8°W",lon:-17.8,ch:1,active:1,inactive:0,bw:{"25":1},traffic:[]},
+ {name:"SICRAL 1B",pos:"11.8°E",lon:11.8,ch:9,active:9,inactive:0,bw:{"25":9},traffic:["RU Traffic"]},
+ {name:"ComSatBw-2",pos:"13.2°E",lon:13.2,ch:3,active:2,inactive:1,bw:{"25":3},traffic:[]},
+ {name:"Skynet 5B",pos:"24.5°E",lon:24.5,ch:7,active:7,inactive:0,bw:{"25":7},traffic:["Italian","RU Traffic"]},
+ {name:"UFO 2",pos:"28.7°E",lon:28.7,ch:6,active:6,inactive:0,bw:{"25":6},traffic:["UA Ukraine","RU Traffic"]},
+ {name:"Skynet 4C",pos:"33.4°E",lon:33.4,ch:1,active:1,inactive:0,bw:{"25":1},traffic:[]},
+ {name:"SICRAL 2",pos:"37°E",lon:37.0,ch:4,active:4,inactive:0,bw:{"25":4},traffic:[]},
+ {name:"Skynet 5D",pos:"52.7°E",lon:52.7,ch:5,active:5,inactive:0,bw:{"25":5},traffic:["Reserve","Interesting"]},
+ {name:"ComSatBw-1",pos:"63°E",lon:63.0,ch:3,active:3,inactive:0,bw:{"25":2,"38":1},traffic:["RU Traffic"]},
+ {name:"Intelsat 22",pos:"72°E",lon:72.0,ch:14,active:14,inactive:0,bw:{"25":11,"6":3},traffic:["RU Traffic","RUS","TRISTA"]},
+ {name:"UFO 11",pos:"75.6°E",lon:75.6,ch:58,active:58,inactive:0,bw:{"6":33,"25":24,"-":1},traffic:["Duty","MOLITVA Prayer","RU Traffic"]},
+ {name:"Skynet 5A",pos:"95°E",lon:95.0,ch:4,active:4,inactive:0,bw:{"25":3,"38":1},traffic:["Romanians"]},
+];
+SATS.forEach(s=>{s.op=ofSat(s.name);s.color=OP[s.op].c;});
+
+// stats
+document.getElementById('st-sat').textContent=SATS.length;
+document.getElementById('st-ch').textContent=SATS.reduce((a,s)=>a+s.ch,0);
+document.getElementById('st-act').textContent=SATS.reduce((a,s)=>a+s.active,0);
+
+// legend
+document.getElementById('leg').innerHTML=Object.values(OP).map(o=>
+  `<div class="row"><span class="sw" style="background:${o.c};box-shadow:0 0 8px ${o.c}"></span>${o.name}</div>`).join('');
+
+// map
+const map=L.map('map',{worldCopyJump:false,minZoom:1,maxZoom:6,zoomControl:true,attributionControl:true})
+  .setView([18,40],2);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+  subdomains:'abcd',maxZoom:8,
+  attribution:'&copy; OpenStreetMap &copy; CARTO · data: Noise Floor Nomad'
+}).addTo(map);
+
+// geodesic footprint polygon around equatorial sub-satellite point
+function footprint(lon,radiusDeg){
+  const lat1=0, lon1=lon*Math.PI/180, d=radiusDeg*Math.PI/180, pts=[];
+  for(let b=0;b<=360;b+=3){
+    const th=b*Math.PI/180;
+    const lat=Math.asin(Math.sin(lat1)*Math.cos(d)+Math.cos(lat1)*Math.sin(d)*Math.cos(th));
+    const lon2=lon1+Math.atan2(Math.sin(th)*Math.sin(d)*Math.cos(lat1),Math.cos(d)-Math.sin(lat1)*Math.sin(lat));
+    pts.push([lat*180/Math.PI, lon2*180/Math.PI]);
+  }
+  // unwrap longitudes to keep polygon continuous around its center
+  for(let i=1;i<pts.length;i++){
+    let dl=pts[i][1]-pts[i-1][1];
+    if(dl>180)pts[i][1]-=360; else if(dl<-180)pts[i][1]+=360;
+  }
+  return pts;
+}
+function radiusForElev(e){ // earth-central half-angle (deg) for min elevation e
+  const er=e*Math.PI/180;
+  return (Math.acos(RATIO*Math.cos(er))-er)*180/Math.PI;
+}
+
+let elev=0, coverageMode='sel', activeOnly=false, bwFilter='all', selected=null;
+const layers={}; // name -> {foot:[poly...], marker}
+
+const visible=s=> (!activeOnly || s.active>0) && (bwFilter==='all' || (s.bw && s.bw[bwFilter]>0));
+
+function draw(){
+  Object.values(layers).forEach(L0=>{L0.foot.forEach(p=>map.removeLayer(p));map.removeLayer(L0.marker);});
+  for(const k in layers)delete layers[k];
+  const r=radiusForElev(elev);
+  SATS.forEach(s=>{
+    if(!visible(s))return;
+    const showFp = coverageMode==='all' || s.name===selected;
+    const isSel = s.name===selected;
+    const polys=[];
+    if(showFp){
+      const base=footprint(s.lon,r);
+      [-360,0,360].forEach(off=>{
+        const ring=base.map(p=>[Math.max(-89,Math.min(89,p[0])),p[1]+off]);
+        const poly=L.polygon(ring,{color:s.color,weight:isSel?2.2:1.2,
+          opacity:isSel?.95:.5, fillColor:s.color, fillOpacity:isSel?.20:.06,
+          interactive:false}).addTo(map);
+        polys.push(poly);
+      });
+    }
+    const html=`<div class="satdiv"><div class="pulse" style="background:${s.color};color:${s.color}"></div>`
+      +`<div class="satlabel">${s.name}</div></div>`;
+    const icon=L.divIcon({className:'',html,iconSize:[0,0],iconAnchor:[0,0]});
+    const m=L.marker([0,s.lon],{icon,opacity:isSel?1:(selected?.7:1)}).addTo(map);
+    m.bindPopup(popupHTML(s));
+    m.on('click',()=>select(s.name));
+    layers[s.name]={foot:polys,marker:m};
+  });
+}
+
+function bwSummary(s){
+  return Object.entries(s.bw).filter(([k])=>k!=='-')
+    .sort((a,b)=>(+a[0])-(+b[0])).map(([k,n])=>`${k}k×${n}`).join('  ');
+}
+
+function popupHTML(s){
+  const tags=s.traffic.length?`<div style="margin-top:6px">${s.traffic.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`:'';
+  return `<h3 style="color:${s.color}">${s.name}</h3>
+    <div class="op">${OP[s.op].name}</div>
+    <div class="kv"><span>Orbital slot</span><span>${s.pos} (GEO)</span></div>
+    <div class="kv"><span>Channels</span><span>${s.ch}</span></div>
+    <div class="kv"><span>Active / Inactive</span><span>${s.active} / ${s.inactive}</span></div>
+    <div class="kv"><span>Bandwidths</span><span>${bwSummary(s)} kHz</span></div>
+    ${tags}`;
+}
+
+function select(name){
+  selected=name;
+  draw();
+  document.querySelectorAll('.sat').forEach(el=>el.classList.toggle('sel',el.dataset.n===name));
+  if(layers[name]){layers[name].marker.openPopup();}
+  const s=SATS.find(x=>x.name===name);
+  if(s)map.panTo([0,s.lon],{animate:true});
+  if(window.renderChannels)renderChannels();
+}
+
+// sidebar list
+const list=document.getElementById('list');
+function buildList(){
+  list.innerHTML='';
+  const shown=SATS.filter(visible);
+  if(!shown.length){list.innerHTML='<div style="padding:18px;color:var(--dim);font-size:11px">No satellites match this filter.</div>';return;}
+  shown.forEach(s=>{
+    const row=document.createElement('div');
+    row.className='sat'+(s.active===0?' inactive':'')+(s.name===selected?' sel':'');
+    row.dataset.n=s.name;
+    const tags=s.traffic.slice(0,3).map(t=>`<span class="tag">${t}</span>`).join('');
+    row.innerHTML=`<span class="dot" style="color:${s.color};background:${s.color}"></span>
+      <div><div class="nm">${s.name}</div><div class="meta">${s.pos} · ${bwSummary(s)} kHz</div>${tags}</div>
+      <div class="ch"><b>${s.ch}</b><span>${s.active} act</span></div>`;
+    row.onclick=()=>select(s.name);
+    list.appendChild(row);
+  });
+}
+
+function refilter(){
+  if(selected && !visible(SATS.find(s=>s.name===selected))){
+    const first=SATS.find(visible);
+    selected=first?first.name:null;
+  }
+  buildList(); draw();
+  if(selected && layers[selected])layers[selected].marker.openPopup();
+  if(window.renderChannels)renderChannels();
+}
+
+// controls
+document.getElementById('elev').addEventListener('click',e=>{
+  if(e.target.tagName!=='BUTTON')return;
+  document.querySelectorAll('#elev button').forEach(b=>b.classList.remove('on'));
+  e.target.classList.add('on'); elev=+e.target.dataset.e; draw();
+});
+document.getElementById('cov').addEventListener('click',e=>{
+  if(e.target.tagName!=='BUTTON')return;
+  document.querySelectorAll('#cov button').forEach(b=>b.classList.remove('on'));
+  e.target.classList.add('on'); coverageMode=e.target.dataset.c; draw();
+});
+document.getElementById('bw').addEventListener('click',e=>{
+  if(e.target.tagName!=='BUTTON')return;
+  document.querySelectorAll('#bw button').forEach(b=>b.classList.remove('on'));
+  e.target.classList.add('on'); bwFilter=e.target.dataset.b; refilter();
+});
+document.getElementById('tg-active').addEventListener('change',e=>{activeOnly=e.target.checked;refilter();});
+
+buildList();
+
+const CHAN={
+  "ComSatBw-1":[[316.725,243.625,25,"Medium","RU Traffic",1],[300.975,249.4,38,"Medium","",1],[317.925,259.0,25,"Weak","",1]],
+  "ComSatBw-2":[[300.4,243.625,25,"","",0],[311.975,248.75,25,"Strong","",1],[307.45,259.05,25,"Medium","",1]],
+  "Intelsat 22":[[298.2,243.8,25,"Medium","",1],[308.45,251.575,25,"Medium","RU Traffic",1],[293.15,252.15,25,"Weak","TRISTA",1],[293.3,252.3,25,"Weak","TRISTA",1],[293.725,253.725,25,"Medium","RU Traffic",1],[294.975,253.975,6,"Medium","",1],[308.1,254.5,6,"Medium","",1],[295.625,254.625,6,"Medium","",1],[311.375,257.775,25,"Weak","RUS",1],[306.975,261.6,25,"Weak","",1],[309.65,261.65,25,"Weak","",1],[295.4,261.75,25,"Weak","",1],[300.275,261.85,25,"Weak","",1],[307.75,261.9,25,"Weak","",1]],
+  "UFO 11":[[317.015,243.915,null,"Weak","",1],[317.035,243.935,6,"Medium","",1],[317.045,243.945,6,"","",1],[317.055,243.955,6,"Weak","",1],[317.065,243.965,6,"Medium","",1],[317.075,243.975,6,"","",1],[294.375,248.825,25,"Weak","",1],[302.445,248.845,6,"Strong","",1],[302.455,248.855,6,"Strong","",1],[302.465,248.865,6,"Strong","",1],[302.475,248.875,6,"Strong","",1],[302.485,248.885,6,"Strong","",1],[302.495,248.895,6,"Strong","",1],[302.505,248.905,6,"Strong","",1],[302.515,248.915,6,"Strong","",1],[302.535,248.935,6,"Strong","",1],[302.545,248.945,6,"Strong","",1],[302.555,248.955,6,"Strong","",1],[302.565,248.965,6,"Strong","",1],[302.65,249.05,6,"Strong","",1],[302.7,249.1,6,"Strong","",1],[302.835,249.235,6,"Strong","",1],[302.845,249.245,6,"Strong","",1],[302.855,249.255,6,"Strong","",1],[302.865,249.265,6,"Strong","",1],[302.875,249.275,6,"Strong","",1],[302.885,249.285,6,"Strong","",1],[302.895,249.295,6,"Strong","",1],[302.905,249.305,6,"Strong","",1],[302.915,249.315,6,"Strong","",1],[302.925,249.325,6,"Strong","",1],[302.935,249.335,6,"Strong","",1],[302.945,249.345,6,"Strong","",1],[302.955,249.355,6,"Strong","",1],[294.55,253.55,25,"","MOLITVA Prayer",1],[299.65,258.65,25,"Strong","Duty",1],[307.075,261.775,25,"Medium","",1],[295.175,261.575,25,"Weak","",1],[296.525,261.7,25,"Weak","",1],[294.625,261.95,25,"Medium","",1],[317.13,263.6,6,"Weak","",1],[297.25,263.8,25,"Medium","",1],[297.425,263.825,25,"Medium","",1],[297.525,263.925,25,"Medium","",1],[306.25,265.25,25,"Weak","",1],[295.1,265.325,25,"Weak","",1],[306.55,265.55,25,"Medium","",1],[306.675,265.675,25,"Weak","",1],[306.85,265.85,25,"Medium","",1],[316.575,266.75,25,"Medium","RU Traffic",1],[297.5,266.975,25,"Weak","",1],[294.9,267.4,25,"Weak","RU Traffic",1],[309.15,268.15,25,"Medium","",1],[297.15,268.45,25,"Weak","",1],[310.65,269.65,25,"Weak","",1],[295.15,269.725,25,"Weak","",1],[295.55,269.925,25,"Weak","",1],[294.325,269.95,25,"Weak","",1]],
+  "FltSatCom F8":[[317.09,243.99,6,"","",1],[295.9,262.3,575,"Weak","",1]],
+  "UFO 10":[[317.095,243.995,6,"Weak","",1],[294.275,260.675,25,"Strong","Brazil Music",1],[295.225,261.625,25,"Medium","Brazil",1],[294.825,258.6,28,"Strong","",1],[294.175,260.575,28,"Medium","",1],[295.675,262.075,25,"","",1],[295.775,262.175,25,"","",1],[306.35,265.35,25,"Weak","",1],[307.85,266.85,25,"Weak","",1],[309.25,268.25,25,"Weak","",1],[310.75,269.75,25,"Medium","",1]],
+  "Skynet 5B":[[309.41,245.8,25,"Medium","RU Traffic",1],[312.85,249.49,25,"Medium","",1],[294.95,261.2,25,"Weak","Italian",1],[314.4,260.25,25,"Weak","",1],[316.55,261.4,25,"Weak","",1],[314.4,263.4,25,"Weak","",1],[315.2,263.5,25,"Medium","",1]],
+  "Skynet 5A":[[314.23,245.85,25,"Strong","",1],[299.0,249.45,38,"","",1],[305.95,257.45,25,"","Romanians",1],[298.38,261.1,25,"Weak","",1]],
+  "Skynet 5D":[[313.0,245.95,25,"Medium","Reserve",1],[298.8,247.45,25,"Medium","Interesting",1],[313.05,260.9,25,"Medium","",1],[316.15,257.7,25,"Medium","",1],[314.2,262.0,25,"Weak","",1]],
+  "Skynet 4C":[[295.6,246.25,25,"Weak","",1]],
+  "UFO 2":[[300.35,251.8,25,"Weak","UA Ukraine",1],[294.65,253.65,25,"Weak","RU Traffic",1],[299.45,258.45,25,"Medium","",1],[316.9,257.25,25,"Medium","RU Traffic",1],[299.3,258.225,25,"Medium","",1],[297.375,263.775,25,"Weak","UA Ukraine",1]],
+  "SICRAL 2":[[310.155,252.2,25,"","",1],[308.1,267.1,25,"Medium","",1],[308.15,267.15,25,"Medium","",1],[308.25,267.25,25,"Medium","",1]],
+  "SICRAL 1B":[[293.2,252.45,25,"Strong","",1],[309.8,252.5,25,"Strong","",1],[310.575,260.025,25,"Strong","",1],[310.125,260.125,25,"Strong","",1],[309.7,259.975,25,"Medium","",1],[310.275,260.075,25,"Medium","",1],[310.525,267.875,25,"","",1],[310.075,267.95,25,"","RU Traffic",1],[310.325,268.05,25,"","",1]],
+  "Skynet 5C":[[294.05,253.825,25,"Medium","",1]],
+  "UFO 7":[[294.85,253.85,25,"Medium","",1],[299.55,258.55,25,"Medium","",1],[294.025,260.425,28,"Medium","",1],[306.45,265.45,25,"Weak","",1],[307.95,266.95,25,"","",1],[309.35,268.35,25,"Strong","",1],[310.85,269.85,25,"Weak","",1]]
+};
+
+// ---- channel table ----
+const COLS=[
+ {k:'sat', t:'Satellite', w:'auto'},
+ {k:'rx',  t:'Receive MHz'},
+ {k:'ul',  t:'Uplink MHz'},
+ {k:'bw',  t:'BW kHz'},
+ {k:'sens',t:'Sens'},
+ {k:'act', t:'Activity'},
+ {k:'st',  t:'Status'},
+];
+const SENSRANK={Strong:3,Medium:2,Weak:1,'':0};
+let chScope='sel', sortKey='rx', sortDir=1, findQ='';
+
+function allChannels(){
+  const out=[];
+  SATS.forEach(s=>{
+    (CHAN[s.name]||[]).forEach(c=>out.push({
+      sat:s.name, color:s.color, ul:c[0], rx:c[1],
+      bw:c[2], sens:c[3], act:c[4], st:c[5]}));
+  });
+  return out;
+}
+const ALLCH=allChannels();
+
+function channelRows(){
+  let r=ALLCH.filter(c=>{
+    if(chScope==='sel' && c.sat!==selected)return false;
+    if(chScope==='all'){ const s=SATS.find(x=>x.name===c.sat); if(!visible(s))return false; }
+    if(activeOnly && !c.st)return false;
+    if(bwFilter!=='all' && String(c.bw)!==bwFilter)return false;
+    if(findQ){
+      const hay=(c.sat+' '+c.rx+' '+c.ul+' '+c.bw+' '+c.sens+' '+c.act).toLowerCase();
+      if(!hay.includes(findQ))return false;
+    }
+    return true;
+  });
+  const dir=sortDir;
+  r.sort((a,b)=>{
+    let x=a[sortKey], y=b[sortKey];
+    if(sortKey==='sens'){x=SENSRANK[x]??0;y=SENSRANK[y]??0;}
+    if(sortKey==='bw'){x=x??-1;y=y??-1;}
+    if(typeof x==='string'&&typeof y==='string'){
+      const c=x.localeCompare(y); if(c)return c*dir;
+    } else if(x!==y) return (x<y?-1:1)*dir;
+    return a.rx-b.rx; // stable tiebreak by receive freq
+  });
+  return r;
+}
+
+function renderHead(){
+  document.getElementById('ch-head').innerHTML=COLS.map(c=>{
+    const on=c.k===sortKey;
+    const ar=on?(sortDir===1?'▲':'▼'):'⇅';
+    return `<th data-k="${c.k}" class="${on?'s':''}">${c.t}<span class="ar">${ar}</span></th>`;
+  }).join('');
+}
+
+function renderChannels(){
+  const rows=channelRows();
+  document.getElementById('ch-scope').textContent = chScope==='all' ? 'all satellites' : (selected||'—');
+  document.getElementById('ch-count').textContent = rows.length+' shown';
+  const body=document.getElementById('ch-body');
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="7" class="empty">No channels match these filters.</td></tr>';
+    renderHead(); return;
+  }
+  body.innerHTML=rows.map(c=>`<tr data-sat="${c.sat}">
+    <td><span class="satcell"><i style="color:${c.color};background:${c.color}"></i>${c.sat}</span></td>
+    <td class="fq rx">${c.rx.toFixed(3)}</td>
+    <td class="fq">${c.ul.toFixed(3)}</td>
+    <td>${c.bw==null?'<span style="color:#3f5652">—</span>':c.bw}</td>
+    <td><span class="sens ${c.sens||'none'}">${c.sens||'—'}</span></td>
+    <td style="color:${c.act?'var(--amber)':'#3f5652'}">${c.act||'—'}</td>
+    <td class="stat ${c.st?'on':'off'}">${c.st?'● ACTIVE':'● INACTIVE'}</td>
+  </tr>`).join('');
+  renderHead();
+  body.querySelectorAll('tr').forEach(tr=>{
+    tr.onclick=()=>{ const n=tr.dataset.sat; if(n&&n!==selected)select(n); };
+  });
+}
+
+document.getElementById('ch-head').addEventListener('click',e=>{
+  const th=e.target.closest('th'); if(!th)return;
+  const k=th.dataset.k;
+  if(k===sortKey)sortDir*=-1; else {sortKey=k;sortDir=1;}
+  renderChannels();
+});
+document.getElementById('cscope').addEventListener('click',e=>{
+  if(e.target.tagName!=='BUTTON')return;
+  document.querySelectorAll('#cscope button').forEach(b=>b.classList.remove('on'));
+  e.target.classList.add('on'); chScope=e.target.dataset.s; renderChannels();
+});
+document.getElementById('ch-find').addEventListener('input',e=>{
+  findQ=e.target.value.trim().toLowerCase(); renderChannels();
+});
+document.getElementById('ch-csv').addEventListener('click',()=>{
+  const rows=channelRows();
+  const csv=['Satellite,Slot,Receive_MHz,Uplink_MHz,BW_kHz,Sensitivity,Activity,Status']
+    .concat(rows.map(c=>{
+      const s=SATS.find(x=>x.name===c.sat);
+      return [c.sat,s.pos,c.rx.toFixed(3),c.ul.toFixed(3),c.bw??'',c.sens,
+              '"'+(c.act||'')+'"', c.st?'Active':'Inactive'].join(',');
+    })).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='uhf-satcom-channels.csv'; a.click();
+});
+
+renderHead();
+select('UFO 11'); // busiest satellite — also triggers draw() + renderChannels()
+
+</script>
+</body>
+</html>
