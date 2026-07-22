@@ -89,6 +89,10 @@
   .chantab .s-Weak{color:#6f8f88}
   .chantab .act{color:var(--amber);font-size:9.5px}
   .chantab tr.off{opacity:.42}
+  .chantab td.derived{color:#5f7d78}
+  .leaflet-popup-content .note{margin-top:7px;padding-top:6px;border-top:1px solid #18302b;
+    color:#9dbdb5;font-size:10px;line-height:1.5;max-width:250px}
+  .sat.dim .nm{color:#9fbdb6}
   .list{overflow-y:auto;flex:1;min-height:96px}
   .sat{
     padding:10px 14px;border-bottom:1px solid #131f20;cursor:pointer;display:flex;gap:10px;align-items:center;
@@ -207,7 +211,7 @@
     <div class="stats">
       <div class="g"><b id="st-sat">0</b>SATELLITES</div>
       <div class="g"><b id="st-ch">0</b>CHANNELS</div>
-      <div><b id="st-act">0</b>ACTIVE</div>
+      <div><b id="st-reg">4</b>REGIONS</div>
     </div>
   </header>
 
@@ -215,7 +219,10 @@
     <div class="legend">
       <h4>Operator / Nation</h4>
       <div id="leg"></div>
-      <h4 style="margin-top:9px">Footprint = horizon visibility (0° elev)</h4>
+      <h4 style="margin-top:9px">Footprint = horizon visibility</h4>
+      <div class="row" style="color:var(--dim);font-size:9px;line-height:1.4;max-width:190px">
+        TX marked * derived from the +41.000 MHz US voice offset. Sources: Noise Floor Nomad DB,
+        mattblaze.org UHF survey, public orbital catalogues.</div>
     </div>
   </div>
 
@@ -234,12 +241,26 @@
         <span style="color:var(--dim)">footprint shown</span>
       </div>
       <div class="ctl-row">
+        <span class="lbl">Region</span>
+        <div class="seg" id="rgn">
+          <button data-r="all" class="on">All</button>
+          <button data-r="CONUS">Americas</button>
+          <button data-r="LANT">Atlantic</button>
+          <button data-r="IO">Indian</button>
+          <button data-r="PAC">Pacific</button>
+        </div>
+      </div>
+      <div class="ctl-row">
         <span class="lbl">Bandwidth</span>
         <div class="seg" id="bw">
           <button data-b="all" class="on">All</button>
+          <button data-b="4.5">4.5</button>
           <button data-b="6">6</button>
           <button data-b="25">25</button>
           <button data-b="28">28</button>
+          <button data-b="30">30</button>
+          <button data-b="34">34</button>
+          <button data-b="36">36</button>
           <button data-b="38">38</button>
           <button data-b="575">575</button>
         </div>
@@ -262,6 +283,7 @@
         <option value="ch">Most channels</option>
         <option value="rxlo">Lowest RX freq</option>
         <option value="rxhi">Highest RX freq</option>
+        <option value="region">Region</option>
         <option value="name">Name A–Z</option>
       </select>
     </div>
@@ -294,67 +316,98 @@ const RE=6378.137, H=35786, RATIO=RE/(RE+H);
 
 // operators / nations
 const OP={
-  US:{name:"US Navy (UFO / FltSatCom)",c:"#39ffa6"},
+  US:{name:"US Navy / Space Force",c:"#39ffa6"},
   UK:{name:"UK MoD (Skynet)",c:"#4dd2ff"},
   IT:{name:"Italy (SICRAL)",c:"#ffb000"},
   DE:{name:"Germany (ComSatBw)",c:"#ff6fb5"},
-  INT:{name:"Intelsat 22 (hosted UHF)",c:"#b78cff"},
+  INT:{name:"Hosted UHF (Intelsat)",c:"#b78cff"},
+  NRO:{name:"NRO relay (SDS)",c:"#ff7a5c"},
 };
-const ofSat=n=>{
-  if(/^UFO|FltSat/.test(n))return"US";
-  if(/^Skynet/.test(n))return"UK";
-  if(/^SICRAL/.test(n))return"IT";
-  if(/^ComSatBw/.test(n))return"DE";
-  return"INT";
-};
+const REGION={CONUS:"Americas",LANT:"Atlantic",IO:"Indian Ocean",PAC:"Pacific"};
+const CONF={obs:"Observed transponders",slot:"Position known, channels unlogged",poss:"UHF payload probable"};
 
-// channel rows: [rx, tx, bw, sens, activity, isActive]
-const CH={
-"FltSatCom F8":[[243.99,317.09,6,"","",1],[262.3,295.9,575,"Weak","",1]],
-"UFO 10":[[243.995,317.095,6,"Weak","",1],[260.675,294.275,25,"Strong","Brazil Music",1],[261.625,295.225,25,"Medium","Brazil",1],[258.6,294.825,28,"Strong","",1],[260.575,294.175,28,"Medium","",1],[262.075,295.675,25,"","",1],[262.175,295.775,25,"","",1],[265.35,306.35,25,"Weak","",1],[266.85,307.85,25,"Weak","",1],[268.25,309.25,25,"Weak","",1],[269.75,310.75,25,"Medium","",1]],
-"UFO 7":[[253.85,294.85,25,"Medium","",1],[258.55,299.55,25,"Medium","",1],[260.425,294.025,28,"Medium","",1],[265.45,306.45,25,"Weak","",1],[266.95,307.95,25,"","",1],[268.35,309.35,25,"Strong","",1],[269.85,310.85,25,"Weak","",1]],
-"Skynet 5C":[[253.825,294.05,25,"Medium","",1]],
-"SICRAL 1B":[[252.45,293.2,25,"Strong","",1],[252.5,309.8,25,"Strong","",1],[260.025,310.575,25,"Strong","",1],[260.125,310.125,25,"Strong","",1],[259.975,309.7,25,"Medium","",1],[260.075,310.275,25,"Medium","",1],[267.875,310.525,25,"","",1],[267.95,310.075,25,"","RU Traffic",1],[268.05,310.325,25,"","",1]],
-"ComSatBw-2":[[243.625,300.4,25,"","",0],[248.75,311.975,25,"Strong","",1],[259.05,307.45,25,"Medium","",1]],
-"Skynet 5B":[[245.8,309.41,25,"Medium","RU Traffic",1],[249.49,312.85,25,"Medium","",1],[261.2,294.95,25,"Weak","Italian",1],[260.25,314.4,25,"Weak","",1],[261.4,316.55,25,"Weak","",1],[263.4,314.4,25,"Weak","",1],[263.5,315.2,25,"Medium","",1]],
-"UFO 2":[[251.8,300.35,25,"Weak","UA Ukraine",1],[253.65,294.65,25,"Weak","RU Traffic",1],[258.45,299.45,25,"Medium","",1],[257.25,316.9,25,"Medium","RU Traffic",1],[258.225,299.3,25,"Medium","",1],[263.775,297.375,25,"Weak","UA Ukraine",1]],
-"Skynet 4C":[[246.25,295.6,25,"Weak","",1]],
-"SICRAL 2":[[252.2,310.155,25,"","",1],[267.1,308.1,25,"Medium","",1],[267.15,308.15,25,"Medium","",1],[267.25,308.25,25,"Medium","",1]],
-"Skynet 5D":[[245.95,313.0,25,"Medium","Reserve",1],[247.45,298.8,25,"Medium","Interesting",1],[260.9,313.05,25,"Medium","",1],[257.7,316.15,25,"Medium","",1],[262.0,314.2,25,"Weak","",1]],
-"ComSatBw-1":[[243.625,316.725,25,"Medium","RU Traffic",1],[249.4,300.975,38,"Medium","",1],[259.0,317.925,25,"Weak","",1]],
-"Intelsat 22":[[243.8,298.2,25,"Medium","",1],[251.575,308.45,25,"Medium","RU Traffic",1],[252.15,293.15,25,"Weak","TRISTA",1],[252.3,293.3,25,"Weak","TRISTA",1],[253.725,293.725,25,"Medium","RU Traffic",1],[253.975,294.975,6,"Medium","",1],[254.5,308.1,6,"Medium","",1],[254.625,295.625,6,"Medium","",1],[257.775,311.375,25,"Weak","RUS",1],[261.6,306.975,25,"Weak","",1],[261.65,309.65,25,"Weak","",1],[261.75,295.4,25,"Weak","",1],[261.85,300.275,25,"Weak","",1],[261.9,307.75,25,"Weak","",1]],
-"UFO 11":[[243.915,317.015,null,"Weak","",1],[243.935,317.035,6,"Medium","",1],[243.945,317.045,6,"","",1],[243.955,317.055,6,"Weak","",1],[243.965,317.065,6,"Medium","",1],[243.975,317.075,6,"","",1],[248.825,294.375,25,"Weak","",1],[248.845,302.445,6,"Strong","",1],[248.855,302.455,6,"Strong","",1],[248.865,302.465,6,"Strong","",1],[248.875,302.475,6,"Strong","",1],[248.885,302.485,6,"Strong","",1],[248.895,302.495,6,"Strong","",1],[248.905,302.505,6,"Strong","",1],[248.915,302.515,6,"Strong","",1],[248.935,302.535,6,"Strong","",1],[248.945,302.545,6,"Strong","",1],[248.955,302.555,6,"Strong","",1],[248.965,302.565,6,"Strong","",1],[249.05,302.65,6,"Strong","",1],[249.1,302.7,6,"Strong","",1],[249.235,302.835,6,"Strong","",1],[249.245,302.845,6,"Strong","",1],[249.255,302.855,6,"Strong","",1],[249.265,302.865,6,"Strong","",1],[249.275,302.875,6,"Strong","",1],[249.285,302.885,6,"Strong","",1],[249.295,302.895,6,"Strong","",1],[249.305,302.905,6,"Strong","",1],[249.315,302.915,6,"Strong","",1],[249.325,302.925,6,"Strong","",1],[249.335,302.935,6,"Strong","",1],[249.345,302.945,6,"Strong","",1],[249.355,302.955,6,"Strong","",1],[253.55,294.55,25,"","MOLITVA Prayer",1],[258.65,299.65,25,"Strong","Duty",1],[261.775,307.075,25,"Medium","",1],[261.575,295.175,25,"Weak","",1],[261.7,296.525,25,"Weak","",1],[261.95,294.625,25,"Medium","",1],[263.6,317.13,6,"Weak","",1],[263.8,297.25,25,"Medium","",1],[263.825,297.425,25,"Medium","",1],[263.925,297.525,25,"Medium","",1],[265.25,306.25,25,"Weak","",1],[265.325,295.1,25,"Weak","",1],[265.55,306.55,25,"Medium","",1],[265.675,306.675,25,"Weak","",1],[265.85,306.85,25,"Medium","",1],[266.75,316.575,25,"Medium","RU Traffic",1],[266.975,297.5,25,"Weak","",1],[267.4,294.9,25,"Weak","RU Traffic",1],[268.15,309.15,25,"Medium","",1],[268.45,297.15,25,"Weak","",1],[269.65,310.65,25,"Weak","",1],[269.725,295.15,25,"Weak","",1],[269.925,295.55,25,"Weak","",1],[269.95,294.325,25,"Medium","",1]],
-"Skynet 5A":[[245.85,314.23,25,"Strong","",1],[249.45,299.0,38,"","",1],[257.45,305.95,25,"","Romanians",1],[261.1,298.38,25,"Weak","",1]]
-};
-
+// channel rows: [rx, tx, bw, sens, activity, isActive, uplinkDerived, source]
 const SATS=[
- {name:"FltSatCom F8",pos:"125.7°W",lon:-125.7,ch:2,active:2,inactive:0,bw:{"6":1,"575":1},traffic:["575 kHz wideband ch @262.3"]},
- {name:"UFO 10",pos:"22.9°W",lon:-22.9,ch:11,active:11,inactive:0,bw:{"6":1,"25":8,"28":2},traffic:["Brazil","Brazil Music"]},
- {name:"UFO 7",pos:"22°W",lon:-22.0,ch:7,active:7,inactive:0,bw:{"25":6,"28":1},traffic:[]},
- {name:"Skynet 5C",pos:"17.8°W",lon:-17.8,ch:1,active:1,inactive:0,bw:{"25":1},traffic:[]},
- {name:"SICRAL 1B",pos:"11.8°E",lon:11.8,ch:9,active:9,inactive:0,bw:{"25":9},traffic:["RU Traffic"]},
- {name:"ComSatBw-2",pos:"13.2°E",lon:13.2,ch:3,active:2,inactive:1,bw:{"25":3},traffic:[]},
- {name:"Skynet 5B",pos:"24.5°E",lon:24.5,ch:7,active:7,inactive:0,bw:{"25":7},traffic:["Italian","RU Traffic"]},
- {name:"UFO 2",pos:"28.7°E",lon:28.7,ch:6,active:6,inactive:0,bw:{"25":6},traffic:["UA Ukraine","RU Traffic"]},
- {name:"Skynet 4C",pos:"33.4°E",lon:33.4,ch:1,active:1,inactive:0,bw:{"25":1},traffic:[]},
- {name:"SICRAL 2",pos:"37°E",lon:37.0,ch:4,active:4,inactive:0,bw:{"25":4},traffic:[]},
- {name:"Skynet 5D",pos:"52.7°E",lon:52.7,ch:5,active:5,inactive:0,bw:{"25":5},traffic:["Reserve","Interesting"]},
- {name:"ComSatBw-1",pos:"63°E",lon:63.0,ch:3,active:3,inactive:0,bw:{"25":2,"38":1},traffic:["RU Traffic"]},
- {name:"Intelsat 22",pos:"72°E",lon:72.0,ch:14,active:14,inactive:0,bw:{"25":11,"6":3},traffic:["RU Traffic","RUS","TRISTA"]},
- {name:"UFO 11",pos:"75.6°E",lon:75.6,ch:58,active:58,inactive:0,bw:{"6":33,"25":24,"-":1},traffic:["Duty","MOLITVA Prayer","RU Traffic"]},
- {name:"Skynet 5A",pos:"95°E",lon:95.0,ch:4,active:4,inactive:0,bw:{"25":3,"38":1},traffic:["Romanians"]},
+ {name:"UFO 4",lon:-177.1,region:"PAC",op:"US",bandplan:"Oscar",desig:"USA-108",note:"Pacific region bird",conf:"obs",src:"MB",ch:41,active:41,inactive:0,bw:{"6": 24, "30": 17},traffic:[]},
+ {name:"MUOS-1",lon:-177.0,region:"PAC",op:"US",bandplan:"legacy UHF",desig:"2012-009A",note:"MUOS legacy UHF payload",conf:"slot",src:"MB",ch:0,active:0,inactive:0,bw:{},traffic:[]},
+ {name:"SDS III-3",lon:-143.9,region:"PAC",op:"NRO",bandplan:"-",desig:"USA-162",note:"NRO relay; UHF downlinks observed",conf:"obs",src:"MB",ch:4,active:4,inactive:0,bw:{"36": 3, "38": 1},traffic:[]},
+ {name:"UFO 6",lon:-105.5,region:"CONUS",op:"US",bandplan:"Quebec",desig:"USA-114",note:"Americas coverage",conf:"obs",src:"MB",ch:39,active:39,inactive:0,bw:{"6": 21, "30": 18},traffic:[]},
+ {name:"MUOS-2",lon:-100.0,region:"CONUS",op:"US",bandplan:"legacy UHF",desig:"2013-036A",note:"MUOS legacy UHF payload",conf:"slot",src:"MB",ch:0,active:0,inactive:0,bw:{},traffic:[]},
+ {name:"UFO 5",lon:-99.4,region:"CONUS",op:"US",bandplan:"November",desig:"USA-111",note:"Americas coverage",conf:"obs",src:"MB",ch:38,active:38,inactive:0,bw:{"6": 21, "30": 17},traffic:[]},
+ {name:"Milstar DFS-6",lon:-90.0,region:"CONUS",op:"US",bandplan:"-",desig:"USA-169",note:"Possible spread-spectrum UHF",conf:"poss",src:"MB",ch:0,active:0,inactive:0,bw:{},traffic:[]},
+ {name:"Milstar DFS-4",lon:-67.9,region:"CONUS",op:"US",bandplan:"-",desig:"USA-157",note:"Possible spread-spectrum UHF",conf:"poss",src:"MB",ch:2,active:2,inactive:0,bw:{"58": 1, "36": 1},traffic:[]},
+ {name:"Milstar DFS-1",lon:-38.9,region:"LANT",op:"US",bandplan:"-",desig:"USA-99",note:"Possible spread-spectrum UHF",conf:"poss",src:"MB",ch:0,active:0,inactive:0,bw:{},traffic:[]},
+ {name:"Skynet 4F",lon:-34.0,region:"LANT",op:"UK",bandplan:"-",desig:"-",note:"Several UHF transponders",conf:"obs",src:"MB",ch:1,active:1,inactive:0,bw:{"36": 1},traffic:[]},
+ {name:"SDS III-6",lon:-30.4,region:"LANT",op:"NRO",bandplan:"-",desig:"USA-227",note:"Possible UHF downlinks",conf:"poss",src:"MB",ch:1,active:1,inactive:0,bw:{"-": 1},traffic:[]},
+ {name:"UFO 10",lon:-22.9,region:"LANT",op:"US",bandplan:"-",desig:"USA-146",note:"Atlantic region",conf:"obs",src:"NFN",ch:11,active:11,inactive:0,bw:{"6": 1, "28": 2, "25": 8},traffic:["Brazil", "Brazil Music"]},
+ {name:"UFO 7",lon:-22.0,region:"LANT",op:"US",bandplan:"Papa",desig:"USA-127",note:"Atlantic region",conf:"obs",src:"NFN",ch:35,active:35,inactive:0,bw:{"6": 21, "30": 7, "25": 6, "28": 1},traffic:[]},
+ {name:"Skynet 5C",lon:-17.8,region:"LANT",op:"UK",bandplan:"-",desig:"-",note:"Heavy pirate traffic reported",conf:"obs",src:"NFN",ch:10,active:10,inactive:0,bw:{"34": 7, "6": 2, "25": 1},traffic:[]},
+ {name:"FLTSATCOM 8",lon:-15.8,region:"LANT",op:"US",bandplan:"Bravo/Charlie",desig:"USA-46",note:"Launched 1989, inclined ~12.4deg. Source DB listed 125.7W; public tracking puts it ~15.8W",conf:"obs",src:"NFN",ch:18,active:18,inactive:0,bw:{"6": 1, "4.5": 5, "25": 10, "30": 1, "575": 1},traffic:[]},
+ {name:"MUOS-3",lon:-15.5,region:"LANT",op:"US",bandplan:"legacy UHF",desig:"2015-002A",note:"MUOS legacy UHF payload",conf:"slot",src:"MB",ch:0,active:0,inactive:0,bw:{},traffic:[]},
+ {name:"SDS III-2 F5",lon:-10.0,region:"LANT",op:"NRO",bandplan:"-",desig:"USA-155",note:"NRO relay; UHF downlinks observed",conf:"obs",src:"MB",ch:3,active:3,inactive:0,bw:{"37": 1, "25": 1, "30": 1},traffic:[]},
+ {name:"SICRAL 1B",lon:11.8,region:"LANT",op:"IT",bandplan:"-",desig:"-",note:"Italian MoD",conf:"obs",src:"NFN",ch:9,active:9,inactive:0,bw:{"25": 9},traffic:["RU Traffic"]},
+ {name:"ComSatBw-2",lon:13.2,region:"LANT",op:"DE",bandplan:"-",desig:"-",note:"German Bundeswehr",conf:"obs",src:"NFN",ch:3,active:2,inactive:1,bw:{"25": 3},traffic:[]},
+ {name:"Skynet 5B",lon:24.5,region:"IO",op:"UK",bandplan:"-",desig:"-",note:"",conf:"obs",src:"NFN",ch:7,active:7,inactive:0,bw:{"25": 7},traffic:["Italian", "RU Traffic"]},
+ {name:"UFO 2",lon:28.7,region:"IO",op:"US",bandplan:"-",desig:"USA-114-cl",note:"Indian Ocean region",conf:"obs",src:"NFN",ch:6,active:6,inactive:0,bw:{"25": 6},traffic:["RU Traffic", "UA Ukraine"]},
+ {name:"Skynet 4C",lon:33.4,region:"IO",op:"UK",bandplan:"-",desig:"-",note:"Legacy UK MoD bird",conf:"obs",src:"NFN",ch:1,active:1,inactive:0,bw:{"25": 1},traffic:[]},
+ {name:"SICRAL 2",lon:37.0,region:"IO",op:"IT",bandplan:"-",desig:"-",note:"Italian/French MoD",conf:"obs",src:"NFN",ch:4,active:4,inactive:0,bw:{"25": 4},traffic:[]},
+ {name:"Skynet 5D",lon:52.7,region:"IO",op:"UK",bandplan:"-",desig:"-",note:"UHF-to-X-band cross-strap",conf:"obs",src:"NFN",ch:5,active:5,inactive:0,bw:{"25": 5},traffic:["Interesting", "Reserve"]},
+ {name:"ComSatBw-1",lon:63.0,region:"IO",op:"DE",bandplan:"-",desig:"-",note:"German Bundeswehr",conf:"obs",src:"NFN",ch:3,active:3,inactive:0,bw:{"25": 2, "38": 1},traffic:["RU Traffic"]},
+ {name:"Intelsat 22",lon:72.0,region:"IO",op:"INT",bandplan:"-",desig:"-",note:"Hosted UHF payload (Australian DoD)",conf:"obs",src:"NFN",ch:14,active:14,inactive:0,bw:{"25": 11, "6": 3},traffic:["RU Traffic", "RUS", "TRISTA"]},
+ {name:"MUOS-4",lon:72.0,region:"IO",op:"US",bandplan:"legacy UHF",desig:"2015-044A",note:"MUOS legacy UHF payload",conf:"slot",src:"MB",ch:0,active:0,inactive:0,bw:{},traffic:[]},
+ {name:"MUOS-5",lon:75.0,region:"IO",op:"US",bandplan:"legacy UHF",desig:"2016-041A",note:"On-orbit spare; salvaged after 2016 engine failure",conf:"slot",src:"MB",ch:0,active:0,inactive:0,bw:{},traffic:[]},
+ {name:"UFO 11",lon:75.6,region:"IO",op:"US",bandplan:"-",desig:"USA-174",note:"Indian Ocean; busiest bird in the DB",conf:"obs",src:"NFN",ch:58,active:58,inactive:0,bw:{"-": 1, "6": 33, "25": 24},traffic:["Duty", "MOLITVA Prayer", "RU Traffic"]},
+ {name:"Skynet 5A",lon:95.0,region:"IO",op:"UK",bandplan:"-",desig:"-",note:"Moved east to 95E",conf:"obs",src:"NFN",ch:4,active:4,inactive:0,bw:{"25": 3, "38": 1},traffic:["Romanians"]},
+ {name:"UFO 8",lon:172.3,region:"PAC",op:"US",bandplan:"Papa",desig:"USA-138",note:"Pacific region bird",conf:"obs",src:"MB",ch:38,active:38,inactive:0,bw:{"6": 21, "30": 17},traffic:[]}
 ];
+
+const CH={
+"UFO 4":[[243.995,284.995,6,"","",1,1,"MB"],[244.005,285.005,6,"","",1,1,"MB"],[244.015,285.015,6,"","",1,1,"MB"],[244.025,285.025,6,"","",1,1,"MB"],[244.035,285.035,6,"","",1,1,"MB"],[244.045,285.045,6,"","",1,1,"MB"],[244.055,285.055,6,"","",1,1,"MB"],[244.065,285.065,6,"","",1,1,"MB"],[248.975,289.975,6,"","",1,1,"MB"],[248.985,289.985,6,"","",1,1,"MB"],[248.995,289.995,6,"","",1,1,"MB"],[249.005,290.005,6,"","",1,1,"MB"],[249.015,290.015,6,"","",1,1,"MB"],[249.025,290.025,6,"","",1,1,"MB"],[249.035,290.035,6,"","",1,1,"MB"],[249.045,290.045,6,"","",1,1,"MB"],[249.055,290.055,6,"","",1,1,"MB"],[249.065,290.065,6,"","",1,1,"MB"],[249.075,290.075,6,"","",1,1,"MB"],[249.085,290.085,6,"","",1,1,"MB"],[249.095,290.095,6,"","",1,1,"MB"],[251.95,292.95,30,"","",1,1,"MB"],[253.65,294.65,30,"","",1,1,"MB"],[255.35,296.35,30,"","",1,1,"MB"],[256.95,297.95,30,"","",1,1,"MB"],[258.45,299.45,30,"","",1,1,"MB"],[260.575,301.575,30,"","",1,1,"MB"],[260.675,301.675,30,"","",1,1,"MB"],[262.075,303.075,30,"","",1,1,"MB"],[262.1,303.1,6,"","",1,1,"MB"],[262.15,303.15,6,"","",1,1,"MB"],[262.175,303.175,30,"","",1,1,"MB"],[262.2,303.2,6,"","",1,1,"MB"],[262.275,303.275,30,"","",1,1,"MB"],[262.375,303.375,30,"","",1,1,"MB"],[263.775,304.775,30,"","",1,1,"MB"],[263.875,304.875,30,"","",1,1,"MB"],[265.35,306.35,30,"","",1,1,"MB"],[266.85,307.85,30,"","",1,1,"MB"],[268.25,309.25,30,"","",1,1,"MB"],[269.75,310.75,30,"","",1,1,"MB"]],
+"MUOS-1":[],
+"SDS III-3":[[250.075,291.075,36,"","",1,1,"MB"],[256.475,297.475,36,"","",1,1,"MB"],[263.225,304.225,36,"","",1,1,"MB"],[267.55,308.55,38,"","",1,1,"MB"]],
+"UFO 6":[[244.155,285.155,6,"","",1,1,"MB"],[244.165,285.165,6,"","",1,1,"MB"],[244.175,285.175,6,"","",1,1,"MB"],[244.185,285.185,6,"","",1,1,"MB"],[244.195,285.195,6,"","",1,1,"MB"],[244.205,285.205,6,"","",1,1,"MB"],[244.215,285.215,6,"","",1,1,"MB"],[244.225,285.225,6,"","",1,1,"MB"],[249.235,290.235,6,"","",1,1,"MB"],[249.245,290.245,6,"","",1,1,"MB"],[249.255,290.255,6,"","",1,1,"MB"],[249.265,290.265,6,"","",1,1,"MB"],[249.275,290.275,6,"","",1,1,"MB"],[249.285,290.285,6,"","",1,1,"MB"],[249.295,290.295,6,"","",1,1,"MB"],[249.305,290.305,6,"","",1,1,"MB"],[249.315,290.315,6,"","",1,1,"MB"],[249.325,290.325,6,"","",1,1,"MB"],[249.335,290.335,6,"","",1,1,"MB"],[249.345,290.345,6,"","",1,1,"MB"],[249.355,290.355,6,"","",1,1,"MB"],[250.65,291.65,30,"","",1,1,"MB"],[252.15,293.15,30,"","",1,1,"MB"],[253.85,294.85,30,"","",1,1,"MB"],[255.55,296.55,30,"","",1,1,"MB"],[257.15,298.15,30,"","",1,1,"MB"],[258.65,299.65,30,"","",1,1,"MB"],[260.625,301.625,30,"","",1,1,"MB"],[260.725,301.725,30,"","",1,1,"MB"],[262.125,303.125,30,"","",1,1,"MB"],[262.225,303.225,30,"","",1,1,"MB"],[262.325,303.325,30,"","",1,1,"MB"],[262.425,303.425,30,"","",1,1,"MB"],[263.825,304.825,30,"","",1,1,"MB"],[263.925,304.925,30,"","",1,1,"MB"],[265.55,306.55,30,"","",1,1,"MB"],[267.05,308.05,30,"","",1,1,"MB"],[268.45,309.45,30,"","",1,1,"MB"],[269.95,310.95,30,"","",1,1,"MB"]],
+"MUOS-2":[],
+"UFO 5":[[243.915,284.915,6,"","",1,1,"MB"],[243.925,284.925,6,"","",1,1,"MB"],[243.935,284.935,6,"","",1,1,"MB"],[243.945,284.945,6,"","",1,1,"MB"],[243.955,284.955,6,"","",1,1,"MB"],[243.965,284.965,6,"","",1,1,"MB"],[243.975,284.975,6,"","",1,1,"MB"],[243.985,284.985,6,"","",1,1,"MB"],[248.845,289.845,6,"","",1,1,"MB"],[248.855,289.855,6,"","",1,1,"MB"],[248.865,289.865,6,"","",1,1,"MB"],[248.875,289.875,6,"","",1,1,"MB"],[248.885,289.885,6,"","",1,1,"MB"],[248.895,289.895,6,"","",1,1,"MB"],[248.905,289.905,6,"","",1,1,"MB"],[248.915,289.915,6,"","",1,1,"MB"],[248.925,289.925,6,"","",1,1,"MB"],[248.935,289.935,6,"","",1,1,"MB"],[248.945,289.945,6,"","",1,1,"MB"],[248.955,289.955,6,"","",1,1,"MB"],[248.965,289.965,6,"","",1,1,"MB"],[251.85,292.85,30,"","",1,1,"MB"],[253.55,294.55,30,"","",1,1,"MB"],[255.25,296.25,30,"","",1,1,"MB"],[256.85,297.85,30,"","",1,1,"MB"],[258.35,299.35,30,"","",1,1,"MB"],[260.375,301.375,30,"","",1,1,"MB"],[260.475,301.475,30,"","",1,1,"MB"],[261.575,302.575,30,"","",1,1,"MB"],[261.675,302.675,30,"","",1,1,"MB"],[261.775,302.775,30,"","",1,1,"MB"],[261.875,302.875,30,"","",1,1,"MB"],[263.575,304.575,30,"","",1,1,"MB"],[263.675,304.675,30,"","",1,1,"MB"],[265.25,306.25,30,"","",1,1,"MB"],[266.75,307.75,30,"","",1,1,"MB"],[268.15,309.15,30,"","",1,1,"MB"],[269.65,310.65,30,"","",1,1,"MB"]],
+"Milstar DFS-6":[],
+"Milstar DFS-4":[[243.8195,284.8195,58,"","",1,1,"MB"],[253.5,294.5,36,"","",1,1,"MB"]],
+"Milstar DFS-1":[],
+"Skynet 4F":[[257.425,298.425,36,"","",1,1,"MB"]],
+"SDS III-6":[[262.675,303.675,null,"","",1,1,"MB"]],
+"UFO 10":[[243.995,317.095,6,"Weak","",1,0,"NFN"],[258.6,294.825,28,"Strong","",1,0,"NFN"],[260.575,294.175,28,"Medium","",1,0,"NFN"],[260.675,294.275,25,"Strong","Brazil Music",1,0,"NFN"],[261.625,295.225,25,"Medium","Brazil",1,0,"NFN"],[262.075,295.675,25,"","",1,0,"NFN"],[262.175,295.775,25,"","",1,0,"NFN"],[265.35,306.35,25,"Weak","",1,0,"NFN"],[266.85,307.85,25,"Weak","",1,0,"NFN"],[268.25,309.25,25,"Weak","",1,0,"NFN"],[269.75,310.75,25,"Medium","",1,0,"NFN"]],
+"UFO 7":[[244.075,285.075,6,"","",1,1,"MB"],[244.085,285.085,6,"","",1,1,"MB"],[244.095,285.095,6,"","",1,1,"MB"],[244.105,285.105,6,"","",1,1,"MB"],[244.115,285.115,6,"","",1,1,"MB"],[244.125,285.125,6,"","",1,1,"MB"],[244.135,285.135,6,"","",1,1,"MB"],[244.145,285.145,6,"","",1,1,"MB"],[249.105,290.105,6,"","",1,1,"MB"],[249.115,290.115,6,"","",1,1,"MB"],[249.125,290.125,6,"","",1,1,"MB"],[249.135,290.135,6,"","",1,1,"MB"],[249.145,290.145,6,"","",1,1,"MB"],[249.155,290.155,6,"","",1,1,"MB"],[249.165,290.165,6,"","",1,1,"MB"],[249.175,290.175,6,"","",1,1,"MB"],[249.185,290.185,6,"","",1,1,"MB"],[249.195,290.195,6,"","",1,1,"MB"],[249.205,290.205,6,"","",1,1,"MB"],[249.215,290.215,6,"","",1,1,"MB"],[249.225,290.225,6,"","",1,1,"MB"],[252.05,293.05,30,"","",1,1,"MB"],[253.75,294.75,30,"","",1,1,"MB"],[253.85,294.85,25,"Medium","",1,0,"NFN"],[255.45,296.45,30,"","",1,1,"MB"],[257.05,298.05,30,"","",1,1,"MB"],[258.55,299.55,25,"Medium","",1,0,"NFN"],[260.425,294.025,28,"Medium","",1,0,"NFN"],[260.525,301.525,30,"","",1,1,"MB"],[263.625,304.625,30,"","",1,1,"MB"],[263.725,304.725,30,"","",1,1,"MB"],[265.45,306.45,25,"Weak","",1,0,"NFN"],[266.95,307.95,25,"","",1,0,"NFN"],[268.35,309.35,25,"Strong","",1,0,"NFN"],[269.85,310.85,25,"Weak","",1,0,"NFN"]],
+"Skynet 5C":[[245.8,286.8,34,"","",1,1,"MB"],[249.45,290.45,6,"","",1,1,"MB"],[249.5,290.5,34,"","",1,1,"MB"],[249.55,290.55,34,"","",1,1,"MB"],[249.918,290.918,34,"","",1,1,"MB"],[250.13,291.13,6,"","",1,1,"MB"],[253.825,294.05,25,"Medium","",1,0,"NFN"],[253.9,294.9,34,"","",1,1,"MB"],[256.6,297.6,34,"","",1,1,"MB"],[262.2,303.2,34,"","",1,1,"MB"]],
+"FLTSATCOM 8":[[243.99,317.09,6,"","",1,0,"NFN"],[244.185,285.185,4.5,"","",1,1,"MB"],[244.19,285.19,4.5,"","",1,1,"MB"],[244.195,285.195,4.5,"","",1,1,"MB"],[244.2,285.2,4.5,"","",1,1,"MB"],[244.21,285.21,4.5,"","",1,1,"MB"],[250.55,291.55,25,"","",1,1,"MB"],[252.15,293.15,25,"","",1,1,"MB"],[253.85,294.85,25,"","",1,1,"MB"],[255.55,296.55,25,"","",1,1,"MB"],[256.85,297.85,25,"","",1,1,"MB"],[258.65,299.65,25,"","",1,1,"MB"],[261.45,302.45,30,"","",1,1,"MB"],[262.3,295.9,575,"Weak","",1,0,"NFN"],[265.55,306.55,25,"","",1,1,"MB"],[267.05,308.05,25,"","",1,1,"MB"],[268.45,309.45,25,"","",1,1,"MB"],[269.95,310.95,25,"","",1,1,"MB"]],
+"MUOS-3":[],
+"SDS III-2 F5":[[251.325,292.325,37,"","",1,1,"MB"],[258.775,299.775,25,"","",1,1,"MB"],[268.675,309.675,30,"","",1,1,"MB"]],
+"SICRAL 1B":[[252.45,293.2,25,"Strong","",1,0,"NFN"],[252.5,309.8,25,"Strong","",1,0,"NFN"],[259.975,309.7,25,"Medium","",1,0,"NFN"],[260.025,310.575,25,"Strong","",1,0,"NFN"],[260.075,310.275,25,"Medium","",1,0,"NFN"],[260.125,310.125,25,"Strong","",1,0,"NFN"],[267.875,310.525,25,"","",1,0,"NFN"],[267.95,310.075,25,"","RU Traffic",1,0,"NFN"],[268.05,310.325,25,"","",1,0,"NFN"]],
+"ComSatBw-2":[[243.625,300.4,25,"","",0,0,"NFN"],[248.75,311.975,25,"Strong","",1,0,"NFN"],[259.05,307.45,25,"Medium","",1,0,"NFN"]],
+"Skynet 5B":[[245.8,309.41,25,"Medium","RU Traffic",1,0,"NFN"],[249.49,312.85,25,"Medium","",1,0,"NFN"],[260.25,314.4,25,"Weak","",1,0,"NFN"],[261.2,294.95,25,"Weak","Italian",1,0,"NFN"],[261.4,316.55,25,"Weak","",1,0,"NFN"],[263.4,314.4,25,"Weak","",1,0,"NFN"],[263.5,315.2,25,"Medium","",1,0,"NFN"]],
+"UFO 2":[[251.8,300.35,25,"Weak","UA Ukraine",1,0,"NFN"],[253.65,294.65,25,"Weak","RU Traffic",1,0,"NFN"],[257.25,316.9,25,"Medium","RU Traffic",1,0,"NFN"],[258.225,299.3,25,"Medium","",1,0,"NFN"],[258.45,299.45,25,"Medium","",1,0,"NFN"],[263.775,297.375,25,"Weak","UA Ukraine",1,0,"NFN"]],
+"Skynet 4C":[[246.25,295.6,25,"Weak","",1,0,"NFN"]],
+"SICRAL 2":[[252.2,310.155,25,"","",1,0,"NFN"],[267.1,308.1,25,"Medium","",1,0,"NFN"],[267.15,308.15,25,"Medium","",1,0,"NFN"],[267.25,308.25,25,"Medium","",1,0,"NFN"]],
+"Skynet 5D":[[245.95,313,25,"Medium","Reserve",1,0,"NFN"],[247.45,298.8,25,"Medium","Interesting",1,0,"NFN"],[257.7,316.15,25,"Medium","",1,0,"NFN"],[260.9,313.05,25,"Medium","",1,0,"NFN"],[262,314.2,25,"Weak","",1,0,"NFN"]],
+"ComSatBw-1":[[243.625,316.725,25,"Medium","RU Traffic",1,0,"NFN"],[249.4,300.975,38,"Medium","",1,0,"NFN"],[259,317.925,25,"Weak","",1,0,"NFN"]],
+"Intelsat 22":[[243.8,298.2,25,"Medium","",1,0,"NFN"],[251.575,308.45,25,"Medium","RU Traffic",1,0,"NFN"],[252.15,293.15,25,"Weak","TRISTA",1,0,"NFN"],[252.3,293.3,25,"Weak","TRISTA",1,0,"NFN"],[253.725,293.725,25,"Medium","RU Traffic",1,0,"NFN"],[253.975,294.975,6,"Medium","",1,0,"NFN"],[254.5,308.1,6,"Medium","",1,0,"NFN"],[254.625,295.625,6,"Medium","",1,0,"NFN"],[257.775,311.375,25,"Weak","RUS",1,0,"NFN"],[261.6,306.975,25,"Weak","",1,0,"NFN"],[261.65,309.65,25,"Weak","",1,0,"NFN"],[261.75,295.4,25,"Weak","",1,0,"NFN"],[261.85,300.275,25,"Weak","",1,0,"NFN"],[261.9,307.75,25,"Weak","",1,0,"NFN"]],
+"MUOS-4":[],
+"MUOS-5":[],
+"UFO 11":[[243.915,317.015,null,"Weak","",1,0,"NFN"],[243.935,317.035,6,"Medium","",1,0,"NFN"],[243.945,317.045,6,"","",1,0,"NFN"],[243.955,317.055,6,"Weak","",1,0,"NFN"],[243.965,317.065,6,"Medium","",1,0,"NFN"],[243.975,317.075,6,"","",1,0,"NFN"],[248.825,294.375,25,"Weak","",1,0,"NFN"],[248.845,302.445,6,"Strong","",1,0,"NFN"],[248.855,302.455,6,"Strong","",1,0,"NFN"],[248.865,302.465,6,"Strong","",1,0,"NFN"],[248.875,302.475,6,"Strong","",1,0,"NFN"],[248.885,302.485,6,"Strong","",1,0,"NFN"],[248.895,302.495,6,"Strong","",1,0,"NFN"],[248.905,302.505,6,"Strong","",1,0,"NFN"],[248.915,302.515,6,"Strong","",1,0,"NFN"],[248.935,302.535,6,"Strong","",1,0,"NFN"],[248.945,302.545,6,"Strong","",1,0,"NFN"],[248.955,302.555,6,"Strong","",1,0,"NFN"],[248.965,302.565,6,"Strong","",1,0,"NFN"],[249.05,302.65,6,"Strong","",1,0,"NFN"],[249.1,302.7,6,"Strong","",1,0,"NFN"],[249.235,302.835,6,"Strong","",1,0,"NFN"],[249.245,302.845,6,"Strong","",1,0,"NFN"],[249.255,302.855,6,"Strong","",1,0,"NFN"],[249.265,302.865,6,"Strong","",1,0,"NFN"],[249.275,302.875,6,"Strong","",1,0,"NFN"],[249.285,302.885,6,"Strong","",1,0,"NFN"],[249.295,302.895,6,"Strong","",1,0,"NFN"],[249.305,302.905,6,"Strong","",1,0,"NFN"],[249.315,302.915,6,"Strong","",1,0,"NFN"],[249.325,302.925,6,"Strong","",1,0,"NFN"],[249.335,302.935,6,"Strong","",1,0,"NFN"],[249.345,302.945,6,"Strong","",1,0,"NFN"],[249.355,302.955,6,"Strong","",1,0,"NFN"],[253.55,294.55,25,"","MOLITVA Prayer",1,0,"NFN"],[258.65,299.65,25,"Strong","Duty",1,0,"NFN"],[261.575,295.175,25,"Weak","",1,0,"NFN"],[261.7,296.525,25,"Weak","",1,0,"NFN"],[261.775,307.075,25,"Medium","",1,0,"NFN"],[261.95,294.625,25,"Medium","",1,0,"NFN"],[263.6,317.13,6,"Weak","",1,0,"NFN"],[263.8,297.25,25,"Medium","",1,0,"NFN"],[263.825,297.425,25,"Medium","",1,0,"NFN"],[263.925,297.525,25,"Medium","",1,0,"NFN"],[265.25,306.25,25,"Weak","",1,0,"NFN"],[265.325,295.1,25,"Weak","",1,0,"NFN"],[265.55,306.55,25,"Medium","",1,0,"NFN"],[265.675,306.675,25,"Weak","",1,0,"NFN"],[265.85,306.85,25,"Medium","",1,0,"NFN"],[266.75,316.575,25,"Medium","RU Traffic",1,0,"NFN"],[266.975,297.5,25,"Weak","",1,0,"NFN"],[267.4,294.9,25,"Weak","RU Traffic",1,0,"NFN"],[268.15,309.15,25,"Medium","",1,0,"NFN"],[268.45,297.15,25,"Weak","",1,0,"NFN"],[269.65,310.65,25,"Weak","",1,0,"NFN"],[269.725,295.15,25,"Weak","",1,0,"NFN"],[269.925,295.55,25,"Weak","",1,0,"NFN"],[269.95,294.325,25,"Weak","",1,0,"NFN"]],
+"Skynet 5A":[[245.85,314.23,25,"Strong","",1,0,"NFN"],[249.45,299,38,"","",1,0,"NFN"],[257.45,305.95,25,"","Romanians",1,0,"NFN"],[261.1,298.38,25,"Weak","",1,0,"NFN"]],
+"UFO 8":[[244.075,285.075,6,"","",1,1,"MB"],[244.085,285.085,6,"","",1,1,"MB"],[244.095,285.095,6,"","",1,1,"MB"],[244.105,285.105,6,"","",1,1,"MB"],[244.115,285.115,6,"","",1,1,"MB"],[244.125,285.125,6,"","",1,1,"MB"],[244.135,285.135,6,"","",1,1,"MB"],[244.145,285.145,6,"","",1,1,"MB"],[249.105,290.105,6,"","",1,1,"MB"],[249.115,290.115,6,"","",1,1,"MB"],[249.125,290.125,6,"","",1,1,"MB"],[249.135,290.135,6,"","",1,1,"MB"],[249.145,290.145,6,"","",1,1,"MB"],[249.155,290.155,6,"","",1,1,"MB"],[249.165,290.165,6,"","",1,1,"MB"],[249.175,290.175,6,"","",1,1,"MB"],[249.185,290.185,6,"","",1,1,"MB"],[249.195,290.195,6,"","",1,1,"MB"],[249.205,290.205,6,"","",1,1,"MB"],[249.215,290.215,6,"","",1,1,"MB"],[249.225,290.225,6,"","",1,1,"MB"],[252.05,293.05,30,"","",1,1,"MB"],[253.75,294.75,30,"","",1,1,"MB"],[255.45,296.45,30,"","",1,1,"MB"],[257.05,298.05,30,"","",1,1,"MB"],[258.55,299.55,30,"","",1,1,"MB"],[260.425,301.425,30,"","",1,1,"MB"],[260.525,301.525,30,"","",1,1,"MB"],[261.625,302.625,30,"","",1,1,"MB"],[261.725,302.725,30,"","",1,1,"MB"],[261.825,302.825,30,"","",1,1,"MB"],[261.925,302.925,30,"","",1,1,"MB"],[263.625,304.625,30,"","",1,1,"MB"],[263.725,304.725,30,"","",1,1,"MB"],[265.45,306.45,30,"","",1,1,"MB"],[266.95,307.95,30,"","",1,1,"MB"],[268.35,309.35,30,"","",1,1,"MB"],[269.85,310.85,30,"","",1,1,"MB"]]
+};
+
 SATS.forEach(s=>{
-  s.op=ofSat(s.name); s.color=OP[s.op].c;
+  s.color=OP[s.op].c;
+  s.pos=Math.abs(s.lon).toFixed(1).replace(/\.0$/,'')+"\u00b0"+(s.lon<0?"W":"E");
   const rows=CH[s.name]||[];
   s.rx=rows.map(r=>r[0]);
-  s.rxlo=Math.min(...s.rx); s.rxhi=Math.max(...s.rx);
+  s.rxlo=rows.length?Math.min(...s.rx):null;
+  s.rxhi=rows.length?Math.max(...s.rx):null;
 });
 
 // stats
 document.getElementById('st-sat').textContent=SATS.length;
 document.getElementById('st-ch').textContent=SATS.reduce((a,s)=>a+s.ch,0);
-document.getElementById('st-act').textContent=SATS.reduce((a,s)=>a+s.active,0);
+document.getElementById('st-reg').textContent=new Set(SATS.map(s=>s.region)).size;
 
 // legend
 document.getElementById('leg').innerHTML=Object.values(OP).map(o=>
@@ -392,7 +445,10 @@ function radiusForElev(e){ // earth-central half-angle (deg) for min elevation e
 let elev=0, coverageMode='sel', activeOnly=false, bwFilter='all', selected=null;
 const layers={}; // name -> {foot:[poly...], marker}
 
-const visible=s=> (!activeOnly || s.active>0) && (bwFilter==='all' || (s.bw && s.bw[bwFilter]>0));
+let rgnFilter='all';
+const visible=s=> (!activeOnly || s.active>0)
+  && (bwFilter==='all' || (s.bw && s.bw[bwFilter]>0))
+  && (rgnFilter==='all' || s.region===rgnFilter);
 
 function draw(){
   Object.values(layers).forEach(L0=>{L0.foot.forEach(p=>map.removeLayer(p));map.removeLayer(L0.marker);});
@@ -430,13 +486,16 @@ function bwSummary(s){
 
 function popupHTML(s){
   const tags=s.traffic.length?`<div style="margin-top:6px">${s.traffic.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`:'';
+  const note=s.note?`<div class="note">${s.note}</div>`:'';
   return `<h3 style="color:${s.color}">${s.name}</h3>
-    <div class="op">${OP[s.op].name}</div>
+    <div class="op">${OP[s.op].name} · ${REGION[s.region]}</div>
     <div class="kv"><span>Orbital slot</span><span>${s.pos} (GEO)</span></div>
-    <div class="kv"><span>Channels</span><span>${s.ch}</span></div>
-    <div class="kv"><span>Active / Inactive</span><span>${s.active} / ${s.inactive}</span></div>
-    <div class="kv"><span>Bandwidths</span><span>${bwSummary(s)} kHz</span></div>
-    ${tags}`;
+    ${s.desig!=='-'?`<div class="kv"><span>Designator</span><span>${s.desig}</span></div>`:''}
+    ${s.bandplan!=='-'?`<div class="kv"><span>Bandplan</span><span>${s.bandplan}</span></div>`:''}
+    <div class="kv"><span>Channels logged</span><span>${s.ch}</span></div>
+    ${s.ch?`<div class="kv"><span>Bandwidths</span><span>${bwSummary(s)} kHz</span></div>`:''}
+    <div class="kv"><span>Status</span><span>${CONF[s.conf]}</span></div>
+    ${note}${tags}`;
 }
 
 function select(name){
@@ -469,7 +528,7 @@ function chanRows(name){
   }
   if(bwFilter!=='all') rows=rows.filter(r=>String(r[2])===bwFilter);
   if(activeOnly) rows=rows.filter(r=>r[5]===1);
-  const idx={sat:6,rx:0,tx:1,bw:2,sens:3,act:4}[chSort];
+  const idx={sat:8,rx:0,tx:1,bw:2,sens:3,act:4}[chSort];
   const rank={Strong:3,Medium:2,Weak:1,"":0};
   rows.sort((a,b)=>{
     let x=a[idx],y=b[idx];
@@ -503,11 +562,11 @@ function renderChannels(){
   }
   const colorOf={}; SATS.forEach(s=>colorOf[s.name]=s.color);
   body.innerHTML=rows.map(r=>{
-    const [rx,tx,bw,sens,act,on,sat]=r;
+    const [rx,tx,bw,sens,act,on,deriv,src,sat]=r;
     return `<tr class="${on?'':'off'}" data-n="${sat}">
       <td class="satcol" style="color:${colorOf[sat]}">${sat}</td>
       <td class="num rx">${fmt(rx)}</td>
-      <td class="num tx">${fmt(tx)}</td>
+      <td class="num tx${deriv?' derived':''}" title="${deriv?'derived from +41.000 MHz US voice offset':'from source database'}">${fmt(tx)}${deriv?'*':''}</td>
       <td class="num">${bw??'–'}</td>
       <td class="s-${sens}">${sens||'–'}</td>
       <td class="act">${act||''}</td></tr>`;
@@ -539,8 +598,9 @@ function sortedSats(){
   const cmp={
     lon:(a,b)=>a.lon-b.lon,
     ch:(a,b)=>b.ch-a.ch,
-    rxlo:(a,b)=>a.rxlo-b.rxlo,
-    rxhi:(a,b)=>b.rxhi-a.rxhi,
+    rxlo:(a,b)=>(a.rxlo??1e9)-(b.rxlo??1e9),
+    rxhi:(a,b)=>(b.rxhi??-1e9)-(a.rxhi??-1e9),
+    region:(a,b)=>a.region.localeCompare(b.region)||a.lon-b.lon,
     name:(a,b)=>a.name.localeCompare(b.name),
   }[satSort];
   return arr.sort(cmp);
@@ -568,7 +628,7 @@ function buildList(){
     const tags=s.traffic.slice(0,3).map(t=>`<span class="tag">${t}</span>`).join('');
     row.innerHTML=`<span class="dot" style="color:${s.color};background:${s.color}"></span>
       <div><div class="nm">${s.name}</div>
-      <div class="meta">${s.pos} · RX ${fmt(s.rxlo)}–${fmt(s.rxhi)}</div>${tags}</div>
+      <div class="meta">${s.pos} · ${s.region} · ${s.ch?`RX ${fmt(s.rxlo)}–${fmt(s.rxhi)}`:'no channels logged'}</div>${tags}</div>
       <div class="ch"><b>${s.ch}</b><span>${s.active} act</span></div>`;
     row.onclick=()=>select(s.name);
     list.appendChild(row);
@@ -594,6 +654,11 @@ document.getElementById('cov').addEventListener('click',e=>{
   if(e.target.tagName!=='BUTTON')return;
   document.querySelectorAll('#cov button').forEach(b=>b.classList.remove('on'));
   e.target.classList.add('on'); coverageMode=e.target.dataset.c; draw();
+});
+document.getElementById('rgn').addEventListener('click',e=>{
+  if(e.target.tagName!=='BUTTON')return;
+  document.querySelectorAll('#rgn button').forEach(b=>b.classList.remove('on'));
+  e.target.classList.add('on'); rgnFilter=e.target.dataset.r; refilter();
 });
 document.getElementById('bw').addEventListener('click',e=>{
   if(e.target.tagName!=='BUTTON')return;
