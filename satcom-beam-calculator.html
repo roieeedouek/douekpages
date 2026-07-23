@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SATCOM Beam Calc</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --amber: #FFB020;
+    --cyan: #5EC8DE;
+    --red: #E5484D;
+    --grid: #232A33;
+    --bg: #0B0E12;
+    --panel: #12161C;
+    --input-bg: #0E1216;
+    --text: #E8ECEF;
+    --muted: #7C8792;
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:var(--sans); }
+  .wrap { max-width: 760px; margin:0 auto; padding:20px 16px 40px; }
+
+  .app-header { display:flex; align-items:center; gap:8px; margin-bottom:2px; }
+  .app-header h1 { font-size:18px; font-weight:600; letter-spacing:0.04em; margin:0; }
+  .subtitle { font-size:12px; color:var(--muted); margin:0 0 20px; }
+
+  .panel { background:var(--panel); border:1px solid var(--grid); border-radius:12px; padding:16px; margin-bottom:20px; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+  .field-label { display:block; font-size:11px; color:var(--muted); margin-bottom:4px; }
+  input[type=number] {
+    width:100%; background:var(--input-bg); border:1px solid var(--grid); border-radius:8px;
+    padding:8px 10px; color:var(--text); font-family:var(--mono); font-size:13px; outline:none;
+  }
+  input[type=number]:focus { border-color:var(--amber); }
+
+  .mode-row { display:flex; gap:8px; margin-bottom:12px; }
+  .mode-btn {
+    flex:1; padding:7px 10px; border-radius:8px; font-size:12px; cursor:pointer;
+    background:transparent; color:var(--muted); border:1px solid var(--grid); font-family:var(--sans);
+  }
+  .mode-btn.active { background:var(--amber); color:#0B0E12; border-color:var(--amber); font-weight:600; }
+  .pointing-label { font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); margin-bottom:8px; }
+  .pointing-block { margin-bottom:16px; }
+
+  .checkbox-row { display:flex; align-items:center; gap:8px; margin-top:16px; font-size:12px; color:var(--muted); cursor:pointer; }
+
+  .warning { display:none; border:1px solid var(--red); color:var(--red); background:#2A1416; border-radius:8px; padding:12px; font-size:13px; margin-bottom:20px; }
+
+  .chart-container { position:relative; background:var(--panel); border:1px solid var(--grid); border-radius:12px; padding:12px; margin-bottom:16px; }
+  #chartSvg { width:100%; height:auto; aspect-ratio: 700 / 320; display:block; }
+  .tooltip {
+    position:absolute; pointer-events:none; background:var(--panel); border:1px solid var(--grid);
+    border-radius:6px; padding:7px 10px; font-family:var(--mono); font-size:12px; display:none; z-index:10; white-space:nowrap;
+  }
+  .tooltip .t-name { font-family:var(--sans); font-weight:600; color:var(--text); }
+  .tooltip .t-sub { color:var(--muted); }
+
+  .legend { display:flex; flex-wrap:wrap; gap:16px; font-size:11px; color:var(--muted); margin-bottom:16px; }
+  .legend-dot { display:inline-flex; align-items:center; gap:6px; }
+  .legend-dot .dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+
+  .readouts { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
+  .readout { background:var(--panel); border:1px solid var(--grid); border-radius:10px; padding:12px; }
+  .readout .r-label { font-size:10px; letter-spacing:0.05em; color:var(--muted); margin-bottom:4px; }
+  .readout .r-value { font-family:var(--mono); color:var(--amber); font-size:15px; }
+  .readout .r-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+
+  @media (max-width:640px) {
+    .readouts { grid-template-columns:1fr; }
+    .grid-2 { grid-template-columns:1fr; }
+  }
+
+  .table-toggle {
+    width:100%; display:flex; align-items:center; justify-content:space-between; background:var(--panel);
+    border:1px solid var(--grid); border-radius:8px; padding:9px 12px; font-size:13px; color:var(--text);
+    cursor:pointer; margin-bottom:8px; font-family:var(--sans);
+  }
+  .table-wrap { display:none; border:1px solid var(--grid); border-radius:8px; overflow-x:auto; margin-bottom:16px; }
+  table.sat-table { width:100%; border-collapse:collapse; font-family:var(--mono); font-size:12px; min-width:420px; }
+  table.sat-table thead tr { background:#161B22; color:var(--muted); }
+  table.sat-table th, table.sat-table td { padding:8px; text-align:right; }
+  table.sat-table th:first-child, table.sat-table td:first-child { text-align:left; font-family:var(--sans); color:var(--text); }
+  table.sat-table tbody tr { border-top:1px solid var(--grid); }
+  .pill { display:inline-block; padding:1px 7px; border-radius:999px; font-size:10px; white-space:nowrap; }
+
+  .footnote { display:flex; gap:8px; font-size:11px; color:var(--muted); align-items:flex-start; }
+  .footnote p { margin:0; }
+  button { font-family:var(--sans); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="app-header">
+    <span style="font-size:20px;">📡</span>
+    <h1>SATCOM BEAM CALC</h1>
+  </div>
+  <p class="subtitle">Ground-station antenna visibility along the geostationary arc</p>
+
+  <div class="panel">
+    <div class="grid-2">
+      <div>
+        <label class="field-label">Ground station lat (°N)</label>
+        <input type="number" step="0.01" id="gsLat" value="32.08">
+      </div>
+      <div>
+        <label class="field-label">Ground station lon (°E)</label>
+        <input type="number" step="0.01" id="gsLon" value="34.78">
+      </div>
+    </div>
+
+    <div class="pointing-block">
+      <div class="pointing-label">Pointing</div>
+      <div class="mode-row">
+        <button type="button" class="mode-btn active" id="modeLonBtn">Satellite longitude</button>
+        <button type="button" class="mode-btn" id="modeAzBtn">Antenna azimuth</button>
+      </div>
+      <div id="lonField">
+        <label class="field-label">Target longitude (°E, negative = °W)</label>
+        <input type="number" step="0.1" id="targetLon" value="37">
+      </div>
+      <div id="azField" style="display:none;">
+        <label class="field-label">Antenna azimuth (° from North)</label>
+        <input type="number" step="0.1" id="targetAz" value="150">
+      </div>
+    </div>
+
+    <div>
+      <label class="field-label">3dB beamwidth (°, full width)</label>
+      <input type="number" step="0.5" min="0.5" id="beamwidth" value="85">
+    </div>
+
+    <label class="checkbox-row">
+      <input type="checkbox" id="showSats" checked>
+      Show known UHF SATCOM satellites
+    </label>
+  </div>
+
+  <div id="warningBox" class="warning"></div>
+
+  <div id="mainOutput">
+    <div class="chart-container">
+      <svg id="chartSvg" viewBox="0 0 700 320"></svg>
+      <div class="tooltip" id="tooltip"></div>
+    </div>
+
+    <div class="legend" id="legend">
+      <span class="legend-dot"><span class="dot" style="background:var(--amber);"></span>in 3dB beam</span>
+      <span class="legend-dot"><span class="dot" style="background:var(--cyan);"></span>visible, outside beam</span>
+      <span class="legend-dot"><span class="dot" style="background:var(--red);"></span>below horizon</span>
+    </div>
+
+    <div class="readouts">
+      <div class="readout">
+        <div class="r-label">BORESIGHT</div>
+        <div class="r-value" id="roBoresight">—</div>
+        <div class="r-sub" id="roBoresightSub"></div>
+      </div>
+      <div class="readout">
+        <div class="r-label">3DB WINDOW</div>
+        <div class="r-value" id="roWindow">—</div>
+        <div class="r-sub" id="roWindowSub"></div>
+      </div>
+      <div class="readout">
+        <div class="r-label">VISIBLE ARC</div>
+        <div class="r-value" id="roArc">—</div>
+        <div class="r-sub">elevation ≥ 0°</div>
+      </div>
+    </div>
+
+    <button type="button" class="table-toggle" id="tableToggle">
+      <span id="tableToggleLabel">Known UHF SATCOM birds (0)</span>
+      <span id="tableChevron">▾</span>
+    </button>
+    <div class="table-wrap" id="tableWrap">
+      <table class="sat-table">
+        <thead>
+          <tr><th>Satellite</th><th>Lon</th><th>Elev</th><th>Loss</th><th>Status</th></tr>
+        </thead>
+        <tbody id="satTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="footnote">
+      <span>ℹ️</span>
+      <p>Loss uses the standard near-boresight approximation Loss = −12·(θ/θ₃dB)², where θ is the angular offset from boresight as seen by the antenna — accurate close to the main lobe. Values are floored at −30 dB (shaded red); real antennas have irregular sidelobes there that this model doesn't capture. Geometry assumes a spherical Earth and ignores station height and refraction.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var Re = 6378.137;
+  var Rgeo = 42164.0;
+  var FLOOR_DB = -30;
+  var AMBER = '#FFB020', CYAN = '#5EC8DE', RED = '#E5484D', GRID = '#232A33', BG = '#0B0E12', MUTED = '#7C8792';
+
+  var KNOWN_SATS = [
+    { name: "SICRAL 2", lon: 37 },
+    { name: "SICRAL 1B", lon: 11.8 },
+    { name: "ComSatBw-1", lon: 63 },
+    { name: "ComSatBw-2", lon: 13.2 },
+    { name: "Intelsat 22", lon: 72 },
+    { name: "UFO 11", lon: 75.6 },
+    { name: "UFO 10", lon: -22.9 },
+    { name: "UFO 7", lon: -22 },
+    { name: "UFO 2", lon: 28.7 },
+    { name: "Skynet 5A", lon: 95 },
+    { name: "Skynet 5B", lon: 24.5 },
+    { name: "Skynet 5C", lon: -17.8 },
+    { name: "Skynet 5D", lon: 52.7 },
+    { name: "Skynet 4C", lon: 33.4 },
+    { name: "FltSatCom F8", lon: -125.7 }
+  ];
+
+  function toRad(d){ return d*Math.PI/180; }
+  function toDeg(r){ return r*180/Math.PI; }
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+  function groundVec(lat, lon){
+    lat = toRad(lat); lon = toRad(lon);
+    return [Re*Math.cos(lat)*Math.cos(lon), Re*Math.cos(lat)*Math.sin(lon), Re*Math.sin(lat)];
+  }
+  function satVec(lon){
+    lon = toRad(lon);
+    return [Rgeo*Math.cos(lon), Rgeo*Math.sin(lon), 0];
+  }
+  function sub(a,b){ return [a[0]-b[0], a[1]-b[1], a[2]-b[2]]; }
+  function dot(a,b){ return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]; }
+  function norm(a){ return Math.sqrt(dot(a,a)); }
+  function lookVec(gs, lon){ return sub(satVec(lon), gs); }
+  function localFrame(lat, lon){
+    lat = toRad(lat); lon = toRad(lon);
+    var up = [Math.cos(lat)*Math.cos(lon), Math.cos(lat)*Math.sin(lon), Math.sin(lat)];
+    var east = [-Math.sin(lon), Math.cos(lon), 0];
+    var north = [-Math.sin(lat)*Math.cos(lon), -Math.sin(lat)*Math.sin(lon), Math.cos(lat)];
+    return { up: up, east: east, north: north };
+  }
+  function azEl(gs, lat, lon, tlon){
+    var L = lookVec(gs, tlon);
+    var frame = localFrame(lat, lon);
+    var e = dot(L, frame.east), n = dot(L, frame.north), u = dot(L, frame.up);
+    var az = (toDeg(Math.atan2(e,n)) + 360) % 360;
+    var el = toDeg(Math.atan2(u, Math.sqrt(e*e+n*n)));
+    return { az: az, el: el };
+  }
+  function angleBetween(gs, lon1, lon2){
+    var L1 = lookVec(gs, lon1), L2 = lookVec(gs, lon2);
+    var c = dot(L1,L2)/(norm(L1)*norm(L2));
+    return toDeg(Math.acos(clamp(c,-1,1)));
+  }
+  function fmtLon(lon){
+    if (lon===null || lon===undefined || isNaN(lon)) return '—';
+    return Math.abs(lon).toFixed(1) + '°' + (lon>=0?'E':'W');
+  }
+  function fmtDeg(v){
+    if (v===null || v===undefined || isNaN(v)) return '—';
+    return v.toFixed(1)+'°';
+  }
+
+  function findVisibleArc(lat, lon){
+    var gs = groundVec(lat, lon);
+    var N = 3600;
+    var min = null, max = null;
+    for (var i=0;i<=N;i++){
+      var l = -180 + 360*i/N;
+      var r = azEl(gs, lat, lon, l);
+      if (r.el >= 0){ if (min===null) min=l; max=l; }
+    }
+    if (min===null) return [-81,81];
+    return [min,max];
+  }
+
+  function findLonForAzimuth(lat, lon, arc, targetAz){
+    var gs = groundVec(lat, lon);
+    var lo = arc[0], hi = arc[1];
+    var N = 2000;
+    var best = null, bestDiff = Infinity;
+    for (var i=0;i<=N;i++){
+      var l = lo + (hi-lo)*i/N;
+      var r = azEl(gs, lat, lon, l);
+      var diff = Math.abs(r.az-targetAz);
+      if (diff > 180) diff = 360-diff;
+      if (diff < bestDiff){ bestDiff = diff; best = l; }
+    }
+    if (bestDiff > 2) return null;
+    return best;
+  }
+
+  var $ = function(id){ return document.getElementById(id); };
+  var gsLatInput = $('gsLat'), gsLonInput = $('gsLon');
+  var modeLonBtn = $('modeLonBtn'), modeAzBtn = $('modeAzBtn');
+  var lonField = $('lonField'), azField = $('azField');
+  var targetLonInput = $('targetLon'), targetAzInput = $('targetAz');
+  var beamwidthInput = $('beamwidth');
+  var showSatsInput = $('showSats');
+  var warningBox = $('warningBox');
+  var mainOutput = $('mainOutput');
+  var chartSvg = $('chartSvg');
+  var tooltip = $('tooltip');
+  var legend = $('legend');
+  var roBoresight = $('roBoresight'), roBoresightSub = $('roBoresightSub');
+  var roWindow = $('roWindow'), roWindowSub = $('roWindowSub');
+  var roArc = $('roArc');
+  var tableToggle = $('tableToggle'), tableToggleLabel = $('tableToggleLabel'), tableChevron = $('tableChevron');
+  var tableWrap = $('tableWrap');
+  var satTableBody = $('satTableBody');
+
+  var pointMode = 'lon';
+  var tableOpen = false;
+
+  // initialize azimuth field default from lon=37 target so the two modes agree at start
+  (function initAz(){
+    var gs0 = groundVec(32.08, 34.78);
+    targetAzInput.value = azEl(gs0, 32.08, 34.78, 37).az.toFixed(1);
+  })();
+
+  modeLonBtn.addEventListener('click', function(){
+    pointMode = 'lon';
+    modeLonBtn.classList.add('active'); modeAzBtn.classList.remove('active');
+    lonField.style.display = 'block'; azField.style.display = 'none';
+    render();
+  });
+  modeAzBtn.addEventListener('click', function(){
+    pointMode = 'az';
+    modeAzBtn.classList.add('active'); modeLonBtn.classList.remove('active');
+    azField.style.display = 'block'; lonField.style.display = 'none';
+    render();
+  });
+  tableToggle.addEventListener('click', function(){
+    tableOpen = !tableOpen;
+    tableWrap.style.display = tableOpen ? 'block' : 'none';
+    tableChevron.textContent = tableOpen ? '▴' : '▾';
+  });
+
+  [gsLatInput, gsLonInput, targetLonInput, targetAzInput, beamwidthInput].forEach(function(inp){
+    inp.addEventListener('input', render);
+  });
+  showSatsInput.addEventListener('change', render);
+
+  var NS = 'http://www.w3.org/2000/svg';
+  function svgEl(tag, attrs){
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  function showTooltip(ev, s){
+    var container = chartSvg.parentElement;
+    var rect = container.getBoundingClientRect();
+    var x = ev.clientX - rect.left;
+    var y = ev.clientY - rect.top;
+    tooltip.style.display = 'block';
+    tooltip.style.left = Math.max(0, Math.min(x+12, rect.width-150)) + 'px';
+    tooltip.style.top = Math.max(0, y-42) + 'px';
+    tooltip.innerHTML = '<div class="t-name">' + s.name + '</div><div class="t-sub">' +
+      fmtLon(s.lon) + ' · el ' + fmtDeg(s.el) + ' · ' +
+      (s.status==='below-horizon' ? 'below horizon' : s.rawLoss.toFixed(1)+' dB') + '</div>';
+  }
+  function hideTooltip(){ tooltip.style.display = 'none'; }
+
+  function drawChart(pts, boresightLon, edgeLow, edgeHigh, satPoints, showSats, xMin, xMax){
+    var W = 700, H = 320;
+    var M = { top:28, right:18, bottom:34, left:46 };
+    var plotW = W - M.left - M.right;
+    var plotH = H - M.top - M.bottom;
+    var yMin = FLOOR_DB, yMax = 2;
+
+    function xScale(lon){ return M.left + (lon-xMin)/(xMax-xMin)*plotW; }
+    function yScale(loss){ return M.top + (1 - (loss-yMin)/(yMax-yMin))*plotH; }
+
+    while (chartSvg.firstChild) chartSvg.removeChild(chartSvg.firstChild);
+
+    var defs = svgEl('defs', {});
+    var grad = svgEl('linearGradient', { id:'beamFill', x1:'0', y1:'0', x2:'0', y2:'1' });
+    grad.appendChild(svgEl('stop', { offset:'0%', 'stop-color':AMBER, 'stop-opacity':'0.35' }));
+    grad.appendChild(svgEl('stop', { offset:'100%', 'stop-color':AMBER, 'stop-opacity':'0' }));
+    defs.appendChild(grad);
+    chartSvg.appendChild(defs);
+
+    // 3dB window shading
+    chartSvg.appendChild(svgEl('rect', {
+      x: xScale(edgeLow), y: M.top, width: Math.max(0, xScale(edgeHigh)-xScale(edgeLow)), height: plotH,
+      fill: AMBER, 'fill-opacity': '0.06'
+    }));
+    // low-confidence sidelobe zone shading
+    chartSvg.appendChild(svgEl('rect', {
+      x: M.left, y: yScale(-20), width: plotW, height: yScale(FLOOR_DB) - yScale(-20),
+      fill: RED, 'fill-opacity': '0.04'
+    }));
+
+    // horizontal gridlines + labels
+    [0,-3,-10,-20,-30].forEach(function(v){
+      var y = yScale(v);
+      chartSvg.appendChild(svgEl('line', { x1:M.left, x2:W-M.right, y1:y, y2:y, stroke:GRID, 'stroke-dasharray':'2 4' }));
+      var t = svgEl('text', { x:M.left-6, y:y+3, fill:MUTED, 'font-size':'10', 'text-anchor':'end' });
+      t.textContent = v;
+      chartSvg.appendChild(t);
+    });
+
+    // rotated Y-axis title
+    var yTitle = svgEl('text', {
+      x: 12, y: M.top + plotH/2, fill: MUTED, 'font-size':'10', 'text-anchor':'middle',
+      transform: 'rotate(-90 12 ' + (M.top + plotH/2) + ')'
+    });
+    yTitle.textContent = 'Loss (dB)';
+    chartSvg.appendChild(yTitle);
+
+    // x-axis ticks (nice step)
+    var range = xMax - xMin;
+    var stepOptions = [5,10,15,20,25,30,50];
+    var step = stepOptions[stepOptions.length-1];
+    for (var si=0; si<stepOptions.length; si++){
+      if (range/stepOptions[si] <= 8){ step = stepOptions[si]; break; }
+    }
+    var firstTick = Math.ceil(xMin/step)*step;
+    for (var t2=firstTick; t2<=xMax; t2+=step){
+      var xt = xScale(t2);
+      var txt = svgEl('text', { x:xt, y:H-M.bottom+16, fill:MUTED, 'font-size':'10', 'text-anchor':'middle' });
+      txt.textContent = Math.round(t2) + '°';
+      chartSvg.appendChild(txt);
+    }
+
+    // -3dB reference line
+    var y3 = yScale(-3);
+    chartSvg.appendChild(svgEl('line', { x1:M.left, x2:W-M.right, y1:y3, y2:y3, stroke:MUTED, 'stroke-dasharray':'4 4' }));
+
+    // area fill
+    var areaD = 'M ' + xScale(pts[0].lon) + ' ' + yScale(FLOOR_DB) + ' ';
+    pts.forEach(function(p){ areaD += 'L ' + xScale(p.lon) + ' ' + yScale(p.loss) + ' '; });
+    areaD += 'L ' + xScale(pts[pts.length-1].lon) + ' ' + yScale(FLOOR_DB) + ' Z';
+    chartSvg.appendChild(svgEl('path', { d:areaD, fill:'url(#beamFill)', stroke:'none' }));
+
+    // loss curve
+    var lineD = pts.map(function(p,i){ return (i===0?'M ':'L ') + xScale(p.lon) + ' ' + yScale(p.loss); }).join(' ');
+    chartSvg.appendChild(svgEl('path', { d:lineD, fill:'none', stroke:AMBER, 'stroke-width':'2' }));
+
+    // 3dB edge lines
+    [edgeLow, edgeHigh].forEach(function(lonV, idx){
+      var x = xScale(lonV);
+      chartSvg.appendChild(svgEl('line', { x1:x, x2:x, y1:M.top, y2:H-M.bottom, stroke:CYAN, 'stroke-dasharray':'3 3' }));
+      var lbl = svgEl('text', { x:x, y:H-M.bottom-6, fill:CYAN, 'font-size':'10', 'text-anchor': idx===0 ? 'start':'end' });
+      lbl.textContent = fmtLon(lonV);
+      chartSvg.appendChild(lbl);
+    });
+
+    // boresight line
+    var xB = xScale(boresightLon);
+    chartSvg.appendChild(svgEl('line', { x1:xB, x2:xB, y1:M.top, y2:H-M.bottom, stroke:AMBER, 'stroke-width':'1.5' }));
+    var bLabel = svgEl('text', { x:xB, y:M.top-10, fill:AMBER, 'font-size':'11', 'text-anchor':'middle' });
+    bLabel.textContent = 'boresight ' + fmtLon(boresightLon);
+    chartSvg.appendChild(bLabel);
+
+    // satellite dots
+    if (showSats){
+      satPoints.forEach(function(s){
+        var cx = xScale(s.lon), cy = yScale(s.loss);
+        var color = s.status==='in-beam' ? AMBER : (s.status==='below-horizon' ? RED : CYAN);
+        var circle = svgEl('circle', { cx:cx, cy:cy, r:'4.5', fill:color, stroke:BG, 'stroke-width':'1.5' });
+        circle.style.cursor = 'pointer';
+        circle.addEventListener('pointerenter', function(ev){ showTooltip(ev, s); });
+        circle.addEventListener('pointermove', function(ev){ showTooltip(ev, s); });
+        circle.addEventListener('pointerleave', hideTooltip);
+        circle.addEventListener('click', function(ev){ showTooltip(ev, s); });
+        chartSvg.appendChild(circle);
+      });
+    }
+  }
+
+  function render(){
+    var gsLatRaw = parseFloat(gsLatInput.value);
+    var gsLat = isFinite(gsLatRaw) ? clamp(gsLatRaw,-90,90) : 32.08;
+    var gsLonRaw = parseFloat(gsLonInput.value);
+    var gsLon = isFinite(gsLonRaw) ? clamp(gsLonRaw,-180,180) : 34.78;
+    var gs = groundVec(gsLat, gsLon);
+    var visibleArc = findVisibleArc(gsLat, gsLon);
+
+    var bwRaw = parseFloat(beamwidthInput.value);
+    var BW = (isFinite(bwRaw) && bwRaw > 0) ? bwRaw : 0.1;
+
+    var boresightLon = null;
+    if (pointMode === 'lon'){
+      var vlon = parseFloat(targetLonInput.value);
+      boresightLon = isFinite(vlon) ? clamp(vlon,-180,180) : null;
+    } else {
+      var vaz = parseFloat(targetAzInput.value);
+      boresightLon = isFinite(vaz) ? findLonForAzimuth(gsLat, gsLon, visibleArc, vaz) : null;
+    }
+
+    if (boresightLon === null){
+      mainOutput.style.display = 'none';
+      warningBox.style.display = 'block';
+      if (pointMode === 'az'){
+        var a1 = azEl(gs, gsLat, gsLon, visibleArc[0]).az;
+        var a2 = azEl(gs, gsLat, gsLon, visibleArc[1]).az;
+        var azLo = Math.min(a1,a2), azHi = Math.max(a1,a2);
+        warningBox.textContent = 'No geostationary position matches that azimuth from this location. From lat ' +
+          gsLat.toFixed(2) + '°, the visible geostationary arc spans roughly azimuth ' + fmtDeg(azLo) + ' to ' + fmtDeg(azHi) + '.';
+      } else {
+        warningBox.textContent = 'Enter a valid target longitude to compute the beam window.';
+      }
+      return;
+    }
+    warningBox.style.display = 'none';
+    mainOutput.style.display = 'block';
+
+    var bAzEl = azEl(gs, gsLat, gsLon, boresightLon);
+
+    var lo = visibleArc[0], hi = visibleArc[1];
+    var N = 260;
+    var pts = [];
+    for (var i=0; i<=N; i++){
+      var lonV = lo + (hi-lo)*i/N;
+      var theta = angleBetween(gs, boresightLon, lonV);
+      var rawLoss = -12*Math.pow(theta/BW, 2);
+      var loss = Math.max(rawLoss, FLOOR_DB);
+      pts.push({ lon:lonV, loss:loss, rawLoss:rawLoss });
+    }
+
+    var left = pts.filter(function(p){ return p.lon <= boresightLon; }).sort(function(a,b){ return b.lon-a.lon; });
+    var right = pts.filter(function(p){ return p.lon >= boresightLon; }).sort(function(a,b){ return a.lon-b.lon; });
+    function crossing(arr){
+      for (var j=1; j<arr.length; j++){
+        if (arr[j].rawLoss <= -3 && arr[j-1].rawLoss > -3){
+          var a = arr[j-1], b = arr[j];
+          var t = (-3 - a.rawLoss) / (b.rawLoss - a.rawLoss);
+          return a.lon + t*(b.lon - a.lon);
+        }
+      }
+      return null;
+    }
+    var edgeLow = crossing(left);
+    var edgeHigh = crossing(right);
+    var horizLow = edgeLow === null, horizHigh = edgeHigh === null;
+    if (edgeLow === null) edgeLow = lo;
+    if (edgeHigh === null) edgeHigh = hi;
+
+    var showSats = showSatsInput.checked;
+    var satPoints = KNOWN_SATS.map(function(s){
+      var r = azEl(gs, gsLat, gsLon, s.lon);
+      var theta = angleBetween(gs, boresightLon, s.lon);
+      var rawLoss = -12*Math.pow(theta/BW, 2);
+      var loss = Math.max(rawLoss, FLOOR_DB);
+      var status = 'out';
+      if (r.el < 0) status = 'below-horizon';
+      else if (rawLoss >= -3) status = 'in-beam';
+      return { name:s.name, lon:s.lon, el:r.el, loss:loss, rawLoss:rawLoss, status:status };
+    }).sort(function(a,b){ return a.lon-b.lon; });
+
+    roBoresight.textContent = fmtLon(boresightLon);
+    roBoresightSub.textContent = 'az ' + fmtDeg(bAzEl.az) + ' · el ' + fmtDeg(bAzEl.el);
+    roWindow.textContent = fmtLon(edgeLow) + ' → ' + fmtLon(edgeHigh);
+    roWindowSub.textContent = 'width ' + (edgeHigh-edgeLow).toFixed(1) + '°' + ((horizLow||horizHigh) ? ' · horizon-limited' : '');
+    roArc.textContent = fmtLon(lo) + ' → ' + fmtLon(hi);
+
+    legend.style.display = showSats ? 'flex' : 'none';
+    tableToggleLabel.textContent = 'Known UHF SATCOM birds (' + satPoints.length + ')';
+
+    satTableBody.innerHTML = '';
+    var statusMap = {
+      'in-beam': { color:AMBER, label:'in beam' },
+      'out': { color:CYAN, label:'outside beam' },
+      'below-horizon': { color:RED, label:'below horizon' }
+    };
+    satPoints.forEach(function(s){
+      var tr = document.createElement('tr');
+      var st = statusMap[s.status];
+      tr.innerHTML =
+        '<td>' + s.name + '</td>' +
+        '<td>' + fmtLon(s.lon) + '</td>' +
+        '<td>' + fmtDeg(s.el) + '</td>' +
+        '<td>' + (s.status==='below-horizon' ? '—' : s.rawLoss.toFixed(1)+' dB') + '</td>' +
+        '<td><span class="pill" style="color:' + st.color + ';border:1px solid ' + st.color + '66;">' + st.label + '</span></td>';
+      satTableBody.appendChild(tr);
+    });
+
+    drawChart(pts, boresightLon, edgeLow, edgeHigh, satPoints, showSats, lo, hi);
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
