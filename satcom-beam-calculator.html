@@ -45,6 +45,15 @@
   .mode-btn.active { background:var(--amber); color:#0B0E12; border-color:var(--amber); font-weight:600; }
   .pointing-label { font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); margin-bottom:8px; }
   .pointing-block { margin-bottom:16px; }
+  .sweep-row { display:flex; align-items:center; gap:8px; margin-top:8px; }
+  .sweep-btn {
+    width:30px; height:30px; flex-shrink:0; border-radius:8px; border:1px solid var(--amber);
+    background:transparent; color:var(--amber); font-size:12px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  .sweep-btn.playing { background:var(--amber); color:#0B0E12; }
+  input[type=range] { flex:1; accent-color: var(--amber); }
+  .sweep-value { font-family:var(--mono); font-size:11px; color:var(--muted); min-width:54px; text-align:right; flex-shrink:0; }
 
   .checkbox-row { display:flex; align-items:center; gap:8px; margin-top:16px; font-size:12px; color:var(--muted); cursor:pointer; }
 
@@ -126,6 +135,11 @@
         <label class="field-label">Antenna azimuth (° from North)</label>
         <input type="number" step="0.1" id="targetAz" value="150">
       </div>
+      <div class="sweep-row">
+        <button type="button" class="sweep-btn" id="sweepBtn" title="Sweep across the visible arc">▶</button>
+        <input type="range" id="sweepSlider" step="0.05">
+        <span class="sweep-value" id="sweepValue">—</span>
+      </div>
     </div>
 
     <div>
@@ -186,7 +200,7 @@
 
     <div class="footnote">
       <span>ℹ️</span>
-      <p>Loss uses the standard near-boresight approximation Loss = −12·(θ/θ₃dB)², where θ is the angular offset from boresight as seen by the antenna — accurate close to the main lobe. Values are floored at −30 dB (shaded red); real antennas have irregular sidelobes there that this model doesn't capture. Geometry assumes a spherical Earth and ignores station height and refraction.</p>
+      <p>Loss uses the standard near-boresight approximation Loss = −12·(θ/θ₃dB)², where θ is the angular offset from boresight as seen by the antenna — accurate close to the main lobe. Values are floored at −30 dB (shaded red); real antennas have irregular sidelobes there that this model doesn't capture. Geometry assumes a spherical Earth and ignores station height and refraction. Satellites below the horizon from this ground station can't be plotted on the arc above, but still show up in the table below with a "below horizon" status.</p>
     </div>
   </div>
 </div>
@@ -201,21 +215,37 @@
   var AMBER = '#FFB020', CYAN = '#5EC8DE', RED = '#E5484D', GRID = '#232A33', BG = '#0B0E12', MUTED = '#7C8792';
 
   var KNOWN_SATS = [
-    { name: "SICRAL 2", lon: 37 },
-    { name: "SICRAL 1B", lon: 11.8 },
-    { name: "ComSatBw-1", lon: 63 },
-    { name: "ComSatBw-2", lon: 13.2 },
-    { name: "Intelsat 22", lon: 72 },
-    { name: "UFO 11", lon: 75.6 },
+    { name: "UFO 4", lon: -177.1 },
+    { name: "MUOS-1", lon: -177.0 },
+    { name: "SDS III-3", lon: -143.9 },
+    { name: "UFO 6", lon: -105.5 },
+    { name: "MUOS-2", lon: -100.0 },
+    { name: "UFO 5", lon: -99.4 },
+    { name: "Milstar DFS-6", lon: -90.0 },
+    { name: "Milstar DFS-4", lon: -67.9 },
+    { name: "Milstar DFS-1", lon: -38.9 },
+    { name: "Skynet 4F", lon: -34.0 },
+    { name: "SDS III-6", lon: -30.4 },
     { name: "UFO 10", lon: -22.9 },
-    { name: "UFO 7", lon: -22 },
-    { name: "UFO 2", lon: 28.7 },
-    { name: "Skynet 5A", lon: 95 },
-    { name: "Skynet 5B", lon: 24.5 },
+    { name: "UFO 7", lon: -22.0 },
     { name: "Skynet 5C", lon: -17.8 },
-    { name: "Skynet 5D", lon: 52.7 },
+    { name: "FLTSATCOM 8", lon: -15.8 },
+    { name: "MUOS-3", lon: -15.5 },
+    { name: "SDS III-2 F5", lon: -10.0 },
+    { name: "SICRAL 1B", lon: 11.8 },
+    { name: "ComSatBw-2", lon: 13.2 },
+    { name: "Skynet 5B", lon: 24.5 },
+    { name: "UFO 2", lon: 28.7 },
     { name: "Skynet 4C", lon: 33.4 },
-    { name: "FltSatCom F8", lon: -125.7 }
+    { name: "SICRAL 2", lon: 37.0 },
+    { name: "Skynet 5D", lon: 52.7 },
+    { name: "ComSatBw-1", lon: 63.0 },
+    { name: "Intelsat 22", lon: 72.0 },
+    { name: "MUOS-4", lon: 72.0 },
+    { name: "MUOS-5", lon: 75.0 },
+    { name: "UFO 11", lon: 75.6 },
+    { name: "Skynet 5A", lon: 95.0 },
+    { name: "UFO 8", lon: 172.3 }
   ];
 
   function toRad(d){ return d*Math.PI/180; }
@@ -310,9 +340,13 @@
   var tableToggle = $('tableToggle'), tableToggleLabel = $('tableToggleLabel'), tableChevron = $('tableChevron');
   var tableWrap = $('tableWrap');
   var satTableBody = $('satTableBody');
+  var sweepBtn = $('sweepBtn'), sweepSlider = $('sweepSlider'), sweepValue = $('sweepValue');
 
   var pointMode = 'lon';
   var tableOpen = false;
+  var sweeping = false;
+  var sweepDir = 1;
+  var sweepIntervalId = null;
 
   // initialize azimuth field default from lon=37 target so the two modes agree at start
   (function initAz(){
@@ -338,8 +372,46 @@
     tableChevron.textContent = tableOpen ? '▴' : '▾';
   });
 
-  [gsLatInput, gsLonInput, targetLonInput, targetAzInput, beamwidthInput].forEach(function(inp){
+  function stopSweep(){
+    sweeping = false;
+    if (sweepIntervalId){ clearInterval(sweepIntervalId); sweepIntervalId = null; }
+    sweepBtn.classList.remove('playing');
+    sweepBtn.textContent = '▶';
+  }
+  function startSweep(){
+    sweeping = true;
+    sweepBtn.classList.add('playing');
+    sweepBtn.textContent = '⏸';
+    sweepIntervalId = setInterval(function(){
+      var lo = parseFloat(sweepSlider.min), hi = parseFloat(sweepSlider.max);
+      if (!(hi > lo)) return;
+      var span = hi - lo;
+      var step = span / 220; // ~9s for one full end-to-end pass
+      var targetInput = pointMode === 'lon' ? targetLonInput : targetAzInput;
+      var v = parseFloat(targetInput.value);
+      if (!isFinite(v)) v = lo;
+      v += step * sweepDir;
+      if (v >= hi){ v = hi; sweepDir = -1; }
+      else if (v <= lo){ v = lo; sweepDir = 1; }
+      targetInput.value = v.toFixed(2);
+      render();
+    }, 40);
+  }
+  sweepBtn.addEventListener('click', function(){
+    if (sweeping) stopSweep(); else startSweep();
+  });
+  sweepSlider.addEventListener('input', function(){
+    stopSweep();
+    var targetInput = pointMode === 'lon' ? targetLonInput : targetAzInput;
+    targetInput.value = parseFloat(sweepSlider.value).toFixed(2);
+    render();
+  });
+
+  [gsLatInput, gsLonInput, beamwidthInput].forEach(function(inp){
     inp.addEventListener('input', render);
+  });
+  [targetLonInput, targetAzInput].forEach(function(inp){
+    inp.addEventListener('input', function(){ stopSweep(); render(); });
   });
   showSatsInput.addEventListener('change', render);
 
@@ -456,11 +528,11 @@
     bLabel.textContent = 'boresight ' + fmtLon(boresightLon);
     chartSvg.appendChild(bLabel);
 
-    // satellite dots
+    // satellite dots (below-horizon sats are excluded - they'd plot far outside the visible arc)
     if (showSats){
-      satPoints.forEach(function(s){
+      satPoints.filter(function(s){ return s.status !== 'below-horizon'; }).forEach(function(s){
         var cx = xScale(s.lon), cy = yScale(s.loss);
-        var color = s.status==='in-beam' ? AMBER : (s.status==='below-horizon' ? RED : CYAN);
+        var color = s.status==='in-beam' ? AMBER : CYAN;
         var circle = svgEl('circle', { cx:cx, cy:cy, r:'4.5', fill:color, stroke:BG, 'stroke-width':'1.5' });
         circle.style.cursor = 'pointer';
         circle.addEventListener('pointerenter', function(ev){ showTooltip(ev, s); });
@@ -480,6 +552,21 @@
     var gs = groundVec(gsLat, gsLon);
     var visibleArc = findVisibleArc(gsLat, gsLon);
 
+    var azArc0 = azEl(gs, gsLat, gsLon, visibleArc[0]).az;
+    var azArc1 = azEl(gs, gsLat, gsLon, visibleArc[1]).az;
+    var azArcLo = Math.min(azArc0, azArc1), azArcHi = Math.max(azArc0, azArc1);
+
+    // keep the sweep slider's range and displayed value in sync with the current mode/ground station
+    var sweepLo = pointMode === 'lon' ? visibleArc[0] : azArcLo + 0.2;
+    var sweepHi = pointMode === 'lon' ? visibleArc[1] : azArcHi - 0.2;
+    sweepSlider.min = sweepLo;
+    sweepSlider.max = sweepHi;
+    var sweepCur = parseFloat(pointMode === 'lon' ? targetLonInput.value : targetAzInput.value);
+    if (!isFinite(sweepCur)) sweepCur = sweepLo;
+    sweepCur = clamp(sweepCur, sweepLo, sweepHi);
+    sweepSlider.value = sweepCur;
+    sweepValue.textContent = sweepCur.toFixed(1) + '°';
+
     var bwRaw = parseFloat(beamwidthInput.value);
     var BW = (isFinite(bwRaw) && bwRaw > 0) ? bwRaw : 0.1;
 
@@ -496,11 +583,8 @@
       mainOutput.style.display = 'none';
       warningBox.style.display = 'block';
       if (pointMode === 'az'){
-        var a1 = azEl(gs, gsLat, gsLon, visibleArc[0]).az;
-        var a2 = azEl(gs, gsLat, gsLon, visibleArc[1]).az;
-        var azLo = Math.min(a1,a2), azHi = Math.max(a1,a2);
         warningBox.textContent = 'No geostationary position matches that azimuth from this location. From lat ' +
-          gsLat.toFixed(2) + '°, the visible geostationary arc spans roughly azimuth ' + fmtDeg(azLo) + ' to ' + fmtDeg(azHi) + '.';
+          gsLat.toFixed(2) + '°, the visible geostationary arc spans roughly azimuth ' + fmtDeg(azArcLo) + ' to ' + fmtDeg(azArcHi) + '.';
       } else {
         warningBox.textContent = 'Enter a valid target longitude to compute the beam window.';
       }
