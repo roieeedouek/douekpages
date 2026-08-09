@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>לקסיקון 2000 — אימון אוצר מילים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=Assistant:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#161F38;
+  --ink-2:#1E2B4D;
+  --ink-3:#283a68;
+  --paper:#FBF6EA;
+  --paper-2:#F3EBD8;
+  --paper-3:#e9dfc7;
+  --amber:#E8A33D;
+  --amber-deep:#c17f1f;
+  --amber-ink:#4a2e05;
+  --correct:#3F8F5F;
+  --correct-deep:#2f6d47;
+  --wrong:#C1452C;
+  --wrong-deep:#9c3520;
+  --line: rgba(22,31,56,.14);
+  --line-light: rgba(251,246,234,.22);
+  --shadow: 0 18px 40px -14px rgba(15,20,38,.35);
+  --shadow-sm: 0 8px 18px -10px rgba(15,20,38,.3);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --font-display:'Fraunces','Assistant',Georgia,serif;
+  --font-body:'Assistant',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'JetBrains Mono','Courier New',monospace;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  background:
+    radial-gradient(1200px 800px at 12% -10%, #1c2a4d 0%, transparent 55%),
+    radial-gradient(1000px 700px at 110% 10%, #223160 0%, transparent 50%),
+    var(--ink);
+  color:var(--paper);
+  min-height:100%;
+  overflow-x:hidden;
+}
+button{font-family:inherit;}
+::selection{background:var(--amber);color:var(--amber-ink);}
+
+/* subtle grain / paper-fiber texture used on light surfaces */
+.grain{position:relative;isolation:isolate;}
+.grain::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:2;opacity:.5;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  border-radius:inherit;
+}
+
+#app{
+  max-width:560px;
+  margin:0 auto;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
+/* ---------- App header ---------- */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px 18px 10px;
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:linear-gradient(180deg, var(--ink) 60%, rgba(22,31,56,0));
+}
+.topbar .tb-side{display:flex;align-items:center;gap:8px;min-width:44px;}
+.iconbtn{
+  width:40px;height:40px;border-radius:12px;
+  border:1px solid var(--line-light);
+  background:rgba(251,246,234,.06);
+  color:var(--paper);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer; font-size:18px; line-height:1;
+  transition:background .15s ease, transform .12s ease;
+}
+.iconbtn:hover{background:rgba(251,246,234,.14);}
+.iconbtn:active{transform:scale(.92);}
+.tb-title{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:16px;
+  letter-spacing:.01em;
+  color:var(--paper);
+  text-align:center;
+  flex:1;
+}
+.tb-stat{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--amber);
+  background:rgba(232,163,61,.12);
+  border:1px solid rgba(232,163,61,.35);
+  border-radius:999px;
+  padding:6px 10px;
+  white-space:nowrap;
+  direction:ltr;
+}
+
+main{flex:1;display:flex;flex-direction:column;padding:6px 18px 28px;}
+
+/* ---------- Home screen ---------- */
+.hero{
+  text-align:center;
+  padding:22px 6px 8px;
+}
+.hero .tag{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--font-mono);
+  font-size:11.5px;letter-spacing:.14em;
+  color:var(--amber);
+  background:rgba(232,163,61,.1);
+  border:1px solid rgba(232,163,61,.3);
+  padding:5px 12px;border-radius:999px;
+  margin-bottom:16px;
+}
+.hero h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:38px;
+  line-height:1.05;
+  margin:0 0 8px;
+  letter-spacing:-.01em;
+}
+.hero h1 em{
+  font-style:italic;color:var(--amber);
+}
+.hero p{
+  margin:0 auto;max-width:34ch;
+  color:rgba(251,246,234,.72);
+  font-size:14.5px;line-height:1.6;
+}
+
+.stat-strip{
+  display:flex;gap:10px;margin:20px 0 6px;
+}
+.stat-card{
+  flex:1;
+  background:rgba(251,246,234,.05);
+  border:1px solid var(--line-light);
+  border-radius:var(--radius-sm);
+  padding:12px 10px;
+  text-align:center;
+}
+.stat-card b{
+  display:block;font-family:var(--font-mono);
+  font-size:22px;color:var(--amber);direction:ltr;
+}
+.stat-card span{
+  font-size:11px;color:rgba(251,246,234,.6);
+}
+
+.mode-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;
+}
+.mode-card{
+  grid-column:span 1;
+  background:var(--paper);
+  color:var(--ink);
+  border-radius:var(--radius);
+  padding:18px 16px;
+  text-align:right;
+  cursor:pointer;
+  border:none;
+  box-shadow:var(--shadow-sm);
+  position:relative;
+  overflow:hidden;
+  transition:transform .15s ease, box-shadow .15s ease;
+  display:flex;flex-direction:column;gap:10px;
+  min-height:148px;
+}
+.mode-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);}
+.mode-card:active{transform:translateY(0px) scale(.98);}
+.mode-card .num{
+  font-family:var(--font-mono);
+  font-size:11px;color:var(--amber-deep);
+  direction:ltr;text-align:left;
+  opacity:.75;
+}
+.mode-card .ico{
+  width:38px;height:38px;border-radius:10px;
+  background:var(--ink);color:var(--amber);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+}
+.mode-card h3{
+  font-family:var(--font-display);
+  font-size:17.5px;margin:0;font-weight:600;
+}
+.mode-card p{
+  margin:0;font-size:12px;line-height:1.5;color:rgba(22,31,56,.62);
+}
+.mode-card .prog{
+  margin-top:auto;
+  font-family:var(--font-mono);
+  font-size:10.5px;color:var(--correct-deep);
+  direction:ltr;text-align:left;
+}
+
+.home-footer{
+  margin-top:24px;text-align:center;
+  font-size:11px;color:rgba(251,246,234,.4);
+  line-height:1.7;
+}
+
+/* ---------- Card catalog index tab decoration ---------- */
+.catalog-tab{
+  position:absolute;top:-1px;right:22px;
+  width:64px;height:16px;
+  background:var(--amber);
+  border-radius:0 0 7px 7px;
+}
+
+/* ---------- Progress bar (quiz modes) ---------- */
+.progress-row{
+  display:flex;align-items:center;gap:10px;margin:4px 0 18px;
+}
+.progress-track{
+  flex:1;height:8px;border-radius:999px;
+  background:rgba(251,246,234,.12);
+  overflow:hidden;
+}
+.progress-fill{
+  height:100%;background:linear-gradient(90deg,var(--amber-deep),var(--amber));
+  border-radius:999px;transition:width .35s ease;
+}
+.progress-num{
+  font-family:var(--font-mono);font-size:12px;color:rgba(251,246,234,.65);
+  direction:ltr;white-space:nowrap;
+}
+.streak-pill{
+  font-family:var(--font-mono);font-size:12px;color:var(--ink);
+  background:var(--amber);border-radius:999px;padding:4px 10px;
+  white-space:nowrap;direction:ltr;font-weight:600;
+}
+
+/* ---------- Quiz card (trivia / completion / rephrase) ---------- */
+.quiz-card{
+  background:var(--paper);color:var(--ink);
+  border-radius:var(--radius);
+  padding:30px 22px 24px;
+  box-shadow:var(--shadow);
+  position:relative;
+  margin-bottom:20px;
+}
+.quiz-label{
+  font-family:var(--font-mono);
+  font-size:11px;letter-spacing:.1em;
+  color:var(--amber-deep);
+  margin-bottom:14px;
+}
+.quiz-word{
+  font-family:var(--font-display);
+  font-size:34px;font-weight:600;
+  direction:ltr;text-align:center;
+  line-height:1.2;
+  margin:6px 0 4px;
+  word-break:break-word;
+}
+.quiz-sentence{
+  direction:ltr;text-align:left;
+  font-family:var(--font-body);
+  font-size:18px;line-height:1.65;
+  color:var(--ink);
+  margin:6px 0 2px;
+}
+.quiz-sentence strong{
+  color:var(--amber-deep);
+  border-bottom:2px solid var(--amber);
+  font-weight:700;
+}
+.quiz-sentence .blank{
+  display:inline-block;min-width:90px;
+  border-bottom:2.5px dashed var(--ink-3);
+  color:transparent;
+}
+
+.options{
+  display:flex;flex-direction:column;gap:10px;margin-top:8px;
+}
+.option-btn{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;
+  background:var(--paper-2);
+  border:1.5px solid var(--paper-3);
+  color:var(--ink);
+  border-radius:14px;
+  padding:14px 16px;
+  font-size:15.5px;
+  font-family:var(--font-body);
+  cursor:pointer;
+  text-align:right;
+  transition:all .12s ease;
+}
+.option-btn .opt-text{direction:rtl;}
+.option-btn[data-dir="ltr"] .opt-text{direction:ltr;text-align:left;}
+.option-btn:hover:not(:disabled){border-color:var(--ink-3);background:#eee3ca;}
+.option-btn:active:not(:disabled){transform:scale(.985);}
+.option-btn:disabled{cursor:default;}
+.option-btn.correct{
+  background:rgba(63,143,95,.14);border-color:var(--correct);color:var(--correct-deep);
+}
+.option-btn.wrong{
+  background:rgba(193,69,44,.12);border-color:var(--wrong);color:var(--wrong-deep);
+}
+.option-btn .badge{
+  font-family:var(--font-mono);font-size:13px;flex-shrink:0;
+}
+
+.feedback-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:16px;gap:10px;
+}
+.reveal-note{
+  font-size:13px;color:rgba(22,31,56,.65);
+  direction:rtl;
+}
+.reveal-note b{color:var(--ink);}
+.next-btn{
+  background:var(--ink);color:var(--paper);
+  border:none;border-radius:12px;
+  padding:12px 22px;font-size:14.5px;font-weight:600;
+  font-family:var(--font-body);cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+  transition:transform .12s ease, background .15s ease;
+  white-space:nowrap;
+}
+.next-btn:hover{background:var(--ink-3);}
+.next-btn:active{transform:scale(.96);}
+
+/* stamp feedback */
+.stamp-wrap{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;z-index:5;
+}
+.stamp{
+  font-family:var(--font-display);
+  font-weight:700;font-size:26px;
+  border:4px solid currentColor;
+  border-radius:14px;
+  padding:8px 22px;
+  transform:rotate(-9deg) scale(0);
+  opacity:0;
+  letter-spacing:.03em;
+  animation: stampIn .38s cubic-bezier(.2,1.6,.4,1) forwards;
+  background:rgba(251,246,234,.92);
+}
+.stamp.ok{color:var(--correct-deep);}
+.stamp.no{color:var(--wrong-deep);}
+@keyframes stampIn{
+  0%{transform:rotate(-9deg) scale(2.2);opacity:0;}
+  60%{opacity:1;}
+  100%{transform:rotate(-9deg) scale(1);opacity:1;}
+}
+
+/* ---------- Pool toggle ---------- */
+.pool-toggle{
+  display:flex;background:rgba(251,246,234,.08);border:1px solid var(--line-light);
+  border-radius:12px;padding:4px;margin-bottom:16px;gap:4px;
+}
+.pool-toggle button{
+  flex:1;border:none;background:transparent;color:rgba(251,246,234,.65);
+  padding:9px 8px;border-radius:9px;font-size:13px;cursor:pointer;
+  font-family:var(--font-body);font-weight:600;transition:all .15s ease;
+}
+.pool-toggle button.active{background:var(--amber);color:var(--amber-ink);}
+
+/* ---------- Swipe screen ---------- */
+.swipe-area{
+  flex:1;display:flex;flex-direction:column;
+}
+.card-stack{
+  position:relative;height:min(58vh,420px);margin:10px 0 18px;
+}
+.swipe-card{
+  position:absolute;inset:0;
+  background:var(--paper);color:var(--ink);
+  border-radius:24px;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:26px;text-align:center;
+  cursor:grab;user-select:none;touch-action:pan-y;
+  transition:transform .28s cubic-bezier(.2,.7,.3,1), opacity .28s ease, box-shadow .2s ease;
+}
+.swipe-card:active{cursor:grabbing;}
+.swipe-card.dragging{transition:none;}
+.swipe-card .catalog-tab{background:var(--ink);opacity:.85;}
+.swipe-card .idx{
+  position:absolute;top:16px;right:20px;
+  font-family:var(--font-mono);font-size:11px;color:rgba(22,31,56,.4);direction:ltr;
+}
+.swipe-card .word{
+  font-family:var(--font-display);font-weight:700;
+  font-size:clamp(28px,8vw,40px);
+  direction:ltr;line-height:1.15;word-break:break-word;
+}
+.swipe-card .pos-tag{
+  font-family:var(--font-mono);font-size:11px;color:var(--amber-deep);
+  margin-top:10px;letter-spacing:.08em;
+}
+.swipe-card .translation{
+  margin-top:18px;padding-top:16px;border-top:1.5px dashed var(--paper-3);
+  font-size:22px;font-weight:600;color:var(--ink-3);
+  opacity:0;transform:translateY(6px);
+  transition:opacity .2s ease, transform .2s ease;
+  width:100%;
+}
+.swipe-card.revealed .translation{opacity:1;transform:translateY(0);}
+.swipe-card .tap-hint{
+  margin-top:14px;font-size:11.5px;color:rgba(22,31,56,.4);
+}
+.swipe-card.revealed .tap-hint{opacity:0;}
+.stamp-hint{
+  position:absolute;top:22px;
+  font-family:var(--font-mono);font-weight:700;font-size:15px;
+  border:3px solid currentColor;border-radius:8px;padding:4px 12px;
+  opacity:0;letter-spacing:.06em;
+}
+.stamp-hint.know{left:20px;color:var(--correct-deep);transform:rotate(-14deg);}
+.stamp-hint.dontknow{right:20px;color:var(--wrong-deep);transform:rotate(14deg);}
+
+.swipe-actions{
+  display:flex;align-items:center;justify-content:center;gap:22px;margin-bottom:8px;
+}
+.swipe-btn{
+  width:60px;height:60px;border-radius:50%;
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+  box-shadow:var(--shadow-sm);
+  transition:transform .12s ease;
+}
+.swipe-btn:active{transform:scale(.9);}
+.swipe-btn.no{background:var(--paper);color:var(--wrong-deep);}
+.swipe-btn.reveal{width:48px;height:48px;background:rgba(251,246,234,.1);color:var(--paper);border:1px solid var(--line-light);font-size:17px;}
+.swipe-btn.yes{background:var(--amber);color:var(--amber-ink);}
+
+.swipe-meta{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--font-mono);font-size:12px;color:rgba(251,246,234,.55);
+  margin-top:auto;padding-top:10px;direction:ltr;
+}
+
+/* ---------- Done / summary screen ---------- */
+.done-wrap{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:20px 0;
+}
+.done-badge{
+  width:84px;height:84px;border-radius:50%;
+  background:var(--amber);color:var(--amber-ink);
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;margin-bottom:18px;
+  box-shadow:var(--shadow);
+}
+.done-wrap h2{font-family:var(--font-display);font-size:26px;margin:0 0 6px;}
+.done-wrap p{color:rgba(251,246,234,.68);font-size:14px;margin:0 0 22px;max-width:30ch;}
+.done-stats{display:flex;gap:12px;margin-bottom:26px;}
+.done-stats .d-card{
+  background:rgba(251,246,234,.06);border:1px solid var(--line-light);
+  border-radius:14px;padding:14px 20px;text-align:center;
+}
+.done-stats .d-card b{display:block;font-family:var(--font-mono);font-size:26px;color:var(--amber);direction:ltr;}
+.done-stats .d-card span{font-size:11px;color:rgba(251,246,234,.6);}
+.primary-btn{
+  background:var(--amber);color:var(--amber-ink);border:none;
+  border-radius:14px;padding:14px 26px;font-size:15px;font-weight:700;
+  cursor:pointer;font-family:var(--font-body);margin-bottom:10px;width:100%;max-width:280px;
+  transition:transform .12s ease;
+}
+.primary-btn:active{transform:scale(.97);}
+.ghost-btn{
+  background:transparent;color:rgba(251,246,234,.75);
+  border:1px solid var(--line-light);
+  border-radius:14px;padding:13px 26px;font-size:14px;font-weight:600;
+  cursor:pointer;font-family:var(--font-body);width:100%;max-width:280px;
+}
+
+/* ---------- misc ---------- */
+.section-title{
+  font-family:var(--font-display);font-size:15px;font-weight:600;
+  color:rgba(251,246,234,.85);margin:2px 0 12px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-title .swatch{width:8px;height:8px;border-radius:2px;background:var(--amber);}
+
+.reduced-motion-safe{transition-duration:.01ms !important;}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+}
+
+@media (max-width:380px){
+  .hero h1{font-size:32px;}
+  .quiz-word{font-size:28px;}
+}
+
+.hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+window.GAME_DATA = {"vocab":[{"num":1,"en":"abduct","he":"לחטוף"},{"num":2,"en":"abduction","he":"חטיפה"},{"num":3,"en":"abide","he":"להתמיד, להתגורר ,להיות נאמן ל"},{"num":4,"en":"abolish","he":"לבטל"},{"num":5,"en":"above","he":"יותר ממשהו ,למעלה, מעל משהו"},{"num":6,"en":"abrogate","he":"לבטל באופן רשמי"},{"num":7,"en":"abrupt","he":"פתאומי"},{"num":8,"en":"absence","he":"היעדר, חוסר"},{"num":9,"en":"absent","he":"נעדר"},{"num":10,"en":"absolute","he":"מוחלט"},{"num":11,"en":"absolutely","he":"לחלוטין"},{"num":12,"en":"abstruse","he":"קשה להבנה"},{"num":13,"en":"abundant","he":"שופע, מלא, גדוש"},{"num":14,"en":"abuse","he":"להשתמש לרעה, לשבש ,להתעלל, לפגוע"},{"num":15,"en":"accept","he":"לקבל"},{"num":16,"en":"access","he":"לגשת, לזכות בגישה, כניסה, גישה"},{"num":17,"en":"accident","he":"תאונה"},{"num":18,"en":"acclaim","he":"שבח, תשואות ,להריע, לשבח"},{"num":19,"en":"accommodation","he":"דיור ,מגורים"},{"num":20,"en":"accomplice","he":"שותף לעבירה"},{"num":21,"en":"accomplish","he":"להשלים, לבצע"},{"num":22,"en":"accomplished","he":"מושלם, גמור"},{"num":23,"en":"accordance","he":"התאמה, תיאום"},{"num":24,"en":"accordingly","he":"בהתאם"},{"num":25,"en":"accumulate","he":"לצבור, לאגור"},{"num":26,"en":"accurate","he":"מדויק"},{"num":27,"en":"accurately","he":"במדויק"},{"num":28,"en":"accusation","he":"האשמה"},{"num":29,"en":"achieve","he":"להשיג"},{"num":30,"en":"acquisition","he":"רכישה"},{"num":31,"en":"active","he":"פעיל"},{"num":32,"en":"addition","he":"תוספת"},{"num":33,"en":"additional","he":"נוסף"},{"num":34,"en":"additionally","he":"בנוסף"},{"num":35,"en":"adequate","he":"הולם, מספיק"},{"num":36,"en":"admirable","he":"נערץ"},{"num":37,"en":"admiration","he":"הערצה"},{"num":38,"en":"admire","he":"להעריץ, להתפעל"},{"num":39,"en":"admit","he":"להודות, לאשפז"},{"num":40,"en":"admittance","he":"אישור, רשות, הודאה, כניסה למקום"},{"num":41,"en":"admonish","he":"להתריע, להזהיר, לנזוף"},{"num":42,"en":"adore","he":"להעריץ, להעריך, לחבב"},{"num":43,"en":"adorn","he":"לקשט, לעטר"},{"num":44,"en":"adult","he":"מבוגר"},{"num":45,"en":"adumbrate","he":"להציג באופן חלקי או מרומז"},{"num":46,"en":"advance","he":"לקדם, להתקדם"},{"num":47,"en":"advantage","he":"יתרון, תועלת"},{"num":48,"en":"advise","he":"להודיע ,לייעץ, להמליץ"},{"num":49,"en":"advocate","he":"לתמוך"},{"num":50,"en":"affidavit","he":"תצהיר משפטי כתוב"},{"num":51,"en":"affiliation","he":"הסתפחות ,הצטרפות"},{"num":52,"en":"affinity","he":"קרבה, משיכה"},{"num":53,"en":"affirm","he":"להסכים, להביע תמיכה ,לאשר, לאשש"},{"num":54,"en":"affluence","he":"שפע, עושר"},{"num":55,"en":"affluent","he":"שופע, עשיר"},{"num":56,"en":"against","he":"כנגד, נגד, אל מול"},{"num":57,"en":"agency","he":"סוכנות, משרד"},{"num":58,"en":"aging","he":"התבגרות, הזדקנות"},{"num":59,"en":"alert","he":"אזהרה, התראה, דרוך, ,להזהיר, להודיע מוכן"},{"num":60,"en":"alleviate","he":"להקל"},{"num":61,"en":"allocate","he":"להקצות"},{"num":62,"en":"allow","he":"לאפשר, להרשות"},{"num":63,"en":"allowance","he":"קצבה, דמי כיס"},{"num":64,"en":"allure","he":"לפתות, למשוך, כוח פיתוי"},{"num":65,"en":"allusion","he":"רמז, אזכור"},{"num":66,"en":"alone","he":"לבד, בודד"},{"num":67,"en":"alter","he":"לשנות, לתקן"},{"num":68,"en":"alteration","he":"שינוי"},{"num":69,"en":"alternatively","he":"לחלופין"},{"num":70,"en":"although","he":"למרות"},{"num":71,"en":"altruistic","he":"אלטרואיסטי"},{"num":72,"en":"amaze","he":"להדהים"},{"num":73,"en":"amazing","he":"מדהים"},{"num":74,"en":"ambiguous","he":"דו-משמעי"},{"num":75,"en":"ambition","he":"שאיפה, אמביציה"},{"num":76,"en":"ambivalent","he":"מתלבט"},{"num":77,"en":"amendment","he":"תיקון לחוק או מסמך רשמי"},{"num":78,"en":"among","he":"בקרב"},{"num":79,"en":"amorphous","he":"ללא צורה, מטושטש"},{"num":80,"en":"analyze","he":"לנתח"},{"num":81,"en":"anastomosis","he":"חיבור בין כלי דם או איברים"},{"num":82,"en":"anathema","he":"קללה או גינוי חריף"},{"num":83,"en":"ancestry","he":"שושלת, מוצא"},{"num":84,"en":"ancient","he":"עתיק"},{"num":85,"en":"angle","he":"להטות, זווית, פן"},{"num":86,"en":"animate","he":"להנפיש, ערני, חי"},{"num":87,"en":"animation","he":"אנימציה, הנפשה"},{"num":88,"en":"announce","he":"להודיע, להכריז"},{"num":89,"en":"announcement","he":"הכרזה"},{"num":90,"en":"annoy","he":"להציק, להטריד"},{"num":91,"en":"annual","he":"שנתי"},{"num":92,"en":"another","he":"אחר, נוסף"},{"num":93,"en":"anthelmintic","he":"תרופה נגד תולעים טפיליות"},{"num":94,"en":"anticipate","he":"לצפות"},{"num":95,"en":"antiquated","he":"ישן, מיושן"},{"num":96,"en":"antique","he":"עתיק, עתיקה"},{"num":97,"en":"antiquity","he":"ימי קדם"},{"num":98,"en":"anxiety","he":"חרדה"},{"num":99,"en":"anxious","he":"חרד, להוט"},{"num":100,"en":"apocryphal","he":"מפוקפק, לא אותנטי"},{"num":101,"en":"apparent","he":"גלוי, נראה"},{"num":102,"en":"appeal","he":"ערעור, משיכה ,לערער, פנייה"},{"num":103,"en":"appear","he":"להיראות, להופיע"},{"num":104,"en":"appease","he":"להרגיע, לסלוח"},{"num":105,"en":"application","he":"פנייה, אפליקציה, יישום ,בקשה"},{"num":106,"en":"appointed","he":"מונה"},{"num":107,"en":"appreciate","he":"לחוש הערכה ,להביע הערכה"},{"num":108,"en":"approach","he":"גישה, התייחסות ,להתקרב, לגשת"},{"num":109,"en":"appropriate","he":"מתאים"},{"num":110,"en":"approve","he":"להסכים, לאשר"},{"num":111,"en":"approximately","he":"בקירוב"},{"num":112,"en":"archetype","he":"אבי טיפוס, דגם"},{"num":113,"en":"arrangement","he":"סידור, הסכם"},{"num":114,"en":"arrive","he":"להגיע"},{"num":115,"en":"articulate","he":"לבטא, רהוט"},{"num":116,"en":"artificial","he":"מלאכותי"},{"num":117,"en":"artificially","he":"באופן מלאכותי"},{"num":118,"en":"ascend","he":"להתרומם, לנסוק, לעלות"},{"num":119,"en":"aspect","he":"אופי, הבט, פן, מראה, הבעת פנים"},{"num":120,"en":"aspiration","he":"שאיפה"},{"num":121,"en":"assemble","he":"לכנס, לאסוף, להרכיב"},{"num":122,"en":"assembly","he":"אסופה, התקהלות"},{"num":123,"en":"assert","he":"לטעון"},{"num":124,"en":"asset","he":"נכס, קניין"},{"num":125,"en":"assign","he":"להקצות"},{"num":126,"en":"assignment","he":"משימה"},{"num":127,"en":"assure","he":"להבטיח"},{"num":128,"en":"astound","he":"להדהים"},{"num":129,"en":"atavistic","he":"פרימיטיבי, הקשור לתכונות אבות קדמונים"},{"num":130,"en":"atmosphere","he":"אווירה, אטמוספירה"},{"num":131,"en":"attach","he":"לחבר"},{"num":132,"en":"attack","he":"לתקוף, תקיפה"},{"num":133,"en":"attain","he":"להשיג, לקבל"},{"num":134,"en":"attend","he":"להשתתף, להיות נוכח, לטפל"},{"num":135,"en":"attendant","he":"סדרן ,מלווה, משרת"},{"num":136,"en":"attire","he":"לבוש"},{"num":137,"en":"attitude","he":"יציבה, מצב רוח ,גישה, עמדה"},{"num":138,"en":"attract","he":"למשוך"},{"num":139,"en":"attraction","he":"משיכה"},{"num":140,"en":"attractive","he":"מושך"},{"num":141,"en":"attribute","he":"לייחס, תכונה"},{"num":142,"en":"augment","he":"להגדיל, להרחיב"},{"num":143,"en":"autarky","he":"שלטון עצמי כלכלי מבודד"},{"num":144,"en":"authentically","he":"באמת"},{"num":145,"en":"authenticate","he":"לאמת"},{"num":146,"en":"author","he":"סופר, כותב"},{"num":147,"en":"authority","he":"רשות, סמכות"},{"num":148,"en":"authorize","he":"לאשר, להסמיך"},{"num":149,"en":"availability","he":"זמינות"},{"num":150,"en":"avert","he":"למנוע, להסיט"},{"num":151,"en":"avoid","he":"להימנע, לחמוק"},{"num":152,"en":"aware","he":"להיות מודע"},{"num":153,"en":"backward","he":"לאחור"},{"num":154,"en":"balance","he":"לאזן, איזון"},{"num":155,"en":"banish","he":"לגרש, להרחיק"},{"num":156,"en":"barely","he":"בקושי"},{"num":157,"en":"barrier","he":"מחסום"},{"num":158,"en":"barter","he":"להתמקח, סחר חליפין"},{"num":159,"en":"because","he":"כי, מכיוון ש"},{"num":160,"en":"become","he":"להפוך ל"},{"num":161,"en":"before","he":"קודם, לפני"},{"num":162,"en":"beginning","he":"התחלה, ראשית"},{"num":163,"en":"behave","he":"להתנהג"},{"num":164,"en":"behavior","he":"התנהגות, התנהלות"},{"num":165,"en":"belief","he":"אמונה"},{"num":166,"en":"belies","he":"מסתיר, מציג באופן מוטעה"},{"num":167,"en":"believe","he":"להאמין"},{"num":168,"en":"beneath","he":"מתחת ל"},{"num":169,"en":"benefactor","he":"תורם, נדבן"},{"num":170,"en":"benefit","he":"רווח, תועלת"},{"num":171,"en":"bequeath","he":"להוריש, להנחיל"},{"num":172,"en":"besides","he":"כמו כן, חוץ מזה"},{"num":173,"en":"between","he":"בין, במשותף"},{"num":174,"en":"bewilder","he":"לבלבל"},{"num":175,"en":"bewilderment","he":"בלבול"},{"num":176,"en":"bifurcate","he":"להתפצל לשניים"},{"num":177,"en":"blame","he":"להאשים, אשמה"},{"num":178,"en":"blaze","he":"להתלקח, להבה"},{"num":179,"en":"bleed","he":"לדמם"},{"num":180,"en":"blind","he":"לעוור, עיוור"},{"num":181,"en":"blindly","he":"באופן עיוור"},{"num":182,"en":"blood","he":"דם"},{"num":183,"en":"blouse","he":"חולצה"},{"num":184,"en":"blunt","he":"קהה, בוטה"},{"num":185,"en":"border","he":"גבול, תחום, קצה"},{"num":186,"en":"boring","he":"משעמם, קדוח"},{"num":187,"en":"borrow","he":"להעתיק ,ללוות, לשאול"},{"num":188,"en":"boundary","he":"גבול, תחום"},{"num":189,"en":"brake","he":"לבלום, מעצור, בלם"},{"num":190,"en":"branch","he":"ענף, סניף, ענף של ,להסתעף, תחום עץ"},{"num":191,"en":"brave","he":"אמיץ"},{"num":192,"en":"break","he":"לשבור"},{"num":193,"en":"breakdown","he":"התמוטטות"},{"num":194,"en":"brief","he":"קצר, מתומצת, תדריך, ,לתדרך, לדווח תקציר"},{"num":195,"en":"bright","he":"מבריק, פיקח, נהיר, ברור ,בהיר, זוהר"},{"num":196,"en":"broad","he":"רחב"},{"num":197,"en":"broadly","he":"בדרך כלל, באופן נרחב"},{"num":198,"en":"budget","he":"תקציב"},{"num":199,"en":"bulky","he":"מגושם, גדול, נפוח"},{"num":200,"en":"burden","he":"להעמיס, להכביד, נטל, משא"},{"num":201,"en":"cacophony","he":"רעש צורם ולא נעים"},{"num":202,"en":"calculate","he":"לחשב"},{"num":203,"en":"callow","he":"חסר ניסיון, צעיר"},{"num":204,"en":"calmly","he":"ברוגע, בנחת"},{"num":205,"en":"campaign","he":"מסע פרסום, קמפיין"},{"num":206,"en":"candid","he":"כן, גלוי לב, ישר"},{"num":207,"en":"candidate","he":"מועמד"},{"num":208,"en":"candor","he":"כנות"},{"num":209,"en":"capability","he":"יכולת, כושר, מיומנות"},{"num":210,"en":"capable","he":"מסוגל, כשיר"},{"num":211,"en":"capacity","he":"קיבולת, יכולת"},{"num":212,"en":"capital","he":"הון, עיר בירה"},{"num":213,"en":"capitalize","he":"להרוויח הון, להפיק תועלת ממשהו"},{"num":214,"en":"captivity","he":"כליאה"},{"num":215,"en":"carefully","he":"בזהירות"},{"num":216,"en":"cargo","he":"מטען, משא"},{"num":217,"en":"casual","he":"שגרתי, רגיל"},{"num":218,"en":"casualty","he":"פגיעה, אובדן בנפש"},{"num":219,"en":"cause","he":"גורם, לגרום"},{"num":220,"en":"cease","he":"לעצור, להפסיק, להסתיים"},{"num":221,"en":"celebrate","he":"לחגוג, להלל, לשבח"},{"num":222,"en":"celebration","he":"חגיגה"},{"num":223,"en":"century","he":"מאה"},{"num":224,"en":"ceremony","he":"טקס"},{"num":225,"en":"certain","he":"בטוח ,מסוים, ודאי"},{"num":226,"en":"certainty","he":"ביטחון, ודאות"},{"num":227,"en":"certificate","he":"אישור ,תעודה"},{"num":228,"en":"certify","he":"לאשר, להסמיך"},{"num":229,"en":"chagrin","he":"אכזבה, צער"},{"num":230,"en":"challenge","he":"לאתגר, אתגר"},{"num":231,"en":"chant","he":"לשיר, לרוב בהקשר דתי"},{"num":232,"en":"chapter","he":"סניף ,פרק, תקופה"},{"num":233,"en":"character","he":"טיפוס, אות, תו ,אישיות, דמות"},{"num":234,"en":"characteristic","he":"מאפיין"},{"num":235,"en":"characterize","he":"לאפיין"},{"num":236,"en":"charge","he":"ובנוסף להאשים, להעמיד להטעין לדין, לחייב בתשלום"},{"num":237,"en":"cheer","he":"שמחה ,לעודד, עידוד"},{"num":238,"en":"chronic","he":"כרוני ,עקבי, מתמשך"},{"num":239,"en":"chronicle","he":"היסטוריה ,קורות"},{"num":240,"en":"chronology","he":"רצף האירועים, כרונולוגיה"},{"num":241,"en":"circuit","he":"מעגל חשמלי ,להקיף, מעגל"},{"num":242,"en":"circular","he":"מעגלי, מחזורי"},{"num":243,"en":"citizen","he":"אזרח, תושב"},{"num":244,"en":"claim","he":"לטעון, טענה"},{"num":245,"en":"clarify","he":"להבהיר, להסביר"},{"num":246,"en":"classification","he":"סיווג, מיון"},{"num":247,"en":"classify","he":"לסווג, למיין"},{"num":248,"en":"clean","he":"לנקות, נקי"},{"num":249,"en":"clever","he":"חכם, פיקח"},{"num":250,"en":"cleverly","he":"בחכמה"},{"num":251,"en":"climate","he":"אקלים"},{"num":252,"en":"cling","he":"להידבק"},{"num":253,"en":"coarse","he":"גס, חסר עידון, שעשוי מחלקים גדולים, בוטה"},{"num":254,"en":"coast","he":"חוף"},{"num":255,"en":"coerce","he":"לאלץ, להכריח"},{"num":256,"en":"coexist","he":"להתקיים יחד"},{"num":257,"en":"coined","he":"המציא, גיבש"},{"num":258,"en":"collect","he":"לאסוף"},{"num":259,"en":"collective","he":"קבוצה, אוסף, אסופה, גוף שנשלט על ידי קבוצת אנשים"},{"num":260,"en":"collectively","he":"במשותף, ביחד, באופן קולקטיבי"},{"num":261,"en":"collide","he":"להתנגש"},{"num":262,"en":"collision","he":"התנגשות"},{"num":263,"en":"colossus","he":"ענק, גיבור ענק"},{"num":264,"en":"column","he":"עמוד, טור"},{"num":265,"en":"comfort","he":"לנחם, נוחיות"},{"num":266,"en":"comfortable","he":"נוח"},{"num":267,"en":"comfortably","he":"בנוחות ,בנחת"},{"num":268,"en":"commensurate","he":"שווה ערך ,בהתאמה"},{"num":269,"en":"commerce","he":"מסחר"},{"num":270,"en":"commercial","he":"פרסומת ,מסחרי"},{"num":271,"en":"commission","he":"הנחייה, הוראה, מינוי, ,עמלה סמכות, ועדה"},{"num":272,"en":"commissioner","he":"ממונה, מפקח ,נציב"},{"num":273,"en":"common","he":"נפוץ, משותף"},{"num":274,"en":"communal","he":"שיתופי, קהילתי"},{"num":275,"en":"commune","he":"לשוחח, קומונה"},{"num":276,"en":"communication","he":"תקשורת"},{"num":277,"en":"companion","he":"בן לוויה, חבר"},{"num":278,"en":"compatible","he":"מתאים"},{"num":279,"en":"compensate","he":"לפצות"},{"num":280,"en":"compensation","he":"פיצוי"},{"num":281,"en":"compete","he":"להתחרות"},{"num":282,"en":"competent","he":"כשיר ,בעל יכולת"},{"num":283,"en":"competition","he":"תחרות"},{"num":284,"en":"complacency","he":"שביעות רצון עצמית"},{"num":285,"en":"complain","he":"להתלונן"},{"num":286,"en":"complete","he":"להשלים, שלם"},{"num":287,"en":"completely","he":"לחלוטין"},{"num":288,"en":"complex","he":"מורכב, תסביך"},{"num":289,"en":"complicate","he":"לסבך"},{"num":290,"en":"complicated","he":"מסובך"},{"num":291,"en":"complication","he":"סיבוך"},{"num":292,"en":"compliment","he":"להחמיא, מחמאה"},{"num":293,"en":"component","he":"רכיב"},{"num":294,"en":"compose","he":"לחבר, להרכיב, להלחין"},{"num":295,"en":"composition","he":"יצירה, קומפוזיציה, הרכב"},{"num":296,"en":"comprehend","he":"להבין, לתפוס"},{"num":297,"en":"comprehensive","he":"מקיף"},{"num":298,"en":"compromise","he":"להתפשר, להעמיד בסיכון, פשרה, סיכון"},{"num":299,"en":"concatenate","he":"לחבר שרשרת של דברים"},{"num":300,"en":"concede","he":"להודות"},{"num":301,"en":"concern","he":"דאגה, עניין"},{"num":302,"en":"conciliatory","he":"פיוסי"},{"num":303,"en":"concur","he":"להסכים"},{"num":304,"en":"condensation","he":"דחיסה, עיבוי של מים"},{"num":305,"en":"condense","he":"לדחוס, לרכז, לעבות"},{"num":306,"en":"condition","he":"תנאי, מצב"},{"num":307,"en":"conditional","he":"מותנה, בהנחה מסוימת"},{"num":308,"en":"condone","he":"למחול"},{"num":309,"en":"confer","he":"להתייעץ, להעניק במתנה"},{"num":310,"en":"conference","he":"ועידה"},{"num":311,"en":"confiscate","he":"להחרים"},{"num":312,"en":"conflagration","he":"שריפה גדולה"},{"num":313,"en":"confluence","he":"התכנסות ,מפגש"},{"num":314,"en":"conformity","he":"צייתנות ,שמרנות"},{"num":315,"en":"confront","he":"להתעמת ,לעמוד בפני"},{"num":316,"en":"confusing","he":"מבלבל"},{"num":317,"en":"confusion","he":"מהומה, בלבול"},{"num":318,"en":"connive","he":"להסכים בסתר"},{"num":319,"en":"conquer","he":"לכבוש"},{"num":320,"en":"conscious","he":"בהכרה, מודע"},{"num":321,"en":"consciousness","he":"הכרה ,מודעות"},{"num":322,"en":"consensus","he":"הסכמה כללית"},{"num":323,"en":"consequently","he":"כתוצאה מכך"},{"num":324,"en":"consistency","he":"דחיסות, עקביות, ,סמיכות הרכב, שילוב"},{"num":325,"en":"consistent","he":"עקבי"},{"num":326,"en":"consolidate","he":"לאחד"},{"num":327,"en":"consortium","he":"שותפות ,קונסורציום"},{"num":328,"en":"constitute","he":"להוות ,להרכיב"},{"num":329,"en":"constitution","he":"חוקה"},{"num":330,"en":"construct","he":"מבנה ,לבנות, להקים"},{"num":331,"en":"construction","he":"מבנה"},{"num":332,"en":"construe","he":"לפרש"},{"num":333,"en":"consume","he":"לצרוך, לעכל"},{"num":334,"en":"consumer","he":"צרכן"},{"num":335,"en":"contact","he":"ליצור קשר, מגע"},{"num":336,"en":"contagion","he":"הידבקות, זיהום"},{"num":337,"en":"contain","he":"להכיל"},{"num":338,"en":"container","he":"מיכל"},{"num":339,"en":"contaminate","he":"לזהם"},{"num":340,"en":"contemporary","he":"עכשווי, בן זמננו"},{"num":341,"en":"contend","he":"להתחרות, להתמודד, לטעון"},{"num":342,"en":"content","he":"לספק, שבע רצון, מסופק, שביעות רצון, תוכן"},{"num":343,"en":"contest","he":"להתחרות, תחרות"},{"num":344,"en":"continent","he":"יבשת"},{"num":345,"en":"continuity","he":"המשכיות"},{"num":346,"en":"continuous","he":"המשכי, מחזורי"},{"num":347,"en":"contract","he":"להתכווץ, לצמצם, הסכם, חוזה"},{"num":348,"en":"contradict","he":"לסתור"},{"num":349,"en":"contradictory","he":"סותר"},{"num":350,"en":"contrary","he":"הפך, בניגוד ל"},{"num":351,"en":"contribute","he":"לתרום ל"},{"num":352,"en":"controversial","he":"שנוי במחלוקת"},{"num":397,"en":"curse","he":"לקלל, קללה"},{"num":398,"en":"cursory","he":"מהיר, שטחי"},{"num":399,"en":"custom","he":"מכס, מנהג"},{"num":400,"en":"damage","he":"אובדן, הפסד ,להזיק, נזק"},{"num":401,"en":"danger","he":"סכנה"},{"num":402,"en":"dangerous","he":"מסוכן"},{"num":403,"en":"daunt","he":"להיבהל, להפחיד"},{"num":404,"en":"dearth","he":"מחסור"},{"num":405,"en":"debacle","he":"התמוטטות ,כישלון"},{"num":406,"en":"debate","he":"דיון ,להתדיין, להתלבט"},{"num":407,"en":"decay","he":"התנוונות ,להירקב, ריקבון"},{"num":408,"en":"deceased","he":"נפטר, בר מינן"},{"num":409,"en":"deceive","he":"לרמות, להונות"},{"num":410,"en":"decent","he":"מכובד, הגון"},{"num":411,"en":"decide","he":"להחליט"},{"num":412,"en":"decision","he":"החלטה"},{"num":413,"en":"decisive","he":"החלטי"},{"num":414,"en":"declaration","he":"הצהרה"},{"num":415,"en":"declare","he":"להצהיר"},{"num":416,"en":"decline","he":"לסרב, לדחות ,להדרדר, ירידה"},{"num":417,"en":"decorum","he":"נימוס, נימוסין"},{"num":418,"en":"decrease","he":"הפחתה ,להפחית, לצמצם"},{"num":419,"en":"deduce","he":"להסיק"},{"num":420,"en":"defeat","he":"להביס, תבוסה, הפסד"},{"num":421,"en":"defend","he":"להגן"},{"num":422,"en":"defenestration","he":"השלכה דרך חלון"},{"num":423,"en":"defense","he":"הגנה"},{"num":424,"en":"defer","he":"לעכב, לדחות, להסכים, להיענות"},{"num":425,"en":"deference","he":"יראת כבוד"},{"num":426,"en":"deficiency","he":"מחסור, פגם"},{"num":427,"en":"deficit","he":"גירעון"},{"num":428,"en":"defied","he":"שהופר"},{"num":429,"en":"define","he":"להגדיר"},{"num":430,"en":"definition","he":"הגדרה"},{"num":431,"en":"delay","he":"לדחות, לעכב, דחיה, עיכוב"},{"num":432,"en":"delegate","he":"להאציל סמכויות, להסמיך, ציר, נציג, בא כוח"},{"num":433,"en":"delegation","he":"משלחת"},{"num":434,"en":"delete","he":"למחוק"},{"num":435,"en":"deliberate","he":"לדון, מֻכון"},{"num":436,"en":"deliberation","he":"דיון, שקילה, תשומת לב"},{"num":437,"en":"delight","he":"תענוג, הנאה, אושר"},{"num":438,"en":"delineate","he":"לתאר, למפות"},{"num":439,"en":"deliver","he":"לשלוח, להעביר, לשחרר, ליילד, לשאת דברים"},{"num":440,"en":"delivery","he":"משלוח, לידה"},{"num":441,"en":"demagogue","he":"פוליטיקאי מסית, פופוליסט"},{"num":442,"en":"demand","he":"לדרוש, דרישה"},{"num":443,"en":"demonstrate","he":"להפגין ,להדגים"},{"num":444,"en":"demure","he":"צנוע"},{"num":445,"en":"denounce","he":"להאשים ,להוקיע, לגנות"},{"num":446,"en":"depend","he":"תלוי"},{"num":447,"en":"dependence","he":"תלות"},{"num":448,"en":"depict","he":"לתאר"},{"num":449,"en":"deplete","he":"לכלות ,לרוקן, להתרוקן"},{"num":450,"en":"depression","he":"דיכאון"},{"num":451,"en":"deprivation","he":"מחסור ,קיפוח"},{"num":452,"en":"deprive","he":"לשלול ,לקפח, למנוע"},{"num":453,"en":"depth","he":"עומק"},{"num":454,"en":"deride","he":"ללעוג"},{"num":455,"en":"descend","he":"לרדת, להנמיך"},{"num":456,"en":"descendant","he":"צאצא"},{"num":457,"en":"describe","he":"לתאר"},{"num":458,"en":"description","he":"תיאור"},{"num":459,"en":"desert","he":"מדבר ,לזנוח, לנטוש"},{"num":460,"en":"design","he":"לעצב, עיצוב"},{"num":461,"en":"despite","he":"למרות"},{"num":462,"en":"despot","he":"רודן"},{"num":463,"en":"destination","he":"יעד"},{"num":464,"en":"destroy","he":"להרוס"},{"num":465,"en":"destruction","he":"הרס"},{"num":466,"en":"detach","he":"להפריד, לנתק, להקצות"},{"num":467,"en":"detain","he":"לעצור, לעכב, לכלוא"},{"num":468,"en":"deter","he":"להרתיע"},{"num":469,"en":"deteriorate","he":"להדרדר"},{"num":470,"en":"determination","he":"החלטיות, נחישות, הגדרה"},{"num":471,"en":"determine","he":"לקבוע, להחליט"},{"num":472,"en":"determined","he":"נחוש, החלטי, שנקבע מראש"},{"num":473,"en":"detrimental","he":"מזיק"},{"num":474,"en":"devastate","he":"להרוס, להשחית"},{"num":475,"en":"develop","he":"לפתח"},{"num":476,"en":"developed","he":"מפותח מתועש"},{"num":477,"en":"development","he":"פיתוח, התפתחות"},{"num":478,"en":"devise","he":"לתכנן, להגות"},{"num":479,"en":"devote","he":"להקדיש"},{"num":480,"en":"devoted","he":"מסור, נאמן"},{"num":481,"en":"dexterity","he":"מיומנות, זריזות"},{"num":482,"en":"diagram","he":"דיאגרמה, תצוגה גרפית של מידע"},{"num":483,"en":"didactic","he":"חינוכי, לימודי"},{"num":484,"en":"differ","he":"נבדל, שונה, לחלוק על"},{"num":485,"en":"difference","he":"הבדל, שוני"},{"num":486,"en":"different","he":"שונה"},{"num":487,"en":"difficult","he":"קשה, מורכב"},{"num":488,"en":"digest","he":"מאגר, לקט ,לעכל, תמצית"},{"num":489,"en":"dilatory","he":"מתעכב, מאחר"},{"num":490,"en":"dilettante","he":"מתעניין שטחי ,חובבן"},{"num":491,"en":"diminish","he":"להפחית"},{"num":492,"en":"diminutive","he":"קטן, מזערי"},{"num":493,"en":"disadvantage","he":"נחיתות ,חסרון"},{"num":494,"en":"disaffected","he":"מתרחק ,מתנער"},{"num":495,"en":"disappear","he":"להיכחד, להיאבד ,להיעלם"},{"num":496,"en":"disappoint","he":"לאכזב"},{"num":497,"en":"disaster","he":"אסון"},{"num":498,"en":"disastrous","he":"הרסני"},{"num":499,"en":"disciple","he":"תלמיד, חסיד"},{"num":500,"en":"discipline","he":"דיסציפלינה, תחום מחקר ,משמעת או ידע"},{"num":501,"en":"disconsolate","he":"עצוב ,מיואש"},{"num":502,"en":"discord","he":"מחלוקת"},{"num":503,"en":"discourage","he":"רפה את ידיו"},{"num":504,"en":"discreet","he":"זהיר, סגור"},{"num":505,"en":"discrepancy","he":"חוסר התאמה"},{"num":506,"en":"discrimination","he":"סיווג ,אפליה"},{"num":507,"en":"dismiss","he":"להסיר ,לפטר, להדיח, לסלק"},{"num":508,"en":"disparage","he":"להמעיט בערך"},{"num":509,"en":"disparate","he":"שונה"},{"num":510,"en":"displacement","he":"העברה, עקירה ממקום או מתפקיד"},{"num":511,"en":"display","he":"להציג, תצוגה"},{"num":512,"en":"dispose","he":"להיפטר"},{"num":513,"en":"disposition","he":"מזג, אופי, נטייה, סידור, היערכות"},{"num":514,"en":"dispute","he":"להתווכח, וויכוח"},{"num":515,"en":"disseminate","he":"להפיץ"},{"num":516,"en":"dissent","he":"להתנגד"},{"num":517,"en":"dissenter","he":"פורש, בדלן"},{"num":518,"en":"dissonance","he":"אי הרמוניה"},{"num":519,"en":"distance","he":"מרחק"},{"num":520,"en":"distant","he":"רחוק, מרוחק"},{"num":521,"en":"distinct","he":"ברור"},{"num":522,"en":"distinction","he":"הבחנה, הבדל, הוקרה, מצוינות"},{"num":523,"en":"distinguish","he":"להבחין, להבדיל"},{"num":524,"en":"distort","he":"לעוות"},{"num":525,"en":"distorted","he":"מעוות, שהושחת"},{"num":526,"en":"distract","he":"להסיח"},{"num":527,"en":"distraction","he":"הסחה"},{"num":528,"en":"distress","he":"מצוקה"},{"num":529,"en":"distressingly","he":"באופן מרגיז"},{"num":530,"en":"diverge","he":"לסטות, להתפצל"},{"num":531,"en":"diverse","he":"מגוון"},{"num":532,"en":"diversity","he":"גיוון, נקודת מחלוקת"},{"num":533,"en":"divulge","he":"לחשוף"},{"num":534,"en":"docile","he":"צייתן, כנוע"},{"num":535,"en":"document","he":"מסמך ,לתעד, תעודה"},{"num":536,"en":"dogmatic","he":"מתנשא, חד-צדדי"},{"num":537,"en":"domestic","he":"ביתי, מקומי"},{"num":538,"en":"domesticated","he":"מאולף ,מבויית"},{"num":539,"en":"dominate","he":"לשלוט"},{"num":540,"en":"donor","he":"תורם"},{"num":541,"en":"doorsteps","he":"מפתן, סף"},{"num":542,"en":"dormant","he":"רדום"},{"num":543,"en":"doubt","he":"להטיל ספק, ספק"},{"num":544,"en":"downgrade","he":"להוריד"},{"num":545,"en":"drastic","he":"קיצוני, דרסטי"},{"num":546,"en":"drift","he":"תנועה ,להיסחף, לנוע"},{"num":547,"en":"duplicate","he":"לשכפל"},{"num":548,"en":"durable","he":"יציב, מתמשך"},{"num":549,"en":"duration","he":"משך"},{"num":550,"en":"dusty","he":"מאובק"},{"num":551,"en":"dwell","he":"להתגורר, לשכון"},{"num":552,"en":"dwelling","he":"בית מגורים, משכן"},{"num":553,"en":"dying","he":"גוסס"},{"num":554,"en":"easily","he":"בקלות"},{"num":555,"en":"eccentric","he":"מוזר, חריג"},{"num":556,"en":"economic","he":"כלכלי, פיננסי, חסכני"},{"num":557,"en":"economize","he":"לחסוך"},{"num":558,"en":"economy","he":"כלכלה"},{"num":559,"en":"edible","he":"אכיל"},{"num":560,"en":"edition","he":"מהדורה, גירסה"},{"num":561,"en":"education","he":"חינוך"},{"num":562,"en":"educational","he":"חינוכי"},{"num":563,"en":"efficiency","he":"יעילות"},{"num":564,"en":"efficient","he":"יעיל"},{"num":565,"en":"effort","he":"מאמץ"},{"num":566,"en":"effulgent","he":"זוהר, בוהק"},{"num":567,"en":"egregious","he":"נורא, מובהק"},{"num":568,"en":"elated","he":"מתרגש, שמח"},{"num":569,"en":"elect","he":"לבחור, להצביע"},{"num":570,"en":"election","he":"בחירה, בחירות"},{"num":571,"en":"element","he":"יסוד, אלמנט, רכיב"},{"num":572,"en":"elicit","he":"לעורר"},{"num":573,"en":"eloquent","he":"רהוט"},{"num":574,"en":"elucidate","he":"להבהיר"},{"num":575,"en":"elude","he":"לברוח, להתחמק"},{"num":576,"en":"elusive","he":"חמקמק"},{"num":577,"en":"emaciated","he":"מרזה"},{"num":578,"en":"emanate","he":"להתפשט"},{"num":579,"en":"embellish","he":"לקשט"},{"num":580,"en":"emblematic","he":"סימלי"},{"num":581,"en":"embrace","he":"לחבק, לאמץ"},{"num":582,"en":"embroil","he":"לערבב, לעורר סכסוך"},{"num":583,"en":"emerge","he":"להתגלות ,לצאת מתוך"},{"num":584,"en":"eminent","he":"בכיר ,בולט, מכובד"},{"num":585,"en":"emphasize","he":"להדגיש"},{"num":586,"en":"empire","he":"אימפריה"},{"num":587,"en":"empirical","he":"אמפירי, מבוסס על ניסיון"},{"num":588,"en":"employ","he":"להעסיק, להפעיל"},{"num":589,"en":"employment","he":"תעסוקה"},{"num":590,"en":"empty","he":"לרוקן, ריק"},{"num":591,"en":"emulate","he":"לחקות"},{"num":592,"en":"enact","he":"לחוקק, לשחק, לגלם דמות"},{"num":593,"en":"encapsulation","he":"עטיפה והסתרת מידע במבנה נתונים"},{"num":594,"en":"encephalopathy","he":"מחלת מוח"},{"num":595,"en":"enchant","he":"להקסים, לכשף"},{"num":596,"en":"enclose","he":"להקיף, לסגור, לצרף"},{"num":597,"en":"encompass","he":"להקיף, להכיל"},{"num":598,"en":"encountered","he":"להיתקל / לפגוש"},{"num":599,"en":"encourage","he":"לעודד"},{"num":600,"en":"endanger","he":"לסכן"},{"num":601,"en":"endeavor","he":"ניסיון, מאמץ"},{"num":602,"en":"endowment","he":"תרומה או נכס קבוע לקרן"},{"num":603,"en":"endurable","he":"נסבל"},{"num":604,"en":"endurance","he":"כוח סבל"},{"num":605,"en":"endure","he":"לסבול, לשאת, להחזיק מעמד, להתמשך"},{"num":606,"en":"enforce","he":"לאכוף"},{"num":607,"en":"enforcement","he":"אכיפה"},{"num":608,"en":"engagement","he":"התחייבות, מחויבות, אירוסין"},{"num":609,"en":"engender","he":"לייצר, להוליד"},{"num":610,"en":"enhance","he":"לשפר, להגביר"},{"num":611,"en":"enigma","he":"חידה"},{"num":612,"en":"enigmatic","he":"מסתורי, חידה"},{"num":613,"en":"enjoy","he":"ליהנות"},{"num":614,"en":"ennui","he":"שעמום"},{"num":615,"en":"enormous","he":"עצום"},{"num":616,"en":"enough","he":"מספיק, די"},{"num":617,"en":"enrage","he":"להרגיז, להכעיס"},{"num":618,"en":"enrich","he":"להעשיר"},{"num":619,"en":"enroll","he":"לגולל ,לרשום, לתעד"},{"num":620,"en":"ensure","he":"להבטיח"},{"num":621,"en":"enter","he":"להיכנס, להכניס"},{"num":622,"en":"enthusiast","he":"חסיד ,נלהב, מעריץ"},{"num":623,"en":"entire","he":"שלם, מכלול"},{"num":624,"en":"entitled","he":"זכאי, ראוי"},{"num":625,"en":"entrance","he":"כניסה, פתח"},{"num":626,"en":"enumerate","he":"למנות"},{"num":627,"en":"envelope","he":"עטיפה ,מעטפה, מעטפת"},{"num":628,"en":"environment","he":"סביבה"},{"num":629,"en":"ephemeral","he":"חולף"},{"num":630,"en":"epitome","he":"מופת, דגם"},{"num":631,"en":"equal","he":"שווה"},{"num":632,"en":"equalize","he":"לאזן, להשוות"},{"num":633,"en":"equate","he":"להשוות, להתאים"},{"num":634,"en":"equator","he":"קו המשווה"},{"num":635,"en":"equivocate","he":"להסיט תשומת לב ,להתמהמה"},{"num":636,"en":"erase","he":"למחוק"},{"num":637,"en":"erode","he":"לשחוק, לחלוד"},{"num":638,"en":"erratic","he":"בלתי יציב"},{"num":639,"en":"erroneously","he":"בטעות"},{"num":640,"en":"error","he":"טעות"},{"num":641,"en":"escape","he":"לברוח, בריחה"},{"num":642,"en":"eschew","he":"להימנע"},{"num":643,"en":"esoteric","he":"נסתר, סודי"},{"num":644,"en":"espouse","he":"לאמץ, לתמוך"},{"num":645,"en":"essay","he":"מאמר, חיבור"},{"num":646,"en":"essence","he":"תמצית, מהות"},{"num":647,"en":"essential","he":"חיוני, הכרחי"},{"num":648,"en":"establish","he":"לייסד, לבסס, להוכיח"},{"num":649,"en":"establishment","he":"מוסד, הקמה"},{"num":650,"en":"esteem","he":"הערכה"},{"num":651,"en":"estimate","he":"להעריך, הערכה"},{"num":652,"en":"estimated","he":"מוערך, משוער"},{"num":653,"en":"ethereal","he":"אווירי, עדין"},{"num":654,"en":"etiolate","he":"להחוויר, לאבד חיות"},{"num":655,"en":"evaluate","he":"להעריך"},{"num":656,"en":"event","he":"אירוע, מקרה"},{"num":657,"en":"eventual","he":"סופי"},{"num":658,"en":"eventually","he":"לבסוף"},{"num":659,"en":"evoke","he":"לעורר, לגרום"},{"num":660,"en":"exacerbate","he":"להחמיר"},{"num":661,"en":"exaggerate","he":"להגזים"},{"num":662,"en":"exaggeration","he":"הגזמה"},{"num":663,"en":"exalt","he":"לשבח, להעריץ"},{"num":664,"en":"examine","he":"לבחון"},{"num":665,"en":"excavate","he":"לחפור"},{"num":666,"en":"excel","he":"להצטיין"},{"num":667,"en":"excellent","he":"מצוין"},{"num":668,"en":"except","he":"חוץ מ"},{"num":669,"en":"excess","he":"עודף, יתר, הגזמה"},{"num":670,"en":"excessive","he":"מוגזם, מופרז"},{"num":671,"en":"exchange","he":"המרה, החלפה ,להמיר, להחליף"},{"num":672,"en":"exegesis","he":"פרשנות טקסט דתי או עתיק"},{"num":673,"en":"exemplify","he":"להדגים"},{"num":674,"en":"exert","he":"להפעיל מאמץ"},{"num":675,"en":"exhale","he":"לנשוף, נשיפה"},{"num":676,"en":"exhausting","he":"מתיש"},{"num":677,"en":"exhaustion","he":"מיצוי ,תשישות"},{"num":678,"en":"exhibit","he":"תערוכה, מוצג ,להציג, תצוגה"},{"num":679,"en":"exhibition","he":"תערוכה"},{"num":680,"en":"exile","he":"לגרש, גלות, גולה"},{"num":681,"en":"exist","he":"להתקיים"},{"num":682,"en":"existence","he":"קיום"},{"num":683,"en":"exonerate","he":"לזכות, לנקות"},{"num":684,"en":"expand","he":"להרחיב, להתפשט"},{"num":685,"en":"expect","he":"לצפות, לקוות"},{"num":686,"en":"expedite","he":"לזרז"},{"num":687,"en":"expel","he":"לגרש"},{"num":688,"en":"experience","he":"ניסיון"},{"num":689,"en":"expert","he":"מומחה"},{"num":690,"en":"explain","he":"להסביר"},{"num":691,"en":"explanation","he":"הסבר"},{"num":692,"en":"explicit","he":"מפורש, ברור"},{"num":693,"en":"explicitly","he":"מפורשות, בבירור"},{"num":694,"en":"exploit","he":"לנצל, למצות, להפיק תועלת"},{"num":695,"en":"explorer","he":"חוקר, מגלה ארצות"},{"num":696,"en":"exploring","he":"עיסוק בחקר"},{"num":697,"en":"explosive","he":"חומר נפץ, נפיץ, רגיש, מועד לפורענות"},{"num":698,"en":"export","he":"לייצא"},{"num":699,"en":"expose","he":"לחשוף, לגלות, להציג"},{"num":700,"en":"exposed","he":"חשוף"},{"num":701,"en":"exposure","he":"חשיפה, גילוי"},{"num":702,"en":"expound","he":"להסביר בפירוט"},{"num":703,"en":"express","he":"לבטא, להביע, להפגין, מהיר, ברור"},{"num":704,"en":"expression","he":"הבעה, ביטוי"},{"num":705,"en":"expulsion","he":"גירוש, סילוק, הרחקה"},{"num":706,"en":"extend","he":"להאריך, להרחיב"},{"num":707,"en":"extension","he":"מתיחה, הרחבה, ,שלוחה, הארכה פישוט"},{"num":708,"en":"extensive","he":"מקיף, נרחב"},{"num":709,"en":"extent","he":"שעור, מידה, גודל ,תחום, גבול"},{"num":710,"en":"external","he":"חיצוני, זר"},{"num":711,"en":"extinct","he":"להכחיד, להעלים"},{"num":712,"en":"extinction","he":"הכחדה"},{"num":713,"en":"extol","he":"לשבח, להלל"},{"num":714,"en":"extract","he":"לחלץ, לסחוט, תמצית ,לתמצת, להפיק"},{"num":715,"en":"extrapolate","he":"להסיק מתוך נתונים"},{"num":716,"en":"extreme","he":"קיצוני"},{"num":717,"en":"extremist","he":"מרחיק לכת ,אדם קיצוני"},{"num":718,"en":"extricate","he":"לשחרר"},{"num":719,"en":"exuberant","he":"נלהב, שופע"},{"num":720,"en":"facetious","he":"הומוריסטי ,קל דעת"},{"num":721,"en":"facial","he":"שקשור לפנים"},{"num":722,"en":"factory","he":"מפעל"},{"num":723,"en":"failure","he":"כישלון"},{"num":724,"en":"fallacious","he":"מטעה"},{"num":725,"en":"famous","he":"מפורסם"},{"num":726,"en":"fascinate","he":"לרתק, לסקרן"},{"num":727,"en":"fascinating","he":"מרתק"},{"num":728,"en":"fascination","he":"קסם, משיכה"},{"num":729,"en":"fastidious","he":"קפדן"},{"num":730,"en":"fatal","he":"קטלני"},{"num":731,"en":"fathom","he":"להבין לעומק"},{"num":732,"en":"fatuous","he":"טיפשי, חסר היגיון"},{"num":733,"en":"fault","he":"אשמה, מגרעה, חסרון, טעות, שגיאה"},{"num":734,"en":"faultlessly","he":"ללא רבב, שנעשה בצורה מושלמת"},{"num":735,"en":"favor","he":"טובה, חסד"},{"num":736,"en":"feasible","he":"בר עשייה, מעשי"},{"num":737,"en":"feature","he":"להציג, לאפיין, תכונה, מאפיין"},{"num":738,"en":"feelings","he":"תחושות, רגשות"},{"num":739,"en":"female","he":"נקבה, אישה"},{"num":740,"en":"ferment","he":"לתסוס, תסיסה, שמרים"},{"num":741,"en":"fertile","he":"פורה, שופע"},{"num":742,"en":"fertility","he":"פוריות"},{"num":743,"en":"fertilize","he":"להפרות"},{"num":744,"en":"fervent","he":"נלהב, סוער"},{"num":745,"en":"festivity","he":"חגיגיות"},{"num":746,"en":"feudalism","he":"שיטת שלטון ימי ביניימית של אדונים וצמיתים"},{"num":747,"en":"fictional","he":"בדיוני, בדוי"},{"num":748,"en":"figure","he":"לחשב, להניח, להסיק, גזרה, דמות, ספרה"},{"num":749,"en":"filibuster","he":"עיכוב הצבעה פרלמנטרית דרך נאומים ארוכים"},{"num":750,"en":"final","he":"סופי, אחרון"},{"num":751,"en":"finance","he":"כספים ,לממן, מימון"},{"num":752,"en":"financial","he":"כספי, פיננסי"},{"num":753,"en":"findings","he":"ממצאים"},{"num":754,"en":"firmly","he":"בנחישות, בחוזקה ,בתקיפות"},{"num":755,"en":"flagrant","he":"בוטה, נחרץ"},{"num":756,"en":"flame","he":"להבה, בעירה ,להצית, להבעיר"},{"num":757,"en":"flexible","he":"גמיש"},{"num":758,"en":"fling","he":"הטלה, זריקה, השלכה ,להשליך, להעיף"},{"num":759,"en":"flippant","he":"קל דעת, שטחי"},{"num":760,"en":"flood","he":"שיטפון, הצפה"},{"num":761,"en":"floor","he":"קומה, רצפה"},{"num":762,"en":"florid","he":"מלבלב, פורח"},{"num":763,"en":"fluctuate","he":"להשתנות"},{"num":764,"en":"fluent","he":"רהוט, שוטף"},{"num":765,"en":"forbid","he":"למנוע, לאסור על"},{"num":766,"en":"forbidden","he":"אסור"},{"num":767,"en":"force","he":"כוח, אלימות, כוח צבאי ,להכריח, לאלץ"},{"num":768,"en":"forceful","he":"יעיל ,חזק, משכנע"},{"num":769,"en":"forebears","he":"אבות אבותינו"},{"num":770,"en":"foreign","he":"חוץ, זר"},{"num":771,"en":"foresight","he":"ראיית הנולד"},{"num":772,"en":"forget","he":"לשכוח"},{"num":773,"en":"forgive","he":"לסלוח"},{"num":774,"en":"former","he":"קדום, קודם, לשעבר"},{"num":775,"en":"formerly","he":"קודם לכן, בימי קדם, משכבר הימים, מזמן"},{"num":776,"en":"fortitude","he":"אומץ, עוז נפשי"},{"num":777,"en":"fortuitous","he":"מקרי, במקרה"},{"num":778,"en":"fortunate","he":"בר מזל"},{"num":779,"en":"fortune","he":"מזל / עושר"},{"num":780,"en":"found","he":"dnif לייסד, צורת העבר של הפועל"},{"num":781,"en":"foundation","he":"יסוד, קרן"},{"num":782,"en":"fragile","he":"שביר"},{"num":783,"en":"fragrance","he":"ריחניות, ניחוח"},{"num":784,"en":"fragrant","he":"מפיץ ריח טוב, נעים, מענג"},{"num":785,"en":"frequency","he":"תדר, תדירות"},{"num":786,"en":"frequent","he":"תדיר"},{"num":787,"en":"frequently","he":"לעיתים קרובות"},{"num":788,"en":"frivolous","he":"שטחי, חסר חשיבות"},{"num":789,"en":"front","he":"קדמי, פרונטאלי, חזית"},{"num":790,"en":"frugal","he":"חסכוני"},{"num":791,"en":"fruit","he":"פרי"},{"num":792,"en":"fruitless","he":"חסר פרי, עקר"},{"num":793,"en":"frustrated","he":"מיואש, מתוסכל"},{"num":794,"en":"frustration","he":"תסכול"},{"num":795,"en":"fulminate","he":"להתפרץ, לזעום"},{"num":796,"en":"function","he":"תפקוד, פונקציה ,לתפקד, לשמש"},{"num":797,"en":"fundamentally","he":"בעיקרו ,ביסודו"},{"num":798,"en":"fungible","he":"ניתן להחלפה"},{"num":799,"en":"furthermore","he":"בנוסף, יתרה מזאת"},{"num":800,"en":"furtive","he":"חשאי, נסתר"},{"num":801,"en":"futile","he":"חסר תועלת"},{"num":802,"en":"gainsay","he":"לסתור, להכחיש"},{"num":803,"en":"galvanize","he":"לעורר, להניע"},{"num":804,"en":"garbage","he":"אשפה, זבל"},{"num":805,"en":"garment","he":"לבוש, בגד, כיסוי ,להלביש, לכסות"},{"num":806,"en":"garments","he":"ביגוד, בגדים"},{"num":807,"en":"gather","he":"לכנס, לאסוף"},{"num":808,"en":"gathering","he":"אסיפה, מפגש"},{"num":809,"en":"general","he":"כללי"},{"num":810,"en":"generalize","he":"להכליל"},{"num":811,"en":"generate","he":"ליצור, לחולל"},{"num":812,"en":"generators","he":"יוצרים, גנרטורים ,מחוללים"},{"num":813,"en":"generous","he":"נדיב"},{"num":814,"en":"genetics","he":"גנטיקה, חקר התורשה"},{"num":815,"en":"genial","he":"נעים, ידידותי"},{"num":816,"en":"gerrymandering","he":"שינוי תחום בחירות כדי להשפיע פוליטית"},{"num":817,"en":"gesture","he":"תנועה, מחווה"},{"num":818,"en":"glare","he":"מבט חודר, נוקב, ברק"},{"num":819,"en":"glean","he":"לאסוף"},{"num":820,"en":"globe","he":"גלובוס, כדור הארץ"},{"num":821,"en":"glory","he":"פאר, תהילה"},{"num":822,"en":"goods","he":"סחורה"},{"num":823,"en":"government","he":"ממשלה"},{"num":824,"en":"governor","he":"מושל"},{"num":825,"en":"grace","he":"לעשות חסד עם מישהו, לכבד, חן, ברכה"},{"num":826,"en":"gracious","he":"חינני, אדיב"},{"num":827,"en":"graciously","he":"באדיבות"},{"num":828,"en":"grade","he":"לדרג, לתת ציון, שלב, כיתה"},{"num":829,"en":"gradual","he":"הדרגתי"},{"num":830,"en":"grant","he":"להעניק, מענק"},{"num":831,"en":"grasp","he":"לתפוס, להבין"},{"num":832,"en":"gratify","he":"לספק"},{"num":833,"en":"gratuitous","he":"מיותר, חסר טעם"},{"num":834,"en":"grave","he":"קבר, חמור, רציני"},{"num":835,"en":"gravitation","he":"גרביטציה, כוח המשיכה"},{"num":836,"en":"greet","he":"לקדם את פניו של מישהו, לברך לשלום"},{"num":837,"en":"gregarious","he":"חברותי"},{"num":838,"en":"grime","he":"לזהם, זוהמה"},{"num":839,"en":"gross","he":"מגעיל ,ברוטו, דוחה"},{"num":840,"en":"growl","he":"לנהום, לרטון"},{"num":841,"en":"growth","he":"צמיחה, גדילה"},{"num":842,"en":"guarantee","he":"להבטיח, אחריות, ערובה ,להתחייב"},{"num":843,"en":"guess","he":"לנחש, ניחוש"},{"num":844,"en":"guidance","he":"ייעוץ, הנהגה ,הדרכה, הובלה"},{"num":845,"en":"guide","he":"מדריך, מורה דרך ,להדריך, להוביל"},{"num":846,"en":"guile","he":"ערמומיות"},{"num":847,"en":"gullible","he":"פתי, סתם"},{"num":848,"en":"haphazard","he":"מקרי, חסר סדר"},{"num":849,"en":"harangue","he":"נאום תוכחה תקיף"},{"num":850,"en":"harden","he":"להקשות"},{"num":851,"en":"hardly","he":"בקושי"},{"num":852,"en":"harsh","he":"נוקשה"},{"num":853,"en":"harvest","he":"לקצור, קציר"},{"num":854,"en":"hasty","he":"מהיר, חפוז, עצבני"},{"num":855,"en":"haughty","he":"יהיר, מתנשא"},{"num":856,"en":"headache","he":"כאב ראש"},{"num":857,"en":"headgear","he":"כובע ,כיסוי ראש"},{"num":858,"en":"hectic","he":"מלא רגש ,עמוס, קדחתני"},{"num":859,"en":"heedless","he":"חסר תשומת לב"},{"num":860,"en":"hegemony","he":"שליטה פוליטית או תרבותית"},{"num":861,"en":"hence","he":"משום כך"},{"num":862,"en":"hereditary","he":"תורשתי"},{"num":863,"en":"heretic","he":"כופר, מתנגד"},{"num":864,"en":"heritage","he":"מורשת"},{"num":865,"en":"hesitate","he":"להסס"},{"num":866,"en":"heuristic","he":"שיטת פתרון ניסיונית"},{"num":867,"en":"hibernate","he":"להיות בתרדמת חורף"},{"num":868,"en":"hibernation","he":"תרדמת חורף"},{"num":869,"en":"hinder","he":"למנוע, לעכב"},{"num":870,"en":"histrionic","he":"דרמטי, תיאטרלי"},{"num":871,"en":"hobby","he":"תחביב"},{"num":872,"en":"horrify","he":"לזעזע, להחריד"},{"num":873,"en":"horror","he":"אימה, זוועה"},{"num":874,"en":"hostile","he":"עוין"},{"num":875,"en":"hostility","he":"עוינות"},{"num":876,"en":"hypocrisy","he":"צביעות"},{"num":877,"en":"hypocrite","he":"צבוע"},{"num":878,"en":"iatrogenic","he":"שנגרם מטיפול רפואי"},{"num":879,"en":"icicle","he":"נטיף קרח"},{"num":880,"en":"iconoclast","he":"פורץ דרך, מתנגד למסורת"},{"num":881,"en":"idiosyncrasy","he":"ייחודיות, מאפיין אישי"},{"num":882,"en":"ignoble","he":"נחות, שפל"},{"num":883,"en":"ignominious","he":"משפיל, בוזי"},{"num":884,"en":"illegal","he":"בלתי חוקי"},{"num":885,"en":"illicit","he":"לא חוקי"},{"num":886,"en":"illiteracy","he":"חוסר היכולת לקרוא ולכתוב"},{"num":887,"en":"illiterate","he":"בור ,אנאלפביתי"},{"num":888,"en":"illness","he":"חולי, מחלה"},{"num":889,"en":"illusion","he":"אשליה"},{"num":890,"en":"illusive","he":"מתעתע"},{"num":891,"en":"illustrate","he":"להמחיש ,לאייר, לעטר"},{"num":892,"en":"illustration","he":"איור"},{"num":893,"en":"image","he":"דמות, תדמית ,לדמות, תמונה"},{"num":894,"en":"imaginary","he":"דמיוני, מדומה"},{"num":895,"en":"imaginative","he":"דמיוני, בעל דמיון"},{"num":896,"en":"imagine","he":"לדמיין"},{"num":897,"en":"immaculate","he":"מושלם, טהור"},{"num":898,"en":"immediate","he":"מיידי, דחוף"},{"num":899,"en":"immediately","he":"מייד"},{"num":900,"en":"imminent","he":"קרוב, מתקרב"},{"num":901,"en":"immodest","he":"חסר בושה, חצוף"},{"num":902,"en":"immortal","he":"אלמותי, נצחי"},{"num":903,"en":"immune","he":"לחסן, מחוסן"},{"num":904,"en":"immunity","he":"חסינות"},{"num":905,"en":"immutable","he":"בלתי משתנה"},{"num":906,"en":"impair","he":"לפגום, להחליש"},{"num":907,"en":"impart","he":"למסור"},{"num":908,"en":"impartial","he":"חסר פניות, בלתי משוחד"},{"num":909,"en":"impartially","he":"בצורה הוגנת"},{"num":910,"en":"impasse","he":"תקיע, מצב ללא מוצא"},{"num":911,"en":"impeccable","he":"מושלם, ללא פגמים"},{"num":912,"en":"impecunious","he":"חסר כסף, עני"},{"num":913,"en":"impede","he":"לעכב"},{"num":914,"en":"implacable","he":"בלתי ניתנים לפישור"},{"num":915,"en":"implausible","he":"בלתי סביר"},{"num":916,"en":"implicit","he":"מרומז"},{"num":917,"en":"implore","he":"להפציר, להתחנן"},{"num":918,"en":"imply","he":"לרמוז"},{"num":919,"en":"import","he":"לייבא"},{"num":920,"en":"importance","he":"חשיבות"},{"num":921,"en":"important","he":"חשוב"},{"num":922,"en":"impose","he":"לכפות, להציב"},{"num":923,"en":"impression","he":"רושם, חוות דעת, חיקוי"},{"num":924,"en":"impressive","he":"מרשים"},{"num":925,"en":"imprint","he":"הטבעה, חותם"},{"num":926,"en":"imprisonment","he":"כליאה"},{"num":927,"en":"improve","he":"לשפר"},{"num":928,"en":"improvise","he":"לאלתר"},{"num":929,"en":"impugn","he":"להטיל ספק"},{"num":930,"en":"inaccessible","he":"לא נגיש"},{"num":931,"en":"inadequate","he":"לקוי ,בלתי מתאים"},{"num":932,"en":"inadvertent","he":"בלתי מכוון"},{"num":933,"en":"inane","he":"טיפשי, חסר משמעות"},{"num":934,"en":"inanimate","he":"דומם"},{"num":935,"en":"inaudible","he":"שלא ניתן לשמוע"},{"num":936,"en":"incendiary","he":"מדליק ,מעורר סערה"},{"num":937,"en":"incentive","he":"תמריץ"},{"num":938,"en":"incessant","he":"מתמיד ,בלתי פוסק"},{"num":939,"en":"inchoate","he":"לא מגובש ,בשלב התחלתי"},{"num":940,"en":"incisive","he":"חד, חודר"},{"num":941,"en":"incite","he":"לעורר, להניע"},{"num":942,"en":"incline","he":"מדרון ,לנטות, שיפוע"},{"num":943,"en":"inclusive","he":"כולל"},{"num":944,"en":"incongruous","he":"לא תואם"},{"num":945,"en":"incontrovertible","he":"בלתי ניתן להכחשה"},{"num":946,"en":"incorrigible","he":"בלתי ניתן לתיקון"},{"num":947,"en":"inculcate","he":"להחדיר ערכים או רעיונות דרך חזרה"},{"num":948,"en":"indefatigable","he":"בלתי נלאה"},{"num":949,"en":"indefinite","he":"שאינו קבוע או מוגדר, לא מוגבל"},{"num":950,"en":"indemnity","he":"שיפוי או פיצוי בגין נזק"},{"num":951,"en":"independent","he":"עצמאי, בלתי תלוי"},{"num":952,"en":"indicate","he":"להצביע על"},{"num":953,"en":"indication","he":"אות, סימן"},{"num":954,"en":"indifferent","he":"אדיש"},{"num":955,"en":"indigenous","he":"ילידי, מקורי"},{"num":956,"en":"indignant","he":"אינו מרוצה כתוצאה מחוסר צדק"},{"num":957,"en":"indispensable","he":"חיוני"},{"num":958,"en":"individual","he":"פרט, יחיד, אינדיבידואל"},{"num":959,"en":"indolent","he":"עצלן"},{"num":960,"en":"indulge","he":"לפנק"},{"num":961,"en":"indulgence","he":"סיפוק, התמכרות, פייסנות"},{"num":962,"en":"industrialization","he":"תיעוש"},{"num":963,"en":"industrious","he":"חרוץ, שקדן"},{"num":964,"en":"industriously","he":"בשקדנות"},{"num":965,"en":"industry","he":"תעשייה"},{"num":966,"en":"ineffable","he":"בלתי ניתן לתיאור"},{"num":967,"en":"inert","he":"אדיש"},{"num":968,"en":"inevitable","he":"בלתי נמנע"},{"num":969,"en":"inexorable","he":"בלתי נלאה, בלתי ניתן לעצירה"},{"num":970,"en":"infamous","he":"ידוע לשמצה"},{"num":971,"en":"infer","he":"להסיק"},{"num":972,"en":"infiltrate","he":"לחדור ,להסתנן"},{"num":973,"en":"infinite","he":"אינסופי"},{"num":974,"en":"inflammation","he":"דלקת ,התלקחות"},{"num":975,"en":"inflict","he":"להטיל ,לגרום, להסב"},{"num":976,"en":"inflicted","he":"שגרם נזק"},{"num":977,"en":"influence","he":"להשפיע, השפעה"},{"num":978,"en":"infringe","he":"להפר"},{"num":979,"en":"ingenuous","he":"תמים, פתי"},{"num":980,"en":"ingredient","he":"מרכיב"},{"num":981,"en":"inhale","he":"לשאוף, שאיפה"},{"num":982,"en":"inherent","he":"טבוע"},{"num":983,"en":"inherit","he":"לקבל בירושה"},{"num":984,"en":"inhibit","he":"לעכב"},{"num":985,"en":"inimical","he":"עוין, מזיק"},{"num":986,"en":"initial","he":"התחלתי, ראשוני"},{"num":987,"en":"initially","he":"בתחילה"},{"num":988,"en":"initials","he":"האות הראשונה של כל ,ראשי תיבות מילה"},{"num":989,"en":"initiate","he":"להתחיל, ליזום"},{"num":990,"en":"injection","he":"זריקה"},{"num":991,"en":"innate","he":"מולד, טבעי"},{"num":992,"en":"innocuous","he":"בלתי מזיק"},{"num":993,"en":"innovate","he":"לחדש, להמציא"},{"num":994,"en":"inoffensive","he":"שאינו פוגעני או מעליב"},{"num":995,"en":"inquiry","he":"חקירה"},{"num":996,"en":"inquisitive","he":"סקרן"},{"num":997,"en":"insensitive","he":"לא מתחשב, לא רגיש"},{"num":998,"en":"insert","he":"להחדיר, לשבץ"},{"num":999,"en":"inside","he":"בפנים, פנימי"},{"num":1000,"en":"insidious","he":"מתגנב, מזיק בהדרגה"},{"num":1001,"en":"insight","he":"תובנה"},{"num":1002,"en":"insinuate","he":"לרמוז"},{"num":1003,"en":"insipid","he":"חסר עניין"},{"num":1004,"en":"insolent","he":"גס, מתנשא"},{"num":1005,"en":"inspection","he":"בדיקה, פיקוח"},{"num":1006,"en":"inspiration","he":"השראה"},{"num":1007,"en":"inspire","he":"לעורר השראה"},{"num":1008,"en":"installation","he":"התקנה, התקן"},{"num":1009,"en":"instigate","he":"ליזום, לעודד"},{"num":1010,"en":"institute","he":"להקים, לייסד, להתחיל, ליזום, ארגון ,ליישם, מוסד"},{"num":1011,"en":"instrument","he":"כלי"},{"num":1012,"en":"insular","he":"מוגבל, צר"},{"num":1013,"en":"intangible","he":"בלתי מוחשי"},{"num":1014,"en":"integral","he":"חיוני, בלתי נפרד"},{"num":1015,"en":"integrate","he":"לשלב"},{"num":1016,"en":"intellectual","he":"אינטלקטואל ,מלומד"},{"num":1017,"en":"intensify","he":"להעצים ,להגביר"},{"num":1018,"en":"intensity","he":"עוצמה"},{"num":1019,"en":"interaction","he":"אינטראקציה, פעולת גומלין"},{"num":1020,"en":"interdict","he":"לאסור"},{"num":1021,"en":"interest","he":"אינטרס, ריבית ,עניין"},{"num":1022,"en":"interesting","he":"מעניין"},{"num":1023,"en":"interim","he":"זמני, ביניים"},{"num":1024,"en":"interject","he":"להכניס בין דברים"},{"num":1025,"en":"intermittent","he":"מדי פעם"},{"num":1026,"en":"internal","he":"פנימי"},{"num":1027,"en":"interpret","he":"לפרש"},{"num":1028,"en":"interpretation","he":"פרשנות"},{"num":1029,"en":"intersection","he":"הצטלבות ,צומת"},{"num":1030,"en":"intervene","he":"להפריע ,להתערב"},{"num":1031,"en":"intervention","he":"התערבות"},{"num":1032,"en":"intimate","he":"אינטימי, קרוב"},{"num":1033,"en":"intrepid","he":"אמיץ"},{"num":1034,"en":"intrinsic","he":"מהותי"},{"num":1035,"en":"introduce","he":"להציג"},{"num":1036,"en":"introduction","he":"מבוא, הצגה, היכרות"},{"num":1037,"en":"intrude","he":"להפריע, להתפרץ"},{"num":1038,"en":"inundate","he":"להציף"},{"num":1039,"en":"invade","he":"לפלוש"},{"num":1040,"en":"invective","he":"העלבות, קללות"},{"num":1041,"en":"inveigh","he":"לזעום, להתנגד באלימות"},{"num":1042,"en":"invent","he":"להמציא"},{"num":1043,"en":"invention","he":"המצאה"},{"num":1044,"en":"inventor","he":"ממציא"},{"num":1045,"en":"inventory","he":"רשימת מלאי, מלאי"},{"num":1046,"en":"invest","he":"להשקיע"},{"num":1047,"en":"investigate","he":"לחקור"},{"num":1048,"en":"investigation","he":"חקירה"},{"num":1049,"en":"investment","he":"השקעה"},{"num":1050,"en":"inveterate","he":"מושרש, מתמיד"},{"num":1051,"en":"invisible","he":"בלתי נראה"},{"num":1052,"en":"invisibly","he":"באופן לא גלוי"},{"num":1053,"en":"invite","he":"להזמין"},{"num":1054,"en":"invoke","he":"לקרוא, להעלות"},{"num":1055,"en":"involve","he":"לערב"},{"num":1056,"en":"irascible","he":"מתפוצץ, קל לעצב"},{"num":1057,"en":"irrefutable","he":"בלתי ניתן להכחשה"},{"num":1058,"en":"irregular","he":"חריג ,לא סדיר"},{"num":1059,"en":"irrigation","he":"השקיה"},{"num":1060,"en":"ischemia","he":"חוסר אספקת דם לרקמה"},{"num":1061,"en":"isolate","he":"לבודד"},{"num":1062,"en":"itinerant","he":"נודד, מטייל"},{"num":1063,"en":"jagged","he":"מֻשנן"},{"num":1064,"en":"jejune","he":"משעמם, חסר תוכן"},{"num":1065,"en":"joints","he":"מפרקים בגוף"},{"num":1066,"en":"judge","he":"לשפוט, שופט"},{"num":1067,"en":"judgment","he":"שיפוט"},{"num":1068,"en":"judicious","he":"נבון, שקול"},{"num":1069,"en":"jurisprudence","he":"תורת המשפט"},{"num":1070,"en":"justification","he":"הצדקה"},{"num":1071,"en":"justified","he":"מוצדק"},{"num":1072,"en":"justify","he":"להצדיק"},{"num":1073,"en":"juxtapose","he":"להציב זה לצד זה"},{"num":1074,"en":"kismet","he":"גורל, מזל שנקבע מראש"},{"num":1075,"en":"knowledge","he":"ידע"},{"num":1076,"en":"known","he":"ידוע"},{"num":1077,"en":"labor","he":"לידה, עבודה ,לעבוד, להתאמץ"},{"num":1078,"en":"laboratory","he":"מעבדה"},{"num":1079,"en":"laborious","he":"עבודה קשה, מפרך"},{"num":1080,"en":"lachrymose","he":"נוטה לדמעות, רגשני מאוד"},{"num":1081,"en":"landscape","he":"נוף"},{"num":1082,"en":"language","he":"שפה"},{"num":1083,"en":"large","he":"גדול"},{"num":1084,"en":"lately","he":"לאחרונה"},{"num":1085,"en":"latent","he":"סמוי, נסתר"},{"num":1086,"en":"latter","he":"השני, האחרון"},{"num":1087,"en":"lavish","he":"מפואר, נדיב"},{"num":1088,"en":"layer","he":"שכבה"},{"num":1089,"en":"legacy","he":"מורשת, נחלה, ירושה"},{"num":1090,"en":"legal","he":"חוקי"},{"num":1091,"en":"legend","he":"אגדה"},{"num":1092,"en":"legerdemain","he":"זריזות ידיים, תחבולה"},{"num":1093,"en":"legible","he":"קריא, בולט"},{"num":1094,"en":"legislate","he":"לחוקק"},{"num":1095,"en":"legislation","he":"חקיקה"},{"num":1096,"en":"legislative","he":"חקיקתי"},{"num":1097,"en":"legislator","he":"מחוקק"},{"num":1098,"en":"leisure","he":"פנאי"},{"num":1099,"en":"length","he":"אורך"},{"num":1100,"en":"lenient","he":"סלחני"},{"num":1101,"en":"lesson","he":"שיעור"},{"num":1102,"en":"lethargic","he":"רדום, איטי"},{"num":1103,"en":"liability","he":"מעמסה, אפשרות ,התחייבות"},{"num":1104,"en":"liberally","he":"באופן חופשי ,בנדיבות"},{"num":1105,"en":"liberate","he":"לשחרר"},{"num":1106,"en":"liberation","he":"שחרור"},{"num":1107,"en":"ligament","he":"רצועה"},{"num":1108,"en":"lightly","he":"בקלות"},{"num":1109,"en":"likewise","he":"באופן דומה"},{"num":1110,"en":"limber","he":"גמיש, זריז"},{"num":1111,"en":"limit","he":"קצה, תחום ,להגביל, הגבלה"},{"num":1112,"en":"limpid","he":"צלול, שקוף"},{"num":1113,"en":"linger","he":"להתמהמה"},{"num":1114,"en":"literate","he":"משכיל, יודע קרוא וכתוב"},{"num":1115,"en":"literature","he":"ספרות"},{"num":1116,"en":"loathe","he":"לתעב"},{"num":1117,"en":"local","he":"מקומי"},{"num":1118,"en":"location","he":"מיקום"},{"num":1119,"en":"logic","he":"היגיון"},{"num":1120,"en":"longevity","he":"אריכות ימים"},{"num":1121,"en":"longitude","he":"קו אורך"},{"num":1122,"en":"loudly","he":"בקול רם"},{"num":1123,"en":"lucid","he":"ברור"},{"num":1124,"en":"lucrative","he":"רווחי"},{"num":1125,"en":"luring","he":"מפתה"},{"num":1126,"en":"machinery","he":"מנגנון, מערכת מכונות"},{"num":1127,"en":"magical","he":"קסום"},{"num":1128,"en":"magnanimous","he":"גדול לב"},{"num":1129,"en":"magnate","he":"ענק, אליטיסט עסקי"},{"num":1130,"en":"mainly","he":"בעיקר"},{"num":1131,"en":"maintain","he":"לשמור, לתחזק"},{"num":1132,"en":"maize","he":"תירס"},{"num":1133,"en":"major","he":"מרכזי, עיקרי"},{"num":1134,"en":"majority","he":"רוב"},{"num":1135,"en":"malevolent","he":"זדוני"},{"num":1136,"en":"malfunction","he":"תפקוד לקוי, כשל בתפקוד"},{"num":1137,"en":"malleable","he":"גמיש, ניתן לעיצוב"},{"num":1138,"en":"malnutrition","he":"תת, תזונה"},{"num":1139,"en":"manage","he":"לנהל, להסתדר"},{"num":1140,"en":"manager","he":"מנהל, אמרגן, סוכן"},{"num":1141,"en":"mandate","he":"צו, מנדט"},{"num":1142,"en":"manifest","he":"להראות, גלּוי"},{"num":1143,"en":"manifold","he":"מגוון, רב פנים"},{"num":1144,"en":"marginal","he":"שוליים, גבול"},{"num":1145,"en":"market","he":"לשווק, שוק"},{"num":1146,"en":"master","he":"להתמקצע, מומחה, אדון ,להתמחות"},{"num":1147,"en":"masterpiece","he":"יצירת מופת"},{"num":1148,"en":"match","he":"יריב שקול, משחק, ,להתאים, גפרור תחרות"},{"num":1149,"en":"material","he":"חומר"},{"num":1150,"en":"materialize","he":"להפוך לגשמי ,להתגשם"},{"num":1151,"en":"matter","he":"חומר, עניין"},{"num":1152,"en":"mature","he":"בוגר"},{"num":1153,"en":"maturity","he":"מועד פירעון ,בגרות, בשלות"},{"num":1154,"en":"maverick","he":"עצמאי, בלתי קונבנציונלי"},{"num":1155,"en":"meager","he":"מועט, דל"},{"num":1156,"en":"meaning","he":"משמעות"},{"num":1157,"en":"means","he":"אמצעים, משאבים"},{"num":1158,"en":"meanwhile","he":"בינתיים"},{"num":1159,"en":"measure","he":"אמת מידה, אמצעי ,למדוד, מידה"},{"num":1160,"en":"measurement","he":"מדידה"},{"num":1161,"en":"mediate","he":"לתווך"},{"num":1162,"en":"mediator","he":"מתווך"},{"num":1163,"en":"medication","he":"טיפול בתרופות, תרופה"},{"num":1164,"en":"medicine","he":"תרופה, רפואה"},{"num":1165,"en":"medium","he":"מתקשר, מדיום ,בינוני, אמצעי"},{"num":1166,"en":"meeting","he":"פגישה"},{"num":1167,"en":"memorization","he":"שינון"},{"num":1168,"en":"memorize","he":"לשנן"},{"num":1169,"en":"mendacious","he":"שקרי"},{"num":1170,"en":"mention","he":"לציין"},{"num":1171,"en":"mercifully","he":"ברחמים"},{"num":1172,"en":"mercy","he":"רחמים"},{"num":1173,"en":"merely","he":"רק, פשוט"},{"num":1174,"en":"merge","he":"למזג, להתמזג"},{"num":1175,"en":"meticulous","he":"קפדני, מדויק"},{"num":1176,"en":"microglia","he":"תאי תמיכה במערכת העצבים המרכזית"},{"num":1177,"en":"migration","he":"נדידה"},{"num":1178,"en":"milestone","he":"אבן דרך"},{"num":1179,"en":"militant","he":"לוחמני"},{"num":1180,"en":"mimic","he":"לחקות, חקיין"},{"num":1181,"en":"mingle","he":"לערב, למזג, להסתובב ולשוחח בין אנשים"},{"num":1182,"en":"minor","he":"פעוט, קטן, חסר משמעות, קטין"},{"num":1183,"en":"minority","he":"מיעוט"},{"num":1184,"en":"minute","he":"דקה, מיניאטורי, זעיר"},{"num":1185,"en":"misconception","he":"תפיסה מוטעית"},{"num":1186,"en":"misery","he":"סבל, אומללות"},{"num":1187,"en":"misinterpreted","he":"שלא פורש נכונה"},{"num":1188,"en":"mislead","he":"להטעות, להוליך שולל"},{"num":1189,"en":"misnomer","he":"כינוי לא נכון"},{"num":1190,"en":"mistake","he":"להתבלבל, טעות ,לשגות"},{"num":1191,"en":"mistaken","he":"מוטעה"},{"num":1192,"en":"mistakenly","he":"בשוגג, בהיסח הדעת ,בטעות"},{"num":1193,"en":"misunderstood","he":"שהבינו אותו לא נכון"},{"num":1194,"en":"mitigate","he":"להקל"},{"num":1195,"en":"mobile","he":"מובילי, נייד"},{"num":1196,"en":"moderate","he":"מתון"},{"num":1197,"en":"moderation","he":"איפוק ,מתינות"},{"num":1198,"en":"modest","he":"צנוע, מועט"},{"num":1199,"en":"modify","he":"לשנות, להתאים"},{"num":1200,"en":"modulation","he":"כוונון ,ויסות"},{"num":1201,"en":"molecule","he":"מולקולה"},{"num":1202,"en":"monetary","he":"כספי"},{"num":1203,"en":"monitor","he":"צג ,להשגיח, משגיח"},{"num":1204,"en":"moratorium","he":"דחייה"},{"num":1205,"en":"moreover","he":"יתרה מזאת"},{"num":1206,"en":"mortal","he":"בן אנוש, קטלני"},{"num":1207,"en":"mortality","he":"תמותה"},{"num":1208,"en":"motif","he":"מוטיב ,רעיון מרכזי"},{"num":1209,"en":"motion","he":"תנועה"},{"num":1210,"en":"motivation","he":"הנעה ,מוטיבציה"},{"num":1211,"en":"mourn","he":"להתאבל"},{"num":1212,"en":"mundane","he":"שבתי, יומיומי"},{"num":1213,"en":"mural","he":"ציור קיר"},{"num":1214,"en":"mutiny","he":"מרד"},{"num":1215,"en":"mutual","he":"הדדי"},{"num":1216,"en":"myriad","he":"אינספור"},{"num":1217,"en":"mysterious","he":"מסקרן, מסתורי, שאינו ידוע"},{"num":1218,"en":"mystery","he":"תעלומה, שאלה, חידה"},{"num":1219,"en":"naive","he":"נאיבי, תמים"},{"num":1220,"en":"namely","he":"כלומר"},{"num":1221,"en":"narration","he":"סיפור, נרטיב, קריינות"},{"num":1222,"en":"narrow","he":"לצמצם, צר"},{"num":1223,"en":"nasal","he":"חוטמי, שקשור לאף"},{"num":1224,"en":"native","he":"מקומי, טבעי, שמוכר לאדם מלידה"},{"num":1225,"en":"natural","he":"טבעי"},{"num":1226,"en":"navigate","he":"לנווט, להכווין, להוביל, להדריך"},{"num":1227,"en":"navigation","he":"ניווט, תכנון מסלול"},{"num":1228,"en":"nearby","he":"קרוב"},{"num":1229,"en":"nearly","he":"כמעט, בקירוב"},{"num":1230,"en":"negate","he":"להכחיש, לבטל"},{"num":1231,"en":"negative","he":"שלילי, תשליל"},{"num":1232,"en":"neglect","he":"להזניח, הזנחה"},{"num":1233,"en":"negligence","he":"רשלנות, הזנחה"},{"num":1234,"en":"negotiation","he":"משא ומתן"},{"num":1235,"en":"neighboring","he":"מתגורר בשכנות, בסמוך ,שכן"},{"num":1236,"en":"neither","he":"אף לא אחד מהשניים"},{"num":1237,"en":"neophyte","he":"מתחיל, טירון"},{"num":1238,"en":"neoteric","he":"חדשני, עכשווי"},{"num":1239,"en":"nevertheless","he":"עם זאת"},{"num":1240,"en":"nobility","he":"התנהגות מכובדת ,ייחוס, אצולה ואצילית"},{"num":1241,"en":"nocturnal","he":"לילי"},{"num":1242,"en":"nominal","he":"סימלי, שמי"},{"num":1243,"en":"nomination","he":"מינוי, הגשת מועמדות"},{"num":1244,"en":"nominee","he":"מועמד"},{"num":1245,"en":"nonchalant","he":"אדיש, קר"},{"num":1246,"en":"nonetheless","he":"עם כל זאת"},{"num":1247,"en":"nosocomial","he":"זיהום שנרכש בבית חולים"},{"num":1248,"en":"notably","he":"במיוחד ,באופן בולט"},{"num":1249,"en":"notebook","he":"מחברת"},{"num":1250,"en":"notice","he":"להבחין, הודעה, תזכורת ,לשים לב"},{"num":1251,"en":"notion","he":"מושג, רעיון"},{"num":1252,"en":"notorious","he":"ידוע לשמצה"},{"num":1253,"en":"notwithstanding","he":"למרות זאת"},{"num":1254,"en":"nourish","he":"להזין, לטפח"},{"num":1255,"en":"novel","he":"נובלה, מחזה, חדשני"},{"num":1256,"en":"novelty","he":"חידוש, קישוט קטן"},{"num":1257,"en":"nuance","he":"דקויות"},{"num":1258,"en":"nugatory","he":"חסר ערך"},{"num":1259,"en":"nuisance","he":"מטרד"},{"num":1260,"en":"nutrition","he":"תזונה"},{"num":1261,"en":"obdurate","he":"קשוח, עקשן מאוד"},{"num":1262,"en":"obedience","he":"ציות"},{"num":1263,"en":"object","he":"להתנגד, אובייקט, פריט"},{"num":1264,"en":"objection","he":"התנגדות"},{"num":1265,"en":"objective","he":"מטרה, תכלית, אובייקטיבי"},{"num":1266,"en":"objurgate","he":"לנזוף, להוכיח בחריפות"},{"num":1267,"en":"oblivion","he":"אובדן זיכרון או השכחה מוחלטת"},{"num":1268,"en":"obscene","he":"מגונה"},{"num":1269,"en":"obscure","he":"מעורפל"},{"num":1270,"en":"observe","he":"להתבונן, להבחין, לציין"},{"num":1271,"en":"obsolete","he":"מיושן"},{"num":1272,"en":"obstacle","he":"מכשול"},{"num":1273,"en":"obstinate","he":"עקשן"},{"num":1274,"en":"obstruct","he":"להפריע, לחסום, למנוע"},{"num":1275,"en":"obtain","he":"להגיש, לקבל"},{"num":1276,"en":"obviate","he":"למנוע"},{"num":1277,"en":"obvious","he":"ברור, מובן מאליו"},{"num":1278,"en":"obviously","he":"וודאי ,ללא ספק"},{"num":1279,"en":"occasion","he":"מקרה, אירוע"},{"num":1280,"en":"occasional","he":"מקרי, אקראי"},{"num":1281,"en":"occasionally","he":"לפעמים ,מדי פעם"},{"num":1282,"en":"occupation","he":"מקצוע, כיבוש ,עיסוק"},{"num":1283,"en":"occupy","he":"לכבוש ,ליישב, להעסיק"},{"num":1284,"en":"occur","he":"להתרחש, לעלות על הדעת"},{"num":1285,"en":"occurrence","he":"מאורע, מקרה ,התרחשות"},{"num":1286,"en":"offend","he":"להעליב"},{"num":1287,"en":"offensive","he":"פוגעני, דוחה, התקפה ,מעליב"},{"num":1288,"en":"offer","he":"הצעה ,להציע, לנדב"},{"num":1289,"en":"official","he":"רשמי, פקיד ציבור"},{"num":1290,"en":"often","he":"בדרך כלל, לעתים קרובות"},{"num":1291,"en":"ominous","he":"מאיים"},{"num":1292,"en":"omission","he":"השמטה"},{"num":1293,"en":"omniscient","he":"יודע הכל"},{"num":1294,"en":"onerous","he":"מעיק, כבד"},{"num":1295,"en":"onset","he":"התקפה ,התחלה, פתיחה"},{"num":1296,"en":"opaque","he":"לא ברור"},{"num":1297,"en":"operate","he":"לפעול, לנתח"},{"num":1298,"en":"operative","he":"ניתוחי ,ביצועי"},{"num":1299,"en":"opinion","he":"דעה"},{"num":1300,"en":"opportune","he":"בזמן, נוח"},{"num":1301,"en":"opposing","he":"מתנגד"},{"num":1302,"en":"opposite","he":"הפוך, הפך, ממול, מנגד"},{"num":1303,"en":"opposition","he":"התנגדות, אופוזיציה"},{"num":1304,"en":"oppress","he":"לדכא, לייסר"},{"num":1305,"en":"oppression","he":"דיכוי"},{"num":1306,"en":"optimal","he":"מיטבי"},{"num":1307,"en":"optimisim","he":"אופטימיות, אמונה שדברים טובים יקרו"},{"num":1308,"en":"option","he":"אפשרות, אופציה"},{"num":1309,"en":"opulent","he":"מפואר, עשיר"},{"num":1310,"en":"ordain","he":"להסמיך, למנות"},{"num":1311,"en":"order","he":"לתת פקודה, לפקוד, להזמין, הזמנה, הוראה, פקודה ,סדר, מסדר"},{"num":1312,"en":"ordinarily","he":"בדרך כלל"},{"num":1313,"en":"ordinary","he":"רגיל"},{"num":1314,"en":"organization","he":"ארגון"},{"num":1315,"en":"organize","he":"לסדר, לארגן"},{"num":1316,"en":"orientation","he":"מגמה, כיוון, אורינטציה, התמצאות"},{"num":1317,"en":"ornament","he":"קישוט"},{"num":1318,"en":"ornamental","he":"עיטורי, קישוטי"},{"num":1319,"en":"oscillate","he":"להתנדנד, להשתנות"},{"num":1320,"en":"ossify","he":"להתקשות, להפוך לקשיח"},{"num":1321,"en":"ostensible","he":"לכאורה"},{"num":1322,"en":"ostentatious","he":"הבלתי מתון ,מתפאר"},{"num":1323,"en":"ostracize","he":"להדרה"},{"num":1324,"en":"other","he":"אחר, שונה"},{"num":1325,"en":"outbreak","he":"התפרצות"},{"num":1326,"en":"outcast","he":"מבודד, נזרק מהחברה"},{"num":1327,"en":"outlandish","he":"מוזר, יוצא דופן"},{"num":1328,"en":"outline","he":"קו, מתאר ,לתאר בכלליות"},{"num":1329,"en":"outstanding","he":"יוצא מהכלל, יוצא דופן"},{"num":1330,"en":"overdo","he":"לעשות יתר על המידה"},{"num":1331,"en":"overestimated","he":"העריך יתר על המידה"},{"num":1332,"en":"overlook","he":"להשקיף, להתעלם, ,לצפות להעלים עין"},{"num":1333,"en":"oversee","he":"לפקח, להשגיח"},{"num":1334,"en":"overt","he":"גלוי, ברור"},{"num":1335,"en":"overwhelm","he":"להמם, להכניע"},{"num":1336,"en":"pacify","he":"להרגיע"},{"num":1337,"en":"paleolithic","he":"תקופת האבן הקדומה"},{"num":1338,"en":"palimpsest","he":"כתב יד מחוק עם שרידים של הישן"},{"num":1339,"en":"palliate","he":"להקל, לרכך"},{"num":1340,"en":"pamper","he":"לפנק, לטפח"},{"num":1341,"en":"panacea","he":"תרופה לכל"},{"num":1342,"en":"panegyric","he":"שבח נלהב"},{"num":1343,"en":"paradigm","he":"מודל, פרדיגמה"},{"num":1344,"en":"paradoxically","he":"באופן סותר"},{"num":1345,"en":"paragon","he":"מופת"},{"num":1346,"en":"parallel","he":"להקביל, מקביל"},{"num":1347,"en":"parameter","he":"פרמטר, גבול"},{"num":1348,"en":"pardon","he":"לסלוח, למחול, סליחה, חנינה"},{"num":1349,"en":"pariah","he":"מכורע, מבודד"},{"num":1350,"en":"parsimonious","he":"קמצני מאוד"},{"num":1351,"en":"partial","he":"חלקי, משוחד"},{"num":1352,"en":"participation","he":"השתתפות"},{"num":1353,"en":"particular","he":"מיוחד, מסוים, פריט, פרט"},{"num":1354,"en":"particularly","he":"במיוחד, בפרט"},{"num":1355,"en":"passage","he":"מעבר, קטע קריאה"},{"num":1356,"en":"passion","he":"תשוקה"},{"num":1357,"en":"passionate","he":"נלהב, מלא תשוקה"},{"num":1358,"en":"patient","he":"סבלני, מטופל"},{"num":1359,"en":"paucity","he":"מחסור, מעטיות"},{"num":1360,"en":"pause","he":"להפסיק, הפסקה"},{"num":1361,"en":"payment","he":"תשלום"},{"num":1362,"en":"peculiar","he":"משונה, ייחודי"},{"num":1363,"en":"pellucid","he":"צלול, ברור לחלוטין"},{"num":1364,"en":"penal","he":"פלילי, של עונש"},{"num":1365,"en":"penalize","he":"להעניש"},{"num":1366,"en":"penalty","he":"עונש, קנס"},{"num":1367,"en":"penitence","he":"חרטה, תשובה"},{"num":1368,"en":"people","he":"אנשים, עם"},{"num":1369,"en":"perceive","he":"לתפוס / להבין"},{"num":1370,"en":"perennial","he":"תמידי, מתמשך"},{"num":1371,"en":"perfect","he":"מושלם ,לשכלל, לשפר"},{"num":1372,"en":"perform","he":"להופיע, לבצע"},{"num":1373,"en":"performance","he":"הופעה ,ביצוע"},{"num":1374,"en":"performer","he":"מבצע, אמן"},{"num":1375,"en":"perfunctory","he":"שטחי"},{"num":1376,"en":"pericardium","he":"קרום הלב"},{"num":1377,"en":"period","he":"נקודה, וסת ,תקופה, עונה"},{"num":1378,"en":"permanent","he":"קבוע"},{"num":1379,"en":"permanently","he":"באופן קבוע, לצמיתות"},{"num":1380,"en":"permission","he":"רשות"},{"num":1381,"en":"permit","he":"היתר ,להרשות, להתיר"},{"num":1382,"en":"pernicious","he":"הרסני ,מסוכן"},{"num":1383,"en":"perpetuate","he":"להנציח"},{"num":1384,"en":"perplexing","he":"מבלבל"},{"num":1385,"en":"persecution","he":"רדיפה"},{"num":1386,"en":"persist","he":"להתמיד"},{"num":1387,"en":"persistent","he":"עקשן, מתמיד"},{"num":1388,"en":"personal","he":"אישי"},{"num":1389,"en":"personality","he":"אישיות"},{"num":1390,"en":"persuade","he":"לשכנע"},{"num":1391,"en":"persuasion","he":"שכנוע, אמונה, כת"},{"num":1392,"en":"persuasive","he":"משכנע"},{"num":1393,"en":"persuasively","he":"באופן משכנע"},{"num":1394,"en":"pertinent","he":"רלוונטי, קשור"},{"num":1395,"en":"peruse","he":"לעיין"},{"num":1396,"en":"pervasive","he":"חודרני, נפוץ בכל מקום"},{"num":1397,"en":"petition","he":"עצומה, עתירה"},{"num":1398,"en":"phalanx","he":"עצם באצבעות"},{"num":1399,"en":"pharmaceuticals","he":"תרופות"},{"num":1400,"en":"phase","he":"לתכנן או להציג בשלבים, שלב"},{"num":1401,"en":"pinch","he":"לצבוט, ללחוץ, גנב, קטף, קורטוב"},{"num":1402,"en":"pivotal","he":"מכריע"},{"num":1403,"en":"place","he":"למקם, לשים, מקום"},{"num":1404,"en":"plant","he":"לשתול, צמח, מפעל"},{"num":1405,"en":"plantation","he":"מטע"},{"num":1406,"en":"plausible","he":"סביר"},{"num":1407,"en":"pleas","he":"בקשות"},{"num":1408,"en":"pledge","he":"להתחייב, הבטחה, התחייבות"},{"num":1409,"en":"plummet","he":"לצנוח במהירות"},{"num":1410,"en":"plutocracy","he":"שלטון עשירים"},{"num":1411,"en":"poetry","he":"שירה"},{"num":1412,"en":"polar","he":"קוטבי"},{"num":1413,"en":"polarize","he":"לקטב, להנגיד"},{"num":1414,"en":"policy","he":"מדיניות"},{"num":1415,"en":"polite","he":"מנומס"},{"num":1416,"en":"politely","he":"בנימוס"},{"num":1417,"en":"political","he":"פוליטי"},{"num":1418,"en":"politics","he":"פוליטיקה"},{"num":1419,"en":"pollute","he":"לזהם"},{"num":1420,"en":"pollution","he":"זיהום"},{"num":1421,"en":"poorly","he":"בצורה גרועה"},{"num":1422,"en":"population","he":"אוכלוסייה"},{"num":1423,"en":"populous","he":"מיושב, מאוכלס"},{"num":1424,"en":"porous","he":"מנוקב, מחורר"},{"num":1425,"en":"portion","he":"חלק, מנה"},{"num":1426,"en":"position","he":"עמדה, תפקיד"},{"num":1427,"en":"positive","he":"חיובי, בטוח"},{"num":1428,"en":"possess","he":"להיות בעלים של ,לכבוש, להשתלט"},{"num":1429,"en":"possession","he":"בעלות, חזקה"},{"num":1430,"en":"possibility","he":"אפשרות"},{"num":1431,"en":"possible","he":"אפשרי"},{"num":1432,"en":"possibly","he":"יתכן"},{"num":1433,"en":"postpone","he":"לדחות למועד אחר"},{"num":1434,"en":"potter","he":"קדר"},{"num":1435,"en":"pottery","he":"קדרות"},{"num":1436,"en":"power","he":"כוח"},{"num":1437,"en":"powerful","he":"חזק"},{"num":1438,"en":"practice","he":"לתרגל, להתאמן, אימון, תרגול"},{"num":1439,"en":"pragmatic","he":"מעשי"},{"num":1440,"en":"praise","he":"להלל, לשבח, שבח"},{"num":1441,"en":"precarious","he":"מסוכן, לא יציב"},{"num":1442,"en":"precede","he":"להקדים, לבוא לפני"},{"num":1443,"en":"preceding","he":"קודם"},{"num":1444,"en":"precipitate","he":"להאיץ, להטיל, לעבות, משקע"},{"num":1445,"en":"precise","he":"מדויק"},{"num":1446,"en":"precision","he":"דיוק"},{"num":1447,"en":"preclude","he":"למנוע"},{"num":1448,"en":"predator","he":"טורף"},{"num":1449,"en":"predicament","he":"מצוקה, בעיה"},{"num":1450,"en":"predict","he":"לחזות"},{"num":1451,"en":"predictable","he":"צפוי"},{"num":1452,"en":"prediction","he":"תחזית, נבואה, ניבוי"},{"num":1453,"en":"predominant","he":"דומיננטי"},{"num":1454,"en":"predominate","he":"להתבלט ,לשלוט"},{"num":1455,"en":"preferable","he":"מועדף"},{"num":1456,"en":"prejudice","he":"דעה קדומה"},{"num":1457,"en":"premature","he":"מוקדם מדי ,לפני זמנו"},{"num":1458,"en":"preparation","he":"הכנה"},{"num":1459,"en":"prerequisite","he":"שנדרש מראש"},{"num":1460,"en":"prescribe","he":"לרשום מרשם"},{"num":1461,"en":"prescription","he":"מרשם"},{"num":1462,"en":"press","he":"ללחוץ, עיתונות"},{"num":1463,"en":"prestigious","he":"יוקרתי"},{"num":1464,"en":"pretend","he":"להעמיד פנים"},{"num":1465,"en":"prevail","he":"לשרוד, לגבור"},{"num":1466,"en":"prevent","he":"למנוע"},{"num":1467,"en":"previous","he":"הקודם"},{"num":1468,"en":"previously","he":"לפני כן ,קודם לכן"},{"num":1469,"en":"pride","he":"גאווה, יהירות"},{"num":1470,"en":"primarily","he":"בעיקר, בראש ובראשונה"},{"num":1471,"en":"primary","he":"ראשוני, עיקרי"},{"num":1472,"en":"print","he":"להדפיס, טקסט כתוב, דפוס"},{"num":1473,"en":"prior","he":"קודם"},{"num":1474,"en":"priority","he":"עדיפות"},{"num":1475,"en":"private","he":"פרטי, טוראי"},{"num":1476,"en":"privilege","he":"זכות יתר, פריבילגיה"},{"num":1477,"en":"prize","he":"להוקיר, להעריך, פרס"},{"num":1478,"en":"proceed","he":"להמשיך, להתקדם"},{"num":1479,"en":"process","he":"לעבד, תהליך"},{"num":1480,"en":"produce","he":"לייצר, תוצרת"},{"num":1481,"en":"profession","he":"מקצוע, הצהרה"},{"num":1482,"en":"proficient","he":"מקצועי, מיומן"},{"num":1483,"en":"profit","he":"להרוויח, רווח"},{"num":1484,"en":"profitable","he":"רווחי, משתלם"},{"num":1485,"en":"profound","he":"מעמיק, עמוק, נחרץ"},{"num":1486,"en":"profoundly","he":"מעומק הלב, עמוקות"},{"num":1487,"en":"progenitors","he":"קדומנים, אבות קדומים"},{"num":1488,"en":"progress","he":"להתקדם, התקדמות, קידמה"},{"num":1489,"en":"progressive","he":"מתקדם, מדורג"},{"num":1490,"en":"prohibited","he":"אסור"},{"num":1491,"en":"prohibits","he":"אוסר"},{"num":1492,"en":"projection","he":"השלכה, הקרנה"},{"num":1493,"en":"prolific","he":"פורה"},{"num":1494,"en":"prolonged","he":"ממושך"},{"num":1495,"en":"prominence","he":"חשיבות, התבלטות"},{"num":1496,"en":"prominent","he":"בולט, חשוב"},{"num":1497,"en":"promise","he":"להבטיח, הבטחה"},{"num":1498,"en":"promote","he":"לקדם, להעלות"},{"num":1499,"en":"promotion","he":"קידום"},{"num":1500,"en":"prompt","he":"מיידי ,לעורר, להמריץ"},{"num":1501,"en":"promptly","he":"מיידית, ללא דיחוי"},{"num":1502,"en":"proof","he":"הוכחה"},{"num":1503,"en":"proper","he":"תקין ,הולם, מתאים"},{"num":1504,"en":"properly","he":"כיאות, היטב"},{"num":1505,"en":"property","he":"תכונה ,רכוש, מאפיין"},{"num":1506,"en":"prophecy","he":"נבואה, חזון"},{"num":1507,"en":"prophet","he":"נביא"},{"num":1508,"en":"proscribe","he":"להוקיע, לאסור, לשלול, ,לגנות להוציא מחוץ לחוק"},{"num":1509,"en":"prosecution","he":"תביעה משפטית"},{"num":1510,"en":"prosper","he":"לשגשג"},{"num":1511,"en":"prosperity","he":"שגשוג"},{"num":1512,"en":"prosperous","he":"מצליח ,משגשג"},{"num":1513,"en":"protest","he":"מחאה, הפגנה ,להפגין, למחות"},{"num":1514,"en":"prove","he":"להוכיח"},{"num":1515,"en":"proverbs","he":"פתגם"},{"num":1516,"en":"provide","he":"לספק, לכלכל"},{"num":1517,"en":"provincial","he":"פרובינציאלי, קרתני, מחוזי, אזורי"},{"num":1518,"en":"provisions","he":"הוראות ,אספקה"},{"num":1519,"en":"provoke","he":"להסית ,לעורר, להתגרות"},{"num":1520,"en":"prudent","he":"נבון, זהיר"},{"num":1521,"en":"pseudocode","he":"קוד מדומה לייצוג אלגוריתם"},{"num":1522,"en":"public","he":"ציבורי"},{"num":1523,"en":"publish","he":"לפרסם"},{"num":1524,"en":"punish","he":"להעניש"},{"num":1525,"en":"punishment","he":"עונש"},{"num":1526,"en":"purchase","he":"לרכוש, רכישה"},{"num":1527,"en":"purification","he":"טיהור"},{"num":1528,"en":"quake","he":"להרעיד, רעידה"},{"num":1529,"en":"qualifications","he":"כישורים"},{"num":1530,"en":"quality","he":"איכות, תכונה, מאפיין"},{"num":1531,"en":"quantify","he":"לכמת"},{"num":1532,"en":"quantity","he":"כמות, מידה"},{"num":1533,"en":"quasar","he":"גוף שמימי דמוי כוכב"},{"num":1534,"en":"quell","he":"לדכא"},{"num":1535,"en":"questioned","he":"מוטל בספק, ֻתשאל, ֻתחקר"},{"num":1536,"en":"quick","he":"מהיר, זריז, חפוז"},{"num":1537,"en":"quickly","he":"בזריזות"},{"num":1538,"en":"quite","he":"לחלוטין, למדי"},{"num":1539,"en":"quixotic","he":"אידיאליסטי בצורה לא מציאותית"},{"num":1540,"en":"quote","he":"לצטט, ציטוט"},{"num":1541,"en":"racial","he":"גזעני"},{"num":1542,"en":"racing","he":"מתחרה"},{"num":1543,"en":"racism","he":"גזענות"},{"num":1544,"en":"radiant","he":"קורן, זוהר"},{"num":1545,"en":"radiation","he":"קרינה"},{"num":1546,"en":"raise","he":"להעלות, העלאה"},{"num":1547,"en":"rancor","he":"מרירות, עוינות"},{"num":1548,"en":"random","he":"אקראי"},{"num":1549,"en":"randomly","he":"באופן אקראי"},{"num":1550,"en":"range","he":"טווח"},{"num":1551,"en":"rapid","he":"מהיר"},{"num":1552,"en":"rapidly","he":"במהירות"},{"num":1553,"en":"rarely","he":"לעתים רחוקות"},{"num":1554,"en":"reach","he":"להגיע, להושיט יד"},{"num":1555,"en":"realpolitik","he":"מדיניות מעשית ולא אידיאולוגית"},{"num":1556,"en":"reaped","he":"נקטף, קוצר"},{"num":1557,"en":"reason","he":"היגיון, סיבה"},{"num":1558,"en":"reasonable","he":"הגיוני"},{"num":1559,"en":"reassurance","he":"עידוד ,הרגעה"},{"num":1560,"en":"rebel","he":"למרוד, מורד"},{"num":1561,"en":"rebellious","he":"מרדני"},{"num":1562,"en":"rebut","he":"להפריך"},{"num":1563,"en":"recapitulate","he":"לסכם מחדש"},{"num":1564,"en":"receive","he":"לקבל"},{"num":1565,"en":"recent","he":"שהתרחש לאחרונה, חדש"},{"num":1566,"en":"recently","he":"לאחרונה"},{"num":1567,"en":"receptive","he":"מסוגל להבין, לקלוט, לקבל במהירות, פתוח לרעיונות חדשים"},{"num":1568,"en":"recipe","he":"מרשם, מתכון"},{"num":1569,"en":"recipient","he":"נמען, שמקבל או יכול לקבל"},{"num":1570,"en":"reciprocal","he":"הדדי, הופכי"},{"num":1571,"en":"recline","he":"לנוח, להישען"},{"num":1572,"en":"recognize","he":"להכיר, לזהות"},{"num":1573,"en":"reconcile","he":"ליישב סכסוך או הבדל"},{"num":1574,"en":"recondite","he":"מעורפל, קשה להבנה"},{"num":1575,"en":"recover","he":"להתאושש, להחלים, לקבל בחזרה"},{"num":1576,"en":"recruit","he":"לגייס"},{"num":1577,"en":"recruitment","he":"גיוס"},{"num":1578,"en":"redolent","he":"נושא ריח חזק"},{"num":1579,"en":"reduce","he":"לצמצם, להפחית"},{"num":1580,"en":"refer","he":"להפנות ל, להתייחס ל"},{"num":1581,"en":"reference","he":"הפניה, המלצה"},{"num":1582,"en":"reflect","he":"לשקף, להרהר"},{"num":1583,"en":"reflection","he":"השתקפות, הרהור"},{"num":1584,"en":"reform","he":"לתקן, להחזיר למוטב, תיקון, רפורמה"},{"num":1585,"en":"refuge","he":"מקלט, מפלט"},{"num":1586,"en":"refugee","he":"פליט"},{"num":1587,"en":"refund","he":"החזר כספי"},{"num":1588,"en":"refuse","he":"לסרב"},{"num":1589,"en":"refute","he":"להפריך"},{"num":1590,"en":"regain","he":"לזכות מחדש"},{"num":1591,"en":"regard","he":"להחשיב, להתייחס ,להתבונן"},{"num":1592,"en":"regardless","he":"ללא התחשבות, למרות"},{"num":1593,"en":"regime","he":"משטר"},{"num":1594,"en":"regret","he":"להתחרט, חרטה"},{"num":1595,"en":"regrettable","he":"מצער"},{"num":1596,"en":"regular","he":"רגיל, סדיר"},{"num":1597,"en":"regulate","he":"לווסת, להסדיר"},{"num":1598,"en":"rehabilitation","he":"שיקום"},{"num":1599,"en":"rehearsal","he":"חזרה, תרגול"},{"num":1600,"en":"reiterate","he":"לחזור על דבר"},{"num":1601,"en":"reject","he":"לדחות, משהו דחוי"},{"num":1602,"en":"rejoice","he":"לעלוץ ,לשמוח, לעלוז"},{"num":1603,"en":"relate","he":"לייחס, להתייחס ,לספר, לתאר"},{"num":1604,"en":"relations","he":"יחסים"},{"num":1605,"en":"relationship","he":"יחסים, מערכת יחסים ,קשר"},{"num":1606,"en":"relative","he":"יחסי ,קרוב משפחה"},{"num":1607,"en":"relatively","he":"באופן יחסי"},{"num":1608,"en":"release","he":"לשחרר, לעזוב, לפרסם, להוציא לאור"},{"num":1609,"en":"reliable","he":"אמין, מהימן"},{"num":1610,"en":"reliance","he":"ביטחון, תלות"},{"num":1611,"en":"relief","he":"הקלה"},{"num":1612,"en":"relieve","he":"להרגיע, להקל, לסייע"},{"num":1613,"en":"reluctant","he":"חסר חשק, חסר רצון, מסויג"},{"num":1614,"en":"remark","he":"להבחין, להעיר, הערה"},{"num":1615,"en":"remarkable","he":"ראוי לציון, יוצא דופן"},{"num":1616,"en":"remedy","he":"לרפא, תרופה"},{"num":1617,"en":"renowned","he":"ידוע, מפורסם"},{"num":1618,"en":"repetition","he":"חזרה"},{"num":1619,"en":"reply","he":"להשיב"},{"num":1620,"en":"report","he":"לדווח, דיווח"},{"num":1621,"en":"repression","he":"הדחקה, דיכוי"},{"num":1622,"en":"repressive","he":"מדכא"},{"num":1623,"en":"reproduce","he":"להתרבות, לשכפל"},{"num":1624,"en":"request","he":"לבקש, בקשה"},{"num":1625,"en":"research","he":"לחקור, מחקר"},{"num":1626,"en":"resemble","he":"להידמות"},{"num":1627,"en":"resilient","he":"מתאושש, גמיש"},{"num":1628,"en":"resolution","he":"החלטה, רזולוציה, כושר הפרדה"},{"num":1629,"en":"resolve","he":"לפתור, נחישות, החלטיות"},{"num":1630,"en":"respect","he":"כבוד ,לכבד, יחס"},{"num":1631,"en":"respond","he":"להגיב"},{"num":1632,"en":"response","he":"תגובה"},{"num":1633,"en":"restore","he":"לשחזר, להשיב על כנו"},{"num":1634,"en":"restrict","he":"להגביל, לאסור על"},{"num":1635,"en":"restriction","he":"מגבלה"},{"num":1636,"en":"result","he":"תוצאה"},{"num":1637,"en":"reticent","he":"מופנם, ביישן"},{"num":1638,"en":"retire","he":"לפרוש"},{"num":1639,"en":"retirement","he":"פרישה"},{"num":1640,"en":"revere","he":"להעריץ"},{"num":1641,"en":"review","he":"לסקור, לכתוב ביקורת, סקירה"},{"num":1642,"en":"revise","he":"לתקן, לשפר"},{"num":1643,"en":"revision","he":"בדיקה מחדש"},{"num":1644,"en":"revolution","he":"מהפכה"},{"num":1645,"en":"revolutionize","he":"לחולל מהפך"},{"num":1646,"en":"ridicule","he":"ללעוג"},{"num":1647,"en":"ridiculous","he":"מגוחך"},{"num":1648,"en":"rigorous","he":"קפדני, מדוקדק"},{"num":1649,"en":"ritual","he":"פולחן"},{"num":1650,"en":"rival","he":"יריב, מתחרה"},{"num":1651,"en":"rivalry","he":"יריבות"},{"num":1652,"en":"round","he":"סיבוב, עיגול, מעגלי"},{"num":1653,"en":"route","he":"דרך, נתיב"},{"num":1654,"en":"routine","he":"שגרה, שגרתי"},{"num":1655,"en":"rudely","he":"בחוצפה"},{"num":1656,"en":"ruins","he":"הריסות, עתיקות"},{"num":1657,"en":"rumor","he":"שמועה"},{"num":1658,"en":"rural","he":"כפרי"},{"num":1659,"en":"sacred","he":"מקודש, קדוש"},{"num":1660,"en":"sagacious","he":"חכם, פיקח"},{"num":1661,"en":"salary","he":"משכורת"},{"num":1662,"en":"salient","he":"בולט, חשוב"},{"num":1663,"en":"sample","he":"לדגום, דוגמה, מדגם"},{"num":1664,"en":"sanguine","he":"אופטימי במצבים קשים"},{"num":1665,"en":"scale","he":"להעלות, להעפיל, לשקול, למדוד, סולם, משקל, מאזניים, קשקש ,קנה מידה"},{"num":1666,"en":"scarce","he":"נדיר"},{"num":1667,"en":"scatter","he":"לפזר"},{"num":1668,"en":"scene","he":"סצנה, מערכה, זירת התרחשות, נוף"},{"num":1669,"en":"scenery","he":"נוף, תפאורה"},{"num":1670,"en":"schedule","he":"לקבוע, לוח זמנים"},{"num":1671,"en":"science","he":"מדע"},{"num":1672,"en":"scientific","he":"מדעי"},{"num":1673,"en":"scientist","he":"מדען"},{"num":1674,"en":"scold","he":"לנזוף"},{"num":1675,"en":"scope","he":"טווח, היקף ,לבחון, להעריך"},{"num":1676,"en":"scorch","he":"לצרוב, צריבה"},{"num":1677,"en":"scrupulous","he":"מצפין, קפדן"},{"num":1678,"en":"scrutinize","he":"לבחון בקפידה"},{"num":1679,"en":"search","he":"לחפש, חיפוש"},{"num":1680,"en":"season","he":"לתבל, עונה"},{"num":1681,"en":"sedentary","he":"יושבני"},{"num":1682,"en":"seduction","he":"פיתוי"},{"num":1683,"en":"seize","he":"לאחוז ,לתפוס, ללכוד"},{"num":1684,"en":"select","he":"לבחור"},{"num":1685,"en":"sense","he":"תחושה, היגיון ,להרגיש, חוש"},{"num":1686,"en":"sensible","he":"הגיוני"},{"num":1687,"en":"sensitive","he":"רגיש"},{"num":1688,"en":"sequel","he":"תוצאה, המשך"},{"num":1689,"en":"sequence","he":"רצף, המשכיות"},{"num":1690,"en":"serendipity","he":"מזל טוב ,גילוי מזל"},{"num":1691,"en":"serious","he":"רציני, חמור"},{"num":1692,"en":"service","he":"טקס, דרשה ,לשרת, שירות"},{"num":1693,"en":"session","he":"זמן קיום של פעילות כלשהי, ישיבה, מפגש"},{"num":1694,"en":"settle","he":"ליישב"},{"num":1695,"en":"several","he":"כמה, אחדים"},{"num":1696,"en":"severe","he":"חמור, מחמיר"},{"num":1697,"en":"severely","he":"אנושות, בצורה חמורה"},{"num":1698,"en":"shape","he":"לעצב, כושר, צורה"},{"num":1699,"en":"share","he":"לחלוק, לשתף, מנייה, חלק"},{"num":1700,"en":"shelter","he":"להגן, לגונן, מחסה"},{"num":1701,"en":"shield","he":"להגן, מגן"},{"num":1702,"en":"shortage","he":"מחסור"},{"num":1703,"en":"shortcoming","he":"מגרעת, חיסרון"},{"num":1704,"en":"signal","he":"לסמן, לאותת, סימן"},{"num":1705,"en":"significance","he":"חשיבות"},{"num":1706,"en":"significant","he":"משמעותי, חשוב"},{"num":1707,"en":"similar","he":"דומה"},{"num":1708,"en":"similarly","he":"בדומה"},{"num":1709,"en":"simulate","he":"לדמות"},{"num":1710,"en":"sincerely","he":"בכנות"},{"num":1711,"en":"single","he":"בודד, אחד, יחיד, רווק"},{"num":1712,"en":"sinuous","he":"מפותל, עקלקל"},{"num":1713,"en":"skill","he":"מיומנות"},{"num":1714,"en":"slander","he":"להשמיץ, להכפיש, הכפשה"},{"num":1715,"en":"slant","he":"לנטות, מדרון, שיפוע, קו נטוי, דעה קדומה"},{"num":1716,"en":"slavery","he":"עבדות"},{"num":1717,"en":"smooth","he":"להחליק, להרגיע, חלק, עדין, שטוח"},{"num":1718,"en":"sober","he":"פיכח, צלול, רגוע"},{"num":1719,"en":"softly","he":"ברכות"},{"num":1720,"en":"solely","he":"רק, בלבד"},{"num":1721,"en":"solicit","he":"לבקש"},{"num":1722,"en":"solve","he":"לפתור"},{"num":1723,"en":"sophisticated","he":"מתוחכם"},{"num":1724,"en":"sophistication","he":"מורכבות, תחכום"},{"num":1725,"en":"soteriology","he":"תורת הגאולה"},{"num":1726,"en":"source","he":"להגיש ממקור מסוים, מקור, מוצא"},{"num":1727,"en":"space","he":"לרווח, החלל החיצון, רווח, מרחב, מקום"},{"num":1728,"en":"spacecraft","he":"חללית"},{"num":1729,"en":"special","he":"מיוחד"},{"num":1730,"en":"specialize","he":"להתמקצע ,להתמחות"},{"num":1731,"en":"species","he":"מינים, זנים"},{"num":1732,"en":"spend","he":"להעביר, לבזבז"},{"num":1733,"en":"spill","he":"דליפה ,לשפוך, להתיז"},{"num":1734,"en":"split","he":"פיצול ,לפצל, להתפצל"},{"num":1735,"en":"spontaneously","he":"באופן ספונטני, לא מתוכנן"},{"num":1736,"en":"sporadic","he":"מדי פעם, זרים"},{"num":1737,"en":"spread","he":"פיזור ,להפיץ, להתפשט"},{"num":1738,"en":"stabilize","he":"לייצב"},{"num":1739,"en":"stable","he":"יציב, אורווה"},{"num":1740,"en":"stack","he":"לאסוף לערימה, ערימה"},{"num":1741,"en":"staff","he":"צוות, סגל, מטה"},{"num":1742,"en":"stage","he":"לביים, שלב, במה"},{"num":1743,"en":"stale","he":"לא טרי, יבש, מעופש, מחניק"},{"num":1744,"en":"state","he":"להצהיר, מדינה, מצב"},{"num":1745,"en":"station","he":"להציב, למקם, תחנה"},{"num":1746,"en":"steam","he":"קיטור, לאדים"},{"num":1747,"en":"stiff","he":"נוקשה, קשיח"},{"num":1748,"en":"stimulate","he":"לעודד, לזרז"},{"num":1749,"en":"sting","he":"לדקור, לעקוץ, עוקץ, עקיצה"},{"num":1750,"en":"stone","he":"לסקול, אבן"},{"num":1751,"en":"strain","he":"להתאמץ, מאמץ, צאצא, סיב"},{"num":1752,"en":"strands","he":"חוטים, קווים"},{"num":1753,"en":"straw","he":"קש"},{"num":1754,"en":"stress","he":"להלחיץ, להדגיש, לחץ, דגש"},{"num":1755,"en":"strict","he":"קפדן, נוקשה, מוחלט"},{"num":1756,"en":"strictly","he":"בקפידה, בדיוק, בפירוש"},{"num":1757,"en":"stride","he":"לצעוד, צעד, פסיעה"},{"num":1758,"en":"strike","he":"להכות, לתקוף, לשבות, שביתה"},{"num":1759,"en":"strive","he":"לשאוף, לחתור"},{"num":1760,"en":"structure","he":"מבנה"},{"num":1761,"en":"struggle","he":"להיאבק, מאבק"},{"num":1762,"en":"stubborn","he":"עקשן"},{"num":1763,"en":"subject","he":"להכניע, נושא, נתין, ,להגיש, לחשוף אזרח"},{"num":1764,"en":"subjective","he":"אישי ,סובייקטיבי"},{"num":1765,"en":"submerge","he":"לכסות, לקבור, להחביא ,להטביע"},{"num":1766,"en":"submit","he":"להיכנע, לקבל מרות ,להגיש, למסור"},{"num":1767,"en":"subsequent","he":"לאחר מכן"},{"num":1768,"en":"subsequently","he":"לאחר מכן"},{"num":1769,"en":"subside","he":"להתמתן"},{"num":1770,"en":"substance","he":"חומר"},{"num":1771,"en":"substantiate","he":"לאשש"},{"num":1772,"en":"substitute","he":"תחליף ,להחליף"},{"num":1773,"en":"subtle","he":"שנון, מתוחכם ,מעודן, דק"},{"num":1774,"en":"success","he":"הצלחה"},{"num":1775,"en":"successor","he":"יורש, ממשיך דרכו"},{"num":1776,"en":"sudden","he":"פתאומי"},{"num":1777,"en":"suffer","he":"לסבול"},{"num":1778,"en":"suffering","he":"סבל, ייסורים"},{"num":1779,"en":"sufficient","he":"מספיק ,כמות מספקת"},{"num":1780,"en":"summarize","he":"לסכם"},{"num":1781,"en":"summary","he":"תקציר, סיכום"},{"num":1782,"en":"summit","he":"פסגה"},{"num":1783,"en":"superficial","he":"שטחי"},{"num":1784,"en":"superfluous","he":"מיותר"},{"num":1785,"en":"superior","he":"עליון"},{"num":1786,"en":"supplant","he":"להחליף, לתפוס מקומו של אחר בכח, מזימה"},{"num":1787,"en":"supply","he":"לספק, אספקה"},{"num":1788,"en":"support","he":"לתמוך, תמיכה"},{"num":1789,"en":"supposedly","he":"לכאורה"},{"num":1790,"en":"suppress","he":"לדכא"},{"num":1791,"en":"surcharge","he":"תשלום נוסף, מטען עודף"},{"num":1792,"en":"surface","he":"לעלות, להגיח, משטח"},{"num":1793,"en":"surgery","he":"ניתוח"},{"num":1794,"en":"surmise","he":"לשער, להניח"},{"num":1795,"en":"surmount","he":"לגבור, להתגבר על"},{"num":1796,"en":"surpass","he":"להתעלות מעל"},{"num":1797,"en":"surprise","he":"להפתיע, הפתעה"},{"num":1798,"en":"surrender","he":"להיכנע"},{"num":1799,"en":"surround","he":"להקיף, לכתר"},{"num":1800,"en":"surveillance","he":"מעקב, פיקוח"},{"num":1801,"en":"survey","he":"סקר"},{"num":1802,"en":"survive","he":"לשרוד"},{"num":1803,"en":"suspect","he":"לחשוד, חשוד"},{"num":1804,"en":"suspicion","he":"חשד"},{"num":1805,"en":"sustain","he":"לתמוך, לסבול, לספוג, להשאיר, להמשיך"},{"num":1806,"en":"sustainability","he":"קיימות"},{"num":1807,"en":"sustainable","he":"שמסוגל לקיים את ,בר קיימא עצמו"},{"num":1808,"en":"syllable","he":"הברה"},{"num":1809,"en":"symmetry","he":"סימטריה"},{"num":1810,"en":"sympathy","he":"אהדה, סימפתיה"},{"num":1811,"en":"syncretism","he":"שילוב של עקרונות דתיים או תרבותיים שונים"},{"num":1812,"en":"syndrome","he":"סינדרום ,תסמונת"},{"num":1813,"en":"synonym","he":"מילה נרדפת"},{"num":1814,"en":"synovial","he":"שקשור לנוזל המפרקים"},{"num":1815,"en":"system","he":"שיטה, מערכת"},{"num":1816,"en":"systematic","he":"שיטתי ,מערכתי"},{"num":1817,"en":"taciturn","he":"שקט, לא מדבר הרבה"},{"num":1818,"en":"taint","he":"לזהם, פגם, זיהום ,לפגום, להכתים"},{"num":1819,"en":"tangible","he":"מוחשי, ברור"},{"num":1820,"en":"tantalize","he":"להתגרות"},{"num":1821,"en":"target","he":"להפוך משהו למטרה, מטרה"},{"num":1822,"en":"taste","he":"לטעום, טעם"},{"num":1823,"en":"teach","he":"ללמד"},{"num":1824,"en":"technological","he":"טכנולוגי"},{"num":1825,"en":"technology","he":"טכנולוגיה"},{"num":1826,"en":"tedious","he":"משעמם, מעייף"},{"num":1827,"en":"teleological","he":"שמתמקד במטרה הסופית של תופעה"},{"num":1828,"en":"teleology","he":"הסבר תכליתי לתופעות"},{"num":1829,"en":"temerity","he":"חוצפה, עורמה"},{"num":1830,"en":"temporary","he":"זמני"},{"num":1831,"en":"tempt","he":"לפתות"},{"num":1832,"en":"tendency","he":"נטייה, מגמה, העדפה"},{"num":1833,"en":"tender","he":"עדין"},{"num":1834,"en":"tendon","he":"גיד"},{"num":1835,"en":"tenebrous","he":"חשוך, קודר"},{"num":1836,"en":"tense","he":"מתוח, לחוץ, זמן"},{"num":1837,"en":"tension","he":"מתח"},{"num":1838,"en":"terminate","he":"לסיים"},{"num":1839,"en":"terrible","he":"נורא, איום"},{"num":1840,"en":"terrify","he":"להפחיד"},{"num":1841,"en":"terrifying","he":"מבעית"},{"num":1842,"en":"theme","he":"נושא, מוטיב חוזר"},{"num":1843,"en":"therapy","he":"תרפיה, טיפול"},{"num":1844,"en":"thereafter","he":"לאחר מכן"},{"num":1845,"en":"therefore","he":"לכן"},{"num":1846,"en":"thorax","he":"בית החזה"},{"num":1847,"en":"though","he":"אף על פי כן"},{"num":1848,"en":"threat","he":"לאיים, איום"},{"num":1849,"en":"throughout","he":"מקצה ועד קצה, לגמרי, כולו"},{"num":1850,"en":"thrust","he":"דחיפה ,לדחוף, לנעוץ"},{"num":1851,"en":"timid","he":"ביישן"},{"num":1852,"en":"tolerance","he":"סובלנות"},{"num":1853,"en":"tolerate","he":"להיות סובלני"},{"num":1854,"en":"topic","he":"נושא, תחום"},{"num":1855,"en":"torment","he":"סבל ,לענות, לייסר"},{"num":1856,"en":"torture","he":"לענות, עינוי"},{"num":1857,"en":"total","he":"סך, סכום, שלם"},{"num":1858,"en":"totally","he":"לגמרי"},{"num":1859,"en":"toxic","he":"רעיל"},{"num":1860,"en":"trace","he":"סימן ,לעקוב, עקבה"},{"num":1861,"en":"track","he":"נתיב, מסלול, ערוץ ,לעקוב, לאתר"},{"num":1862,"en":"trade","he":"לסחור, מסחר"},{"num":1863,"en":"tradition","he":"מסורת"},{"num":1864,"en":"train","he":"לאמן, רכבת"},{"num":1865,"en":"training","he":"כושר, מיומנות ,אימון, תרגול"},{"num":1866,"en":"transaction","he":"מגעים, העברה ,עסקה"},{"num":1867,"en":"transcend","he":"להתעלות מעל"},{"num":1868,"en":"transfer","he":"להעביר, העברה"},{"num":1869,"en":"transform","he":"להפוך, לשנות צורה"},{"num":1870,"en":"transient","he":"זמני"},{"num":1871,"en":"transition","he":"מעבר, שינוי"},{"num":1872,"en":"translation","he":"תרגום"},{"num":1873,"en":"transmit","he":"להעביר"},{"num":1874,"en":"transparency","he":"שקיפות"},{"num":1875,"en":"transparent","he":"שקוף"},{"num":1876,"en":"transplant","he":"להשתיל, השתלה"},{"num":1877,"en":"transport","he":"להעביר"},{"num":1878,"en":"transportation","he":"אמצעי תחבורה"},{"num":1879,"en":"treason","he":"בגידה"},{"num":1880,"en":"treat","he":"לטפל, פינוק, כיבוד"},{"num":1881,"en":"tremble","he":"לרעוד, לשקשק, לפחד"},{"num":1882,"en":"tremendous","he":"עצום, כביר"},{"num":1883,"en":"trend","he":"כיוון, מגמה, סגנון, טרנד"},{"num":1884,"en":"trial","he":"משפט, ניסיון, צרה"},{"num":1885,"en":"tribe","he":"שבט"},{"num":1886,"en":"trigger","he":"להפעיל, להתניע, הדק, גורם התחלתי"},{"num":1887,"en":"triumph","he":"לנצח, ניצחון"},{"num":1888,"en":"truculent","he":"אגרסיבי, תוקפני"},{"num":1889,"en":"truncate","he":"לקצר"},{"num":1890,"en":"trust","he":"לבטוח, לקוות, להפקיד, ביטחון, אמון, נאמנות"},{"num":1891,"en":"twist","he":"לפתל, לעוות, תסבוכת, תפנית, פיתול, שזירה"},{"num":1892,"en":"ubiquitous","he":"נמצא בכל מקום"},{"num":1893,"en":"ultimately","he":"בסופו של דבר"},{"num":1894,"en":"ululate","he":"ליילל, לצרוח"},{"num":1895,"en":"unattractive","he":"לא מושך"},{"num":1896,"en":"unavoidable","he":"בלתי נמנע"},{"num":1897,"en":"unbelievable","he":"לא ייאמן"},{"num":1898,"en":"unctuous","he":"חנפן בצורה מעוררת סלידה"},{"num":1899,"en":"under","he":"מתחת"},{"num":1900,"en":"underestimated","he":"העריך נמוך מדי"},{"num":1901,"en":"undergo","he":"לחוות, להתנסות"},{"num":1902,"en":"underline","he":"להדגיש בקו"},{"num":1903,"en":"undermine","he":"לערער ,לחתור תחת"},{"num":1904,"en":"understand","he":"להבין"},{"num":1905,"en":"understandable","he":"מובן"},{"num":1906,"en":"undertake","he":"ליטול על עצמו, להבטיח"},{"num":1907,"en":"unearth","he":"לחשוף"},{"num":1908,"en":"unequivocal","he":"חד-משמעי"},{"num":1909,"en":"unfortunate","he":"אומלל, חסר מזל, מצער"},{"num":1910,"en":"uniform","he":"אחיד, מדים"},{"num":1911,"en":"uniformity","he":"אחידות"},{"num":1912,"en":"union","he":"איחוד, איגוד"},{"num":1913,"en":"unknown","he":"לא ידוע, שטרם התגלה, נעלם"},{"num":1914,"en":"unlock","he":"לשחרר, לפתוח"},{"num":1915,"en":"unofficial","he":"בלתי רשמי"},{"num":1916,"en":"unprecedented","he":"חסר תקדים"},{"num":1917,"en":"unreasonable","he":"לא הגיוני, שאינו שומע בקול ההיגיון"},{"num":1918,"en":"unreliable","he":"לא מהימן, שלא ניתן לסמוך עליו"},{"num":1919,"en":"unsatisfied","he":"שאינו מסופק"},{"num":1920,"en":"unscrupulous","he":"חסר מצפון"},{"num":1921,"en":"unstable","he":"לא יציב"},{"num":1922,"en":"unusual","he":"לא רגיל"},{"num":1923,"en":"upgrade","he":"לשדרג"},{"num":1924,"en":"upgrowing","he":"חינוך"},{"num":1925,"en":"upheaval","he":"מהפך, תהפוכות"},{"num":1926,"en":"urgency","he":"דחיפות, בהילות"},{"num":1927,"en":"urgent","he":"דחוף"},{"num":1928,"en":"usefulness","he":"שימושיות"},{"num":1929,"en":"usual","he":"רגיל, שגרתי"},{"num":1930,"en":"usually","he":"בדרך כלל, לרוב"},{"num":1931,"en":"utilize","he":"לנצל, להשתמש"},{"num":1932,"en":"vacation","he":"חופשה"},{"num":1933,"en":"vacillate","he":"להתלבט"},{"num":1934,"en":"valid","he":"בר תוקף"},{"num":1935,"en":"validate","he":"לאמת"},{"num":1936,"en":"valuable","he":"בעל ערך, יקר ערך, חפץ יקר ערך"},{"num":1937,"en":"value","he":"להוקיר, להעריך, ערך"},{"num":1938,"en":"vanquish","he":"להעלים, להביס"},{"num":1939,"en":"variable","he":"משתנה"},{"num":1940,"en":"variety","he":"מגון, מבחר"},{"num":1941,"en":"various","he":"מגֻון"},{"num":1942,"en":"vehicle","he":"רכב"},{"num":1943,"en":"venerate","he":"להעריץ, לכבד"},{"num":1944,"en":"ventilation","he":"אורור"},{"num":1945,"en":"venture","he":"להסתכן, סיכון"},{"num":1946,"en":"verify","he":"לאמת, לוודא"},{"num":1947,"en":"verisimilitude","he":"מראית עין של אמת"},{"num":1948,"en":"version","he":"גרסה"},{"num":1949,"en":"vestige","he":"שארית, שריד קדום"},{"num":1950,"en":"veteran","he":"יוצא צבא"},{"num":1951,"en":"viable","he":"בר-קיימא"},{"num":1952,"en":"vicious","he":"מרושע, אכזרי"},{"num":1953,"en":"vicissitude","he":"שינוי פתאומי ובלתי צפוי"},{"num":1954,"en":"victory","he":"ניצחון"},{"num":1955,"en":"vigilance","he":"דריכות, נדודי שינה ,ערנות"},{"num":1956,"en":"vindicate","he":"להצדיק"},{"num":1957,"en":"vindictive","he":"נקמני"},{"num":1958,"en":"violate","he":"להפר"},{"num":1959,"en":"violence","he":"אלימות"},{"num":1960,"en":"viscera","he":"מעיים"},{"num":1961,"en":"visibility","he":"נראות"},{"num":1962,"en":"visible","he":"שניתן לראות אותו"},{"num":1963,"en":"vital","he":"חיוני, נחוץ, נמרץ"},{"num":1964,"en":"vivacious","he":"מלא חיים, נמרץ"},{"num":1965,"en":"vivid","he":"חי, בולט"},{"num":1966,"en":"vociferous","he":"רועש, צועק"},{"num":1967,"en":"voice","he":"להביע, לבטא, קול"},{"num":1968,"en":"volcano","he":"הר געש"},{"num":1969,"en":"volunteer","he":"להתנדב, מתנדב"},{"num":1970,"en":"vulnerable","he":"פגיע"},{"num":1971,"en":"waive","he":"לוותר"},{"num":1972,"en":"wanton","he":"חסר מצפון, פרוע"},{"num":1973,"en":"waste","he":"לבזבז, פסולת"},{"num":1974,"en":"wasteful","he":"בזבזני"},{"num":1975,"en":"weather","he":"מזג אוויר"},{"num":1976,"en":"weave","he":"לארוג, לרקום"},{"num":1977,"en":"weight","he":"משקל"},{"num":1978,"en":"welfare","he":"רווחה"},{"num":1979,"en":"welter","he":"בלגן, ערבוביה"},{"num":1980,"en":"whale","he":"להכות, לוויתן"},{"num":1981,"en":"whereas","he":"בעוד ש"},{"num":1982,"en":"wickedly","he":"ברשעות, בזדון"},{"num":1983,"en":"wield","he":"להשתמש"},{"num":1984,"en":"wilderness","he":"שממה, ערבה"},{"num":1985,"en":"windmill","he":"טחנת רוח"},{"num":1986,"en":"withdraw","he":"לסגת"},{"num":1987,"en":"withdrawal","he":"נסיגה"},{"num":1988,"en":"withhold","he":"למנוע מ"},{"num":1989,"en":"within","he":"בתוך"},{"num":1990,"en":"without","he":"ללא, בלי"},{"num":1991,"en":"withstand","he":"לעמוד ב"},{"num":1992,"en":"witness","he":"להיות עד למשהו, עד ראייה"},{"num":1993,"en":"witty","he":"שנון, חד, מפולפל"},{"num":1994,"en":"wreck","he":"להרוס, הרס"},{"num":1995,"en":"wreckage","he":"חורבן ,שריד, הרס"},{"num":1996,"en":"wrestle","he":"להתגושש ,להיאבק"},{"num":1997,"en":"writer","he":"כותב, מחבר"},{"num":1998,"en":"xeric","he":"יבש מאוד, חסר לחות"},{"num":1999,"en":"yield","he":"להיכנע, לסגת ,להניב, להפיק"},{"num":2000,"en":"zealous","he":"נלהב"},{"num":2001,"en":"zeitgeist","he":"רוח התקופה"},{"num":2002,"en":"zephyr","he":"רוח קלה ונעימה"},{"num":2003,"en":"zymurgy","he":"חקר תסיסה"}],"idioms":[{"en":"abide by","he":"לציית ל (חוק, כלל)"},{"en":"account for","he":"להסביר / להוות (אחוז מ...)"},{"en":"act on","he":"לפעול על סמך"},{"en":"bear with","he":"להתאזר בסבלנות כלפי מישהו"},{"en":"blow up","he":"להתפוצץ / להתעצבן"},{"en":"break down","he":"להתמוטט / להתפרק"},{"en":"bring about","he":"לגרום ל..."},{"en":"bring up","he":"להעלות נושא / לגדל ילד"},{"en":"call for","he":"לדרוש"},{"en":"call off","he":"לבטל"},{"en":"carry out","he":"לבצע"},{"en":"come across","he":"להיתקל ב־"},{"en":"come up with","he":"להעלות רעיון / פתרון"},{"en":"cut down on","he":"להפחית"},{"en":"do away with","he":"לבטל / להיפטר מ־"},{"en":"fall apart","he":"להתפרק"},{"en":"fall back on","he":"להסתמך על (כאופציה חלופית)"},{"en":"figure out","he":"להבין / לפענח"},{"en":"get across","he":"להעביר (מסר)"},{"en":"get ahead","he":"להתקדם"},{"en":"get by","he":"להסתדר"},{"en":"get rid of","he":"להיפטר מ־"},{"en":"give in","he":"להיכנע"},{"en":"go off","he":"להתפוצץ / להתקלקל"},{"en":"hand in","he":"להגיש (עבודה, טופס)"},{"en":"hold back","he":"לעכב / להסתיר"},{"en":"keep up with","he":"לעמוד בקצב"},{"en":"lay off","he":"לפטר"},{"en":"look down on","he":"לזלזל ב־"},{"en":"look forward to","he":"לצפות ל־"},{"en":"look into","he":"לבדוק, לחקור"},{"en":"make up for","he":"לפצות על"},{"en":"pass out","he":"להתעלף"},{"en":"pull through","he":"לשרוד / להתאושש"},{"en":"put off","he":"לדחות"},{"en":"put up with","he":"לסבול (משהו מעצבן)"},{"en":"run into","he":"להיתקל ב־"},{"en":"set out","he":"לצאת לדרך / להתחיל"},{"en":"show off","he":"להתרברב"},{"en":"stand out","he":"לבלוט"},{"en":"stick to","he":"לדבוק ב־"},{"en":"take after","he":"להידמות ל־"},{"en":"take part in","he":"להשתתף ב־"},{"en":"turn down","he":"לסרב"},{"en":"wear out","he":"להתבלות / להתיש"},{"en":"wipe out","he":"להשמיד / לכלות / למחות"}],"sentences":[{"en":"abduct","he":"לחטוף","pos":"v","sentence":"Police believe the suspect planned to *abduct* the child from the playground.","paraphrase":"Police believe the suspect planned to kidnap the child from the playground."},{"en":"absolute","he":"מוחלט","pos":"adj","sentence":"There is *absolute* silence in the library during exam week.","paraphrase":"There is complete silence in the library during exam week."},{"en":"accommodation","he":"דיור ,מגורים","pos":"n","sentence":"The university provides *accommodation* for all first-year students.","paraphrase":"The university provides housing for all first-year students."},{"en":"accusation","he":"האשמה","pos":"n","sentence":"The manager denied the *accusation* of favoritism among staff.","paraphrase":"The manager denied the claim of favoritism among staff."},{"en":"admiration","he":"הערצה","pos":"n","sentence":"The young athlete watched her coach with great *admiration*.","paraphrase":"The young athlete watched her coach with great respect."},{"en":"advance","he":"לקדם, להתקדם","pos":"v","sentence":"New treatments continue to *advance* our understanding of the disease.","paraphrase":"New treatments continue to improve our understanding of the disease."},{"en":"affluent","he":"שופע, עשיר","pos":"adj","sentence":"The charity focuses on neighborhoods that are less *affluent* than the city center.","paraphrase":"The charity focuses on neighborhoods that are less wealthy than the city center."},{"en":"allure","he":"לפתות, למשוך, כוח פיתוי","pos":"n","sentence":"Despite the risks, the *allure* of quick profit tempted many investors.","paraphrase":"Despite the risks, the appeal of quick profit tempted many investors."},{"en":"amazing","he":"מדהים","pos":"adj","sentence":"The tour guide showed us an *amazing* view of the canyon at sunset.","paraphrase":"The tour guide showed us a stunning view of the canyon at sunset."},{"en":"anathema","he":"קללה או גינוי חריף","pos":"n","sentence":"Cutting corners on safety was *anathema* to the veteran engineer.","paraphrase":"Cutting corners on safety was deeply unacceptable to the veteran engineer."},{"en":"annual","he":"שנתי","pos":"adj","sentence":"The company holds its *annual* meeting every March.","paraphrase":"The company holds its yearly meeting every March."},{"en":"apocryphal","he":"מפוקפק, לא אותנטי","pos":"adj","sentence":"Historians consider the famous quote to be largely *apocryphal*.","paraphrase":"Historians consider the famous quote to be largely unverified."},{"en":"appropriate","he":"מתאים","pos":"adj","sentence":"Please wear clothing *appropriate* for a formal interview.","paraphrase":"Please wear clothing suitable for a formal interview."},{"en":"ascend","he":"להתרומם, לנסוק, לעלות","pos":"v","sentence":"The climbers began to *ascend* the mountain before dawn.","paraphrase":"The climbers began to climb the mountain before dawn."},{"en":"assure","he":"להבטיח","pos":"v","sentence":"The doctor tried to *assure* the nervous patient that the surgery was routine.","paraphrase":"The doctor tried to reassure the nervous patient that the surgery was routine."},{"en":"attire","he":"לבוש","pos":"n","sentence":"Guests were asked to wear formal *attire* to the wedding.","paraphrase":"Guests were asked to wear formal clothing to the wedding."},{"en":"authenticate","he":"לאמת","pos":"v","sentence":"Experts used lab tests to *authenticate* the ancient painting.","paraphrase":"Experts used lab tests to verify the ancient painting."},{"en":"balance","he":"לאזן, איזון","pos":"n","sentence":"After the accident, it took him weeks to regain his *balance*.","paraphrase":"After the accident, it took him weeks to regain his stability."},{"en":"behave","he":"להתנהג","pos":"v","sentence":"Children tend to *behave* differently when their parents are watching.","paraphrase":"Children tend to act differently when their parents are watching."},{"en":"besides","he":"כמו כן, חוץ מזה","pos":"adv","sentence":"*Besides* the cost, there are other reasons to avoid that plan.","paraphrase":"In addition to the cost, there are other reasons to avoid that plan."},{"en":"blindly","he":"באופן עיוור","pos":"adv","sentence":"He *blindly* followed his older brother's advice without asking questions.","paraphrase":"He unquestioningly followed his older brother's advice without asking questions."},{"en":"branch","he":"ענף, סניף, ענף של ,להסתעף, תחום עץ","pos":"n","sentence":"The bank closed its downtown *branch* last year.","paraphrase":"The bank closed its downtown location last year."},{"en":"bulky","he":"מגושם, גדול, נפוח","pos":"adj","sentence":"The old television was too *bulky* to fit in the new apartment.","paraphrase":"The old television was too large and awkward to fit in the new apartment."},{"en":"candor","he":"כנות","pos":"n","sentence":"The interviewer appreciated the candidate's *candor* about her weaknesses.","paraphrase":"The interviewer appreciated the candidate's honesty about her weaknesses."},{"en":"casual","he":"שגרתי, רגיל","pos":"adj","sentence":"The office allows *casual* clothing on Fridays.","paraphrase":"The office allows relaxed clothing on Fridays."},{"en":"certainty","he":"ביטחון, ודאות","pos":"n","sentence":"No one can predict the outcome of the election with total *certainty*.","paraphrase":"No one can predict the outcome of the election with total confidence."},{"en":"characterize","he":"לאפיין","pos":"v","sentence":"Critics *characterize* the film as a slow but rewarding drama.","paraphrase":"Critics describe the film as a slow but rewarding drama."},{"en":"claim","he":"לטעון, טענה","pos":"v","sentence":"The company continues to *claim* that its product is completely safe.","paraphrase":"The company continues to assert that its product is completely safe."},{"en":"coarse","he":"גס, חסר עידון, שעשוי מחלקים גדולים, בוטה","pos":"adj","sentence":"The old rope felt *coarse* against her hands.","paraphrase":"The old rope felt rough against her hands."},{"en":"collision","he":"התנגשות","pos":"n","sentence":"Two cars were damaged in the *collision* at the intersection.","paraphrase":"Two cars were damaged in the crash at the intersection."},{"en":"commission","he":"הנחייה, הוראה, מינוי, ,עמלה סמכות, ועדה","pos":"n","sentence":"The salesman earns a *commission* on every car he sells.","paraphrase":"The salesman earns a percentage fee on every car he sells."},{"en":"compensation","he":"פיצוי","pos":"n","sentence":"Workers injured on the job are entitled to *compensation*.","paraphrase":"Workers injured on the job are entitled to payment for their losses."},{"en":"complicate","he":"לסבך","pos":"v","sentence":"Adding more rules will only *complicate* an already confusing process.","paraphrase":"Adding more rules will only make an already confusing process more complicated."},{"en":"compromise","he":"להתפשר, להעמיד בסיכון, פשרה, סיכון","pos":"n","sentence":"After hours of debate, the two sides finally reached a *compromise*.","paraphrase":"After hours of debate, the two sides finally reached a mutual agreement."},{"en":"conditional","he":"מותנה, בהנחה מסוימת","pos":"adj","sentence":"Her acceptance to the program is *conditional* on passing the final exam.","paraphrase":"Her acceptance to the program depends on passing the final exam."},{"en":"confusing","he":"מבלבל","pos":"adj","sentence":"The instructions on the form were *confusing* and hard to follow.","paraphrase":"The instructions on the form were unclear and hard to follow."},{"en":"consistent","he":"עקבי","pos":"adj","sentence":"The coach praised the team for its *consistent* performance all season.","paraphrase":"The coach praised the team for its steady performance all season."},{"en":"consumer","he":"צרכן","pos":"n","sentence":"The new law protects the *consumer* from misleading advertising.","paraphrase":"The new law protects the buyer from misleading advertising."},{"en":"contest","he":"להתחרות, תחרות","pos":"v","sentence":"The losing candidate decided to *contest* the results of the election.","paraphrase":"The losing candidate decided to challenge the results of the election."},{"en":"controversial","he":"שנוי במחלוקת","pos":"adj","sentence":"The mayor's new tax plan proved to be highly *controversial*.","paraphrase":"The mayor's new tax plan proved to be highly disputed."},{"en":"debacle","he":"התמוטטות ,כישלון","pos":"n","sentence":"The failed product launch was a complete *debacle* for the company.","paraphrase":"The failed product launch was a complete disaster for the company."},{"en":"declaration","he":"הצהרה","pos":"n","sentence":"The country issued a formal *declaration* of independence in 1965.","paraphrase":"The country issued a formal announcement of independence in 1965."},{"en":"defense","he":"הגנה","pos":"n","sentence":"The lawyer built a strong *defense* for her client.","paraphrase":"The lawyer built a strong case in support of her client."},{"en":"delegate","he":"להאציל סמכויות, להסמיך, ציר, נציג, בא כוח","pos":"v","sentence":"A good manager knows how to *delegate* tasks to the team.","paraphrase":"A good manager knows how to assign tasks to the team."},{"en":"demagogue","he":"פוליטיקאי מסית, פופוליסט","pos":"n","sentence":"Historians warned that the popular speaker was becoming a dangerous *demagogue*.","paraphrase":"Historians warned that the popular speaker was becoming a dangerous rabble-rousing politician."},{"en":"depression","he":"דיכאון","pos":"n","sentence":"The country's economy fell into a deep *depression* in the 1930s.","paraphrase":"The country's economy fell into a deep economic slump in the 1930s."},{"en":"desert","he":"מדבר ,לזנוח, לנטוש","pos":"v","sentence":"Soldiers who *desert* their unit face serious punishment.","paraphrase":"Soldiers who abandon their unit face serious punishment."},{"en":"deter","he":"להרתיע","pos":"v","sentence":"Higher fines are meant to *deter* people from littering.","paraphrase":"Higher fines are meant to discourage people from littering."},{"en":"development","he":"פיתוח, התפתחות","pos":"n","sentence":"The team announced a major *development* in cancer research.","paraphrase":"The team announced a major advance in cancer research."},{"en":"different","he":"שונה","pos":"adj","sentence":"Each culture has a *different* way of celebrating the new year.","paraphrase":"Each culture has a distinct way of celebrating the new year."},{"en":"disappear","he":"להיכחד, להיאבד ,להיעלם","pos":"v","sentence":"The magician made the coin *disappear* right before our eyes.","paraphrase":"The magician made the coin vanish right before our eyes."},{"en":"discreet","he":"זהיר, סגור","pos":"adj","sentence":"Please be *discreet* when discussing the layoffs with staff.","paraphrase":"Please be careful and quiet when discussing the layoffs with staff."},{"en":"disposition","he":"מזג, אופי, נטייה, סידור, היערכות","pos":"n","sentence":"Despite the stressful job, she has a calm *disposition*.","paraphrase":"Despite the stressful job, she has a calm temperament."},{"en":"distinction","he":"הבחנה, הבדל, הוקרה, מצוינות","pos":"n","sentence":"The professor drew a clear *distinction* between the two theories.","paraphrase":"The professor drew a clear difference between the two theories."},{"en":"diverse","he":"מגוון","pos":"adj","sentence":"The city is known for its *diverse* population and cuisine.","paraphrase":"The city is known for its varied population and cuisine."},{"en":"donor","he":"תורם","pos":"n","sentence":"The hospital thanked the anonymous *donor* for the generous gift.","paraphrase":"The hospital thanked the anonymous giver for the generous gift."},{"en":"duration","he":"משך","pos":"n","sentence":"Passengers must wear a seatbelt for the entire *duration* of the flight.","paraphrase":"Passengers must wear a seatbelt for the entire length of the flight."},{"en":"economy","he":"כלכלה","pos":"n","sentence":"The government introduced new policies to strengthen the *economy*.","paraphrase":"The government introduced new policies to strengthen the country's financial system."},{"en":"egregious","he":"נורא, מובהק","pos":"adj","sentence":"The referee's mistake was so *egregious* that fans booed for minutes.","paraphrase":"The referee's mistake was so glaringly bad that fans booed for minutes."},{"en":"elusive","he":"חמקמק","pos":"adj","sentence":"A cure for the common cold has remained *elusive* for decades.","paraphrase":"A cure for the common cold has remained hard to achieve for decades."},{"en":"emphasize","he":"להדגיש","pos":"v","sentence":"The teacher tried to *emphasize* the importance of practice.","paraphrase":"The teacher tried to stress the importance of practice."},{"en":"enchant","he":"להקסים, לכשף","pos":"v","sentence":"The old story never fails to *enchant* young readers.","paraphrase":"The old story never fails to delight young readers."},{"en":"endurable","he":"נסבל","pos":"adj","sentence":"The heat was barely *endurable* without air conditioning.","paraphrase":"The heat was barely bearable without air conditioning."},{"en":"enigmatic","he":"מסתורי, חידה","pos":"adj","sentence":"The professor gave an *enigmatic* smile and refused to explain further.","paraphrase":"The professor gave a mysterious smile and refused to explain further."},{"en":"enter","he":"להיכנס, להכניס","pos":"v","sentence":"Visitors must show identification before they *enter* the building.","paraphrase":"Visitors must show identification before they go into the building."},{"en":"epitome","he":"מופת, דגם","pos":"n","sentence":"The tiny cafe is the *epitome* of a cozy neighborhood spot.","paraphrase":"The tiny cafe is the perfect example of a cozy neighborhood spot."},{"en":"erroneously","he":"בטעות","pos":"adv","sentence":"The report *erroneously* listed the wrong date for the meeting.","paraphrase":"The report mistakenly listed the wrong date for the meeting."},{"en":"establish","he":"לייסד, לבסס, להוכיח","pos":"v","sentence":"The scientists worked for years to *establish* a clear link between the two factors.","paraphrase":"The scientists worked for years to prove a clear link between the two factors."},{"en":"eventual","he":"סופי","pos":"adj","sentence":"Despite early setbacks, the team's *eventual* victory surprised everyone.","paraphrase":"Despite early setbacks, the team's final victory surprised everyone."},{"en":"excel","he":"להצטיין","pos":"v","sentence":"She continues to *excel* in both academics and sports.","paraphrase":"She continues to do extremely well in both academics and sports."},{"en":"exhale","he":"לנשוף, נשיפה","pos":"v","sentence":"The instructor told the class to *exhale* slowly through the mouth.","paraphrase":"The instructor told the class to breathe out slowly through the mouth."},{"en":"expand","he":"להרחיב, להתפשט","pos":"v","sentence":"The company plans to *expand* into three new countries next year.","paraphrase":"The company plans to grow into three new countries next year."},{"en":"explicitly","he":"מפורשות, בבירור","pos":"adv","sentence":"The contract *explicitly* forbids subletting the apartment.","paraphrase":"The contract clearly and directly forbids subletting the apartment."},{"en":"expound","he":"להסביר בפירוט","pos":"v","sentence":"The lecturer took an extra hour to *expound* on his theory.","paraphrase":"The lecturer took an extra hour to explain his theory in detail."},{"en":"extinct","he":"להכחיד, להעלים","pos":"adj","sentence":"Scientists estimate that the species became *extinct* thousands of years ago.","paraphrase":"Scientists estimate that the species died out thousands of years ago."},{"en":"facetious","he":"הומוריסטי ,קל דעת","pos":"adj","sentence":"His *facetious* remark was not meant to be taken seriously.","paraphrase":"His joking remark was not meant to be taken seriously."},{"en":"fastidious","he":"קפדן","pos":"adj","sentence":"The chef is famously *fastidious* about the freshness of his ingredients.","paraphrase":"The chef is famously extremely particular about the freshness of his ingredients."},{"en":"feelings","he":"תחושות, רגשות","pos":"n","sentence":"She tried not to hurt her brother's *feelings* with her criticism.","paraphrase":"She tried not to hurt her brother's emotions with her criticism."},{"en":"fictional","he":"בדיוני, בדוי","pos":"adj","sentence":"The novel's *fictional* town is based on a real place in Ireland.","paraphrase":"The novel's invented town is based on a real place in Ireland."},{"en":"flame","he":"להבה, בעירה ,להצית, להבעיר","pos":"n","sentence":"A single *flame* lit the entire dark room.","paraphrase":"A single fire lit the entire dark room."},{"en":"forbid","he":"למנוע, לאסור על","pos":"v","sentence":"House rules *forbid* pets in the building.","paraphrase":"House rules prohibit pets in the building."},{"en":"former","he":"קדום, קודם, לשעבר","pos":"adj","sentence":"The *former* president gave a speech at the university.","paraphrase":"The previous president gave a speech at the university."},{"en":"fragrance","he":"ריחניות, ניחוח","pos":"n","sentence":"The garden was filled with the *fragrance* of blooming roses.","paraphrase":"The garden was filled with the scent of blooming roses."},{"en":"fruitless","he":"חסר פרי, עקר","pos":"adj","sentence":"After a *fruitless* search, the hikers finally found the trail again.","paraphrase":"After an unproductive search, the hikers finally found the trail again."},{"en":"futile","he":"חסר תועלת","pos":"adj","sentence":"Arguing with him about politics is usually *futile*.","paraphrase":"Arguing with him about politics is usually pointless."},{"en":"generalize","he":"להכליל","pos":"v","sentence":"It's unfair to *generalize* about an entire group based on one person.","paraphrase":"It's unfair to make broad claims about an entire group based on one person."},{"en":"glean","he":"לאסוף","pos":"v","sentence":"Researchers *glean* useful data from thousands of old records.","paraphrase":"Researchers gather useful data from thousands of old records."},{"en":"grade","he":"לדרג, לתת ציון, שלב, כיתה","pos":"v","sentence":"Teachers must *grade* dozens of essays before the weekend.","paraphrase":"Teachers must evaluate dozens of essays before the weekend."},{"en":"gregarious","he":"חברותי","pos":"adj","sentence":"Her *gregarious* personality made her popular at every party.","paraphrase":"Her sociable personality made her popular at every party."},{"en":"guile","he":"ערמומיות","pos":"n","sentence":"He won the negotiation through patience rather than *guile*.","paraphrase":"He won the negotiation through patience rather than cunning."},{"en":"haughty","he":"יהיר, מתנשא","pos":"adj","sentence":"The waiter found the customer's *haughty* attitude unpleasant.","paraphrase":"The waiter found the customer's arrogant attitude unpleasant."},{"en":"heritage","he":"מורשת","pos":"n","sentence":"The festival celebrates the region's rich cultural *heritage*.","paraphrase":"The festival celebrates the region's rich cultural legacy."},{"en":"horror","he":"אימה, זוועה","pos":"n","sentence":"Witnesses watched in *horror* as the building collapsed.","paraphrase":"Witnesses watched in terror as the building collapsed."},{"en":"ignoble","he":"נחות, שפל","pos":"adj","sentence":"Historians view the betrayal as an *ignoble* end to his career.","paraphrase":"Historians view the betrayal as a shameful end to his career."},{"en":"illustrate","he":"להמחיש ,לאייר, לעטר","pos":"v","sentence":"The professor used a simple diagram to *illustrate* the concept.","paraphrase":"The professor used a simple diagram to demonstrate the concept."},{"en":"imminent","he":"קרוב, מתקרב","pos":"adj","sentence":"Forecasters warned residents that the storm was *imminent*.","paraphrase":"Forecasters warned residents that the storm was about to happen."},{"en":"impartially","he":"בצורה הוגנת","pos":"adv","sentence":"Judges are expected to treat every case *impartially*.","paraphrase":"Judges are expected to treat every case fairly, without bias."},{"en":"imply","he":"לרמוז","pos":"v","sentence":"Her silence seemed to *imply* that she disagreed.","paraphrase":"Her silence seemed to suggest that she disagreed."},{"en":"improve","he":"לשפר","pos":"v","sentence":"Regular practice will *improve* your writing skills over time.","paraphrase":"Regular practice will strengthen your writing skills over time."},{"en":"incendiary","he":"מדליק ,מעורר סערה","pos":"adj","sentence":"The politician's *incendiary* remarks sparked outrage online.","paraphrase":"The politician's inflammatory remarks sparked outrage online."},{"en":"incontrovertible","he":"בלתי ניתן להכחשה","pos":"adj","sentence":"The lab results provided *incontrovertible* proof of the contamination.","paraphrase":"The lab results provided undeniable proof of the contamination."},{"en":"indifferent","he":"אדיש","pos":"adj","sentence":"He seemed strangely *indifferent* to the news of his promotion.","paraphrase":"He seemed strangely unconcerned about the news of his promotion."},{"en":"industrious","he":"חרוץ, שקדן","pos":"adj","sentence":"The *industrious* new employee finished the project a week early.","paraphrase":"The hardworking new employee finished the project a week early."},{"en":"infiltrate","he":"לחדור ,להסתנן","pos":"v","sentence":"Spies managed to *infiltrate* the organization for years without detection.","paraphrase":"Spies managed to secretly enter the organization for years without detection."},{"en":"inhale","he":"לשאוף, שאיפה","pos":"v","sentence":"She told him to *inhale* deeply before the injection.","paraphrase":"She told him to breathe in deeply before the injection."},{"en":"injection","he":"זריקה","pos":"n","sentence":"The nurse gave the patient a flu *injection*.","paraphrase":"The nurse gave the patient a flu shot."},{"en":"inside","he":"בפנים, פנימי","pos":"adv","sentence":"It was raining, so the children stayed *inside* all afternoon.","paraphrase":"It was raining, so the children stayed indoors all afternoon."},{"en":"installation","he":"התקנה, התקן","pos":"n","sentence":"The museum's newest art *installation* covers an entire wall.","paraphrase":"The museum's newest art display covers an entire wall."},{"en":"intensify","he":"להעצים ,להגביר","pos":"v","sentence":"Officials expect the storm to *intensify* overnight.","paraphrase":"Officials expect the storm to get stronger overnight."},{"en":"internal","he":"פנימי","pos":"adj","sentence":"The company launched an *internal* investigation into the complaint.","paraphrase":"The company launched an in-house investigation into the complaint."},{"en":"introduce","he":"להציג","pos":"v","sentence":"Let me *introduce* you to my colleague from the Tokyo office.","paraphrase":"Let me present you to my colleague from the Tokyo office."},{"en":"inventor","he":"ממציא","pos":"n","sentence":"The museum honors the *inventor* of the telephone.","paraphrase":"The museum honors the creator of the telephone."},{"en":"invite","he":"להזמין","pos":"v","sentence":"We plan to *invite* the whole neighborhood to the block party.","paraphrase":"We plan to ask the whole neighborhood to the block party."},{"en":"itinerant","he":"נודד, מטייל","pos":"adj","sentence":"The *itinerant* worker moved from farm to farm during harvest season.","paraphrase":"The traveling worker moved from farm to farm during harvest season."},{"en":"justified","he":"מוצדק","pos":"adj","sentence":"The judge ruled that the officer's use of force was *justified*.","paraphrase":"The judge ruled that the officer's use of force was warranted."},{"en":"lachrymose","he":"נוטה לדמעות, רגשני מאוד","pos":"adj","sentence":"The film's *lachrymose* final scene left the whole theater in tears.","paraphrase":"The film's tearful final scene left the whole theater in tears."},{"en":"legacy","he":"מורשת, נחלה, ירושה","pos":"n","sentence":"The professor left behind a *legacy* of groundbreaking research.","paraphrase":"The professor left behind a lasting impact of groundbreaking research."},{"en":"leisure","he":"פנאי","pos":"n","sentence":"Retirees finally have time to enjoy *leisure* activities like gardening.","paraphrase":"Retirees finally have time to enjoy free-time activities like gardening."},{"en":"ligament","he":"רצועה","pos":"n","sentence":"The skier tore a *ligament* in her knee during the race.","paraphrase":"The skier tore a connective knee tissue during the race."},{"en":"loathe","he":"לתעב","pos":"v","sentence":"Most students *loathe* standardized testing.","paraphrase":"Most students strongly dislike standardized testing."},{"en":"luring","he":"מפתה","pos":"v","sentence":"Bright signs continued *luring* shoppers into the store.","paraphrase":"Bright signs continued attracting shoppers into the store."},{"en":"majority","he":"רוב","pos":"n","sentence":"The *majority* of voters supported the new policy.","paraphrase":"Most of the voters supported the new policy."},{"en":"manifold","he":"מגוון, רב פנים","pos":"adj","sentence":"The benefits of regular exercise are *manifold*.","paraphrase":"The benefits of regular exercise are numerous and varied."},{"en":"mature","he":"בוגר","pos":"adj","sentence":"For her age, she is remarkably *mature*.","paraphrase":"For her age, she is remarkably grown-up and sensible."},{"en":"mediate","he":"לתווך","pos":"v","sentence":"A neutral third party was asked to *mediate* the dispute.","paraphrase":"A neutral third party was asked to help resolve the dispute."},{"en":"mention","he":"לציין","pos":"v","sentence":"Did she *mention* what time the meeting starts?","paraphrase":"Did she bring up what time the meeting starts?"},{"en":"militant","he":"לוחמני","pos":"adj","sentence":"The group took an increasingly *militant* stance against the new law.","paraphrase":"The group took an increasingly aggressive stance against the new law."},{"en":"mislead","he":"להטעות, להוליך שולל","pos":"v","sentence":"The advertisement was designed to *mislead* customers about the price.","paraphrase":"The advertisement was designed to deceive customers about the price."},{"en":"moderation","he":"איפוק ,מתינות","pos":"n","sentence":"Doctors recommend eating sweets in *moderation*.","paraphrase":"Doctors recommend eating sweets in limited amounts."},{"en":"mortal","he":"בן אנוש, קטלני","pos":"adj","sentence":"The soldier suffered a *mortal* wound in the final battle.","paraphrase":"The soldier suffered a fatal wound in the final battle."},{"en":"mutual","he":"הדדי","pos":"adj","sentence":"The two companies signed an agreement based on *mutual* trust.","paraphrase":"The two companies signed an agreement based on shared trust."},{"en":"native","he":"מקומי, טבעי, שמוכר לאדם מלידה","pos":"adj","sentence":"English is not her *native* language.","paraphrase":"English is not her first language."},{"en":"negligence","he":"רשלנות, הזנחה","pos":"n","sentence":"The lawsuit accused the company of *negligence*.","paraphrase":"The lawsuit accused the company of carelessness."},{"en":"nominal","he":"סימלי, שמי","pos":"adj","sentence":"The museum charges only a *nominal* entry fee on Sundays.","paraphrase":"The museum charges only a token entry fee on Sundays."},{"en":"notion","he":"מושג, רעיון","pos":"n","sentence":"She rejected the *notion* that success requires luck.","paraphrase":"She rejected the idea that success requires luck."},{"en":"nutrition","he":"תזונה","pos":"n","sentence":"The clinic offers free classes on *nutrition* for new parents.","paraphrase":"The clinic offers free classes on healthy eating for new parents."},{"en":"obscure","he":"מעורפל","pos":"adj","sentence":"The book references an *obscure* nineteenth-century painter.","paraphrase":"The book references a little-known nineteenth-century painter."},{"en":"obviously","he":"וודאי ,ללא ספק","pos":"adv","sentence":"*Obviously*, the flight delay ruined our travel plans.","paraphrase":"Clearly, the flight delay ruined our travel plans."},{"en":"offensive","he":"פוגעני, דוחה, התקפה ,מעליב","pos":"adj","sentence":"Some viewers found the comedian's jokes deeply *offensive*.","paraphrase":"Some viewers found the comedian's jokes deeply insulting."},{"en":"opaque","he":"לא ברור","pos":"adj","sentence":"The windows were covered with *opaque* glass for privacy.","paraphrase":"The windows were covered with non-transparent glass for privacy."},{"en":"oppression","he":"דיכוי","pos":"n","sentence":"The novel describes life under decades of political *oppression*.","paraphrase":"The novel describes life under decades of political tyranny."},{"en":"organization","he":"ארגון","pos":"n","sentence":"She volunteers for a local *organization* that helps the homeless.","paraphrase":"She volunteers for a local group that helps the homeless."},{"en":"ostracize","he":"להדרה","pos":"v","sentence":"Classmates began to *ostracize* the new student for no clear reason.","paraphrase":"Classmates began to exclude the new student for no clear reason."},{"en":"panacea","he":"תרופה לכל","pos":"n","sentence":"Exercise is helpful, but it is not a *panacea* for every illness.","paraphrase":"Exercise is helpful, but it is not a cure-all for every illness."},{"en":"parsimonious","he":"קמצני מאוד","pos":"adj","sentence":"The *parsimonious* landlord refused to fix the broken heater.","paraphrase":"The extremely stingy landlord refused to fix the broken heater."},{"en":"paucity","he":"מחסור, מעטיות","pos":"n","sentence":"Researchers noted a *paucity* of evidence supporting the theory.","paraphrase":"Researchers noted a scarcity of evidence supporting the theory."},{"en":"people","he":"אנשים, עם","pos":"n","sentence":"Thousands of *people* gathered in the square for the concert.","paraphrase":"Thousands of individuals gathered in the square for the concert."},{"en":"period","he":"נקודה, וסת ,תקופה, עונה","pos":"n","sentence":"Sales dropped sharply during that *period* of the year.","paraphrase":"Sales dropped sharply during that time of the year."},{"en":"persist","he":"להתמיד","pos":"v","sentence":"The rumors about the merger continued to *persist* despite the denial.","paraphrase":"The rumors about the merger continued despite the denial."},{"en":"peruse","he":"לעיין","pos":"v","sentence":"She likes to *peruse* the newspaper with her morning coffee.","paraphrase":"She likes to read through the newspaper with her morning coffee."},{"en":"plant","he":"לשתול, צמח, מפעל","pos":"v","sentence":"Volunteers will *plant* new trees along the riverbank this weekend.","paraphrase":"Volunteers will put new trees in the ground along the riverbank this weekend."},{"en":"polarize","he":"לקטב, להנגיד","pos":"v","sentence":"The proposed law continues to *polarize* public opinion.","paraphrase":"The proposed law continues to divide public opinion."},{"en":"population","he":"אוכלוסייה","pos":"n","sentence":"The city's *population* has doubled in the past twenty years.","paraphrase":"The city's number of residents has doubled in the past twenty years."},{"en":"possible","he":"אפשרי","pos":"adj","sentence":"Is it *possible* to finish the project by Friday?","paraphrase":"Is it feasible to finish the project by Friday?"},{"en":"praise","he":"להלל, לשבח, שבח","pos":"v","sentence":"Critics *praise* the film for its stunning visual effects.","paraphrase":"Critics commend the film for its stunning visual effects."},{"en":"predicament","he":"מצוקה, בעיה","pos":"n","sentence":"Losing his passport abroad put him in a difficult *predicament*.","paraphrase":"Losing his passport abroad put him in a difficult situation."},{"en":"preparation","he":"הכנה","pos":"n","sentence":"Months of *preparation* went into planning the wedding.","paraphrase":"Months of careful groundwork went into planning the wedding."},{"en":"previous","he":"הקודם","pos":"adj","sentence":"In the *previous* chapter, the author introduces the main character.","paraphrase":"In the earlier chapter, the author introduces the main character."},{"en":"privilege","he":"זכות יתר, פריבילגיה","pos":"n","sentence":"Attending that school is considered a *privilege* in the community.","paraphrase":"Attending that school is considered a special advantage in the community."},{"en":"profound","he":"מעמיק, עמוק, נחרץ","pos":"adj","sentence":"The loss had a *profound* effect on the entire family.","paraphrase":"The loss had a deep effect on the entire family."},{"en":"prolonged","he":"ממושך","pos":"adj","sentence":"A *prolonged* drought devastated crops across the region.","paraphrase":"An extended drought devastated crops across the region."},{"en":"proper","he":"תקין ,הולם, מתאים","pos":"adj","sentence":"Make sure you use the *proper* tools for this repair.","paraphrase":"Make sure you use the correct tools for this repair."},{"en":"prosperous","he":"מצליח ,משגשג","pos":"adj","sentence":"The town became remarkably *prosperous* after the factory opened.","paraphrase":"The town became remarkably successful and wealthy after the factory opened."},{"en":"prudent","he":"נבון, זהיר","pos":"adj","sentence":"It would be *prudent* to save part of the bonus rather than spend it all.","paraphrase":"It would be wise to save part of the bonus rather than spend it all."},{"en":"quality","he":"איכות, תכונה, מאפיין","pos":"n","sentence":"Customers complained about the poor *quality* of the fabric.","paraphrase":"Customers complained about the poor standard of the fabric."},{"en":"quixotic","he":"אידיאליסטי בצורה לא מציאותית","pos":"adj","sentence":"His *quixotic* plan to sail around the world alone worried his family.","paraphrase":"His unrealistically idealistic plan to sail around the world alone worried his family."},{"en":"random","he":"אקראי","pos":"adj","sentence":"The security guards perform *random* bag checks at the entrance.","paraphrase":"The security guards perform unpredictable bag checks at the entrance."},{"en":"reason","he":"היגיון, סיבה","pos":"n","sentence":"She never explained the *reason* for her sudden resignation.","paraphrase":"She never explained the cause of her sudden resignation."},{"en":"recently","he":"לאחרונה","pos":"adv","sentence":"The store *recently* opened a second location downtown.","paraphrase":"The store just opened a second location downtown."},{"en":"recover","he":"להתאושש, להחלים, לקבל בחזרה","pos":"v","sentence":"Doctors expect him to fully *recover* within a few weeks.","paraphrase":"Doctors expect him to fully heal within a few weeks."},{"en":"reform","he":"לתקן, להחזיר למוטב, תיקון, רפורמה","pos":"v","sentence":"Lawmakers are under pressure to *reform* the outdated tax system.","paraphrase":"Lawmakers are under pressure to update the outdated tax system."},{"en":"regime","he":"משטר","pos":"n","sentence":"The documentary examines daily life under the former *regime*.","paraphrase":"The documentary examines daily life under the former ruling government."},{"en":"rejoice","he":"לעלוץ ,לשמוח, לעלוז","pos":"v","sentence":"Fans began to *rejoice* the moment the final whistle blew.","paraphrase":"Fans began to celebrate joyfully the moment the final whistle blew."},{"en":"relief","he":"הקלה","pos":"n","sentence":"It brought great *relief* to hear that everyone survived the crash.","paraphrase":"It brought great comfort to hear that everyone survived the crash."},{"en":"report","he":"לדווח, דיווח","pos":"v","sentence":"Employees must *report* any safety hazards to their supervisor.","paraphrase":"Employees must inform their supervisor of any safety hazards."},{"en":"resolve","he":"לפתור, נחישות, החלטיות","pos":"v","sentence":"The two neighbors finally managed to *resolve* their dispute.","paraphrase":"The two neighbors finally managed to settle their dispute."},{"en":"retire","he":"לפרוש","pos":"v","sentence":"She plans to *retire* from teaching at the end of the year.","paraphrase":"She plans to stop working as a teacher at the end of the year."},{"en":"ridiculous","he":"מגוחך","pos":"adj","sentence":"It seemed *ridiculous* to cancel the trip over a small delay.","paraphrase":"It seemed absurd to cancel the trip over a small delay."},{"en":"ruins","he":"הריסות, עתיקות","pos":"n","sentence":"Tourists visit the ancient *ruins* every summer.","paraphrase":"Tourists visit the ancient remains every summer."},{"en":"scale","he":"להעלות, להעפיל, לשקול, למדוד, סולם, משקל, מאזניים, קשקש ,קנה מידה","pos":"n","sentence":"The project's *scale* surprised even its own investors.","paraphrase":"The project's size surprised even its own investors."},{"en":"scold","he":"לנזוף","pos":"v","sentence":"The teacher had to *scold* the students for talking during the test.","paraphrase":"The teacher had to reprimand the students for talking during the test."},{"en":"seize","he":"לאחוז ,לתפוס, ללכוד","pos":"v","sentence":"Customs officers moved to *seize* the illegal shipment at the port.","paraphrase":"Customs officers moved to confiscate the illegal shipment at the port."},{"en":"service","he":"טקס, דרשה ,לשרת, שירות","pos":"n","sentence":"The restaurant is known for its excellent *service*.","paraphrase":"The restaurant is known for its excellent customer care."},{"en":"shield","he":"להגן, מגן","pos":"v","sentence":"Parents often try to *shield* their children from bad news.","paraphrase":"Parents often try to protect their children from bad news."},{"en":"sincerely","he":"בכנות","pos":"adv","sentence":"I *sincerely* hope you feel better soon.","paraphrase":"I truly and honestly hope you feel better soon."},{"en":"softly","he":"ברכות","pos":"adv","sentence":"She spoke *softly* so as not to wake the baby.","paraphrase":"She spoke gently so as not to wake the baby."},{"en":"spacecraft","he":"חללית","pos":"n","sentence":"The *spacecraft* will reach Mars orbit next spring.","paraphrase":"The space vehicle will reach Mars orbit next spring."},{"en":"spread","he":"פיזור ,להפיץ, להתפשט","pos":"v","sentence":"News of the discovery began to *spread* quickly across campus.","paraphrase":"News of the discovery began to circulate quickly across campus."},{"en":"steam","he":"קיטור, לאדים","pos":"n","sentence":"*Steam* rose from the cup of hot tea.","paraphrase":"Vapor rose from the cup of hot tea."},{"en":"strict","he":"קפדן, נוקשה, מוחלט","pos":"adj","sentence":"The new coach has *strict* rules about attendance at practice.","paraphrase":"The new coach has rigid rules about attendance at practice."},{"en":"subjective","he":"אישי ,סובייקטיבי","pos":"adj","sentence":"Taste in art is highly *subjective*.","paraphrase":"Taste in art is highly personal and based on opinion."},{"en":"subtle","he":"שנון, מתוחכם ,מעודן, דק","pos":"adj","sentence":"There is a *subtle* difference between the two shades of blue.","paraphrase":"There is a slight, hard-to-notice difference between the two shades of blue."},{"en":"summit","he":"פסגה","pos":"n","sentence":"World leaders will meet at the climate *summit* next month.","paraphrase":"World leaders will meet at the climate conference next month."},{"en":"surcharge","he":"תשלום נוסף, מטען עודף","pos":"n","sentence":"The airline added a fuel *surcharge* to every ticket.","paraphrase":"The airline added a fuel extra fee to every ticket."},{"en":"surveillance","he":"מעקב, פיקוח","pos":"n","sentence":"The store installed cameras to increase *surveillance* of the parking lot.","paraphrase":"The store installed cameras to increase monitoring of the parking lot."},{"en":"symmetry","he":"סימטריה","pos":"n","sentence":"The architect designed the building with perfect *symmetry*.","paraphrase":"The architect designed the building with perfectly balanced proportions."},{"en":"taint","he":"לזהם, פגם, זיהום ,לפגום, להכתים","pos":"v","sentence":"A single scandal can *taint* an entire company's reputation.","paraphrase":"A single scandal can damage an entire company's reputation."},{"en":"tedious","he":"משעמם, מעייף","pos":"adj","sentence":"Filling out the same form five times felt *tedious*.","paraphrase":"Filling out the same form five times felt tiresome and boring."},{"en":"tense","he":"מתוח, לחוץ, זמן","pos":"adj","sentence":"The room grew *tense* as the negotiations dragged on.","paraphrase":"The room grew strained and uneasy as the negotiations dragged on."},{"en":"therefore","he":"לכן","pos":"adv","sentence":"The bridge is closed for repairs; *therefore*, traffic will be rerouted.","paraphrase":"The bridge is closed for repairs; as a result, traffic will be rerouted."},{"en":"topic","he":"נושא, תחום","pos":"n","sentence":"The professor chose an unusual *topic* for her next lecture.","paraphrase":"The professor chose an unusual subject for her next lecture."},{"en":"tradition","he":"מסורת","pos":"n","sentence":"It is a family *tradition* to bake cookies every December.","paraphrase":"It is a family custom to bake cookies every December."},{"en":"translation","he":"תרגום","pos":"n","sentence":"The publisher hired an expert to review the *translation* before printing.","paraphrase":"The publisher hired an expert to review the converted text before printing."},{"en":"tremble","he":"לרעוד, לשקשק, לפחד","pos":"v","sentence":"Her hands began to *tremble* as she opened the envelope.","paraphrase":"Her hands began to shake as she opened the envelope."},{"en":"trust","he":"לבטוח, לקוות, להפקיד, ביטחון, אמון, נאמנות","pos":"n","sentence":"It takes years to rebuild *trust* after a betrayal.","paraphrase":"It takes years to rebuild confidence after a betrayal."},{"en":"unequivocal","he":"חד-משמעי","pos":"adj","sentence":"The board gave an *unequivocal* answer: the merger would not proceed.","paraphrase":"The board gave a completely clear answer: the merger would not proceed."},{"en":"unreasonable","he":"לא הגיוני, שאינו שומע בקול ההיגיון","pos":"adj","sentence":"It felt *unreasonable* to expect the interns to work unpaid overtime.","paraphrase":"It felt unjustifiable to expect the interns to work unpaid overtime."},{"en":"urgency","he":"דחיפות, בהילות","pos":"n","sentence":"The doctor's tone conveyed a real sense of *urgency*.","paraphrase":"The doctor's tone conveyed a real sense of pressing importance."},{"en":"validate","he":"לאמת","pos":"v","sentence":"The results were sent to another lab to *validate* the findings.","paraphrase":"The results were sent to another lab to confirm the findings."},{"en":"ventilation","he":"אורור","pos":"n","sentence":"The kitchen needs better *ventilation* to clear the smoke.","paraphrase":"The kitchen needs better airflow to clear the smoke."},{"en":"vicissitude","he":"שינוי פתאומי ובלתי צפוי","pos":"n","sentence":"The memoir describes the *vicissitudes* of a life spent at sea.","paraphrase":"The memoir describes the ups and downs of a life spent at sea."},{"en":"visible","he":"שניתן לראות אותו","pos":"adj","sentence":"The mountain peak was barely *visible* through the fog.","paraphrase":"The mountain peak could barely be seen through the fog."},{"en":"waive","he":"לוותר","pos":"v","sentence":"The university agreed to *waive* the application fee for veterans.","paraphrase":"The university agreed to give up the application fee for veterans."},{"en":"yield","he":"להיכנע, לסגת ,להניב, להפיק","pos":"v","sentence":"Farmers hope the new seeds will *yield* a larger harvest.","paraphrase":"Farmers hope the new seeds will produce a larger harvest."},{"en":"whale","he":"להכות, לוויתן","pos":"n","sentence":"A blue *whale* can grow longer than three school buses.","paraphrase":"A blue ocean giant can grow longer than three school buses."}]};
+</script>
+<script>
+(function(){
+'use strict';
+
+var DATA = window.GAME_DATA;
+var VOCAB = DATA.vocab;
+var IDIOMS = DATA.idioms;
+var SENT = DATA.sentences;
+
+var ICONS = {
+  trivia: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.8 2.8 0 0 1 5.4.9c0 1.9-2.8 2.1-2.8 4"/><circle cx="12" cy="17.2" r=".4" fill="currentColor" stroke="none"/></svg>',
+  complete: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="7.5" x2="20" y2="7.5"/><line x1="4" y1="12" x2="10.5" y2="12"/><line x1="14.5" y1="12" x2="20" y2="12" stroke-dasharray="1 3.2"/><line x1="4" y1="16.5" x2="16" y2="16.5"/></svg>',
+  rephrase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12a7.5 7.5 0 0 1 12.8-5.3M19.5 3v4.2h-4.2"/><path d="M19.5 12a7.5 7.5 0 0 1-12.8 5.3M4.5 21v-4.2h4.2"/></svg>',
+  swipe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4.5" width="12" height="16" rx="2.5"/><path d="M20 9.5l2.2 2.5-2.2 2.5M4 9.5l-2.2 2.5L4 14.5"/></svg>',
+  eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.6"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg>'
+};
+
+/* ---------------- storage ---------------- */
+var Store = {
+  mem: {},
+  get: function(key, fallback){
+    try{
+      var v = localStorage.getItem(key);
+      if(v === null) return fallback;
+      return JSON.parse(v);
+    }catch(e){
+      return (key in this.mem) ? this.mem[key] : fallback;
+    }
+  },
+  set: function(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); }
+    catch(e){ this.mem[key] = val; }
+  }
+};
+
+var DEFAULT_PROGRESS = {
+  swipe: {},
+  scores: {
+    trivia: {correct:0, total:0, best:0, streak:0},
+    complete: {correct:0, total:0, best:0, streak:0},
+    rephrase: {correct:0, total:0, best:0, streak:0}
+  }
+};
+var progress = Store.get('lex2000_progress_v1', null) || DEFAULT_PROGRESS;
+if(!progress.swipe) progress.swipe = {};
+if(!progress.scores) progress.scores = DEFAULT_PROGRESS.scores;
+['trivia','complete','rephrase'].forEach(function(k){
+  if(!progress.scores[k]) progress.scores[k] = {correct:0,total:0,best:0,streak:0};
+});
+function saveProgress(){ Store.set('lex2000_progress_v1', progress); }
+
+/* ---------------- utils ---------------- */
+function shuffle(arr){
+  var a = arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t=a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function sentenceParts(s){
+  var i1 = s.indexOf('*'), i2 = s.indexOf('*', i1+1);
+  return {before: s.slice(0,i1), word: s.slice(i1+1,i2), after: s.slice(i2+1)};
+}
+function pct(a,b){ return b ? Math.round(100*a/b) : 0; }
+
+/* ---------------- app shell / router ---------------- */
+var app = document.getElementById('app');
+var state = {screen:'home'};
+var currentKeyHandler = null;
+
+function go(screen, extra){
+  if(currentKeyHandler){ document.removeEventListener('keydown', currentKeyHandler); currentKeyHandler = null; }
+  state = Object.assign({screen: screen}, extra || {});
+  render();
+  try { window.scrollTo(0,0); } catch(e){}
+}
+
+function render(){
+  if(state.screen === 'home') renderHome();
+  else if(state.screen === 'trivia') renderTrivia();
+  else if(state.screen === 'complete') renderCompletion();
+  else if(state.screen === 'rephrase') renderRephrase();
+  else if(state.screen === 'swipe') renderSwipe();
+}
+
+function topbar(title, rightHtml){
+  return '' +
+  '<div class="topbar">' +
+    '<div class="tb-side"><button class="iconbtn" id="backBtn">' + ICONS.back + '</button></div>' +
+    '<div class="tb-title">' + title + '</div>' +
+    '<div class="tb-side">' + (rightHtml||'') + '</div>' +
+  '</div>';
+}
+function bindBack(){
+  var b = document.getElementById('backBtn');
+  if(b) b.addEventListener('click', function(){ go('home'); });
+}
+
+function showStamp(container, ok){
+  var wrap = document.createElement('div');
+  wrap.className = 'stamp-wrap';
+  wrap.innerHTML = '<div class="stamp ' + (ok?'ok':'no') + '">' + (ok?'&#10003; נכון':'&#10007; טעות') + '</div>';
+  container.appendChild(wrap);
+  setTimeout(function(){ wrap.remove(); }, 700);
+}
+
+/* ================= HOME ================= */
+function renderHome(){
+  var knownVocab = 0, seenVocab = 0;
+  Object.keys(progress.swipe).forEach(function(k){
+    if(k.indexOf('v:')===0){ seenVocab++; if(progress.swipe[k]==='known') knownVocab++; }
+  });
+  var triviaAcc = pct(progress.scores.trivia.correct, progress.scores.trivia.total);
+
+  app.innerHTML =
+  '<div class="topbar">' +
+    '<div class="tb-side"></div>' +
+    '<div class="tb-title">לקסיקון 2000</div>' +
+    '<div class="tb-side"></div>' +
+  '</div>' +
+  '<main>' +
+    '<div class="hero">' +
+      '<div class="tag">AMIRNET · פסיכומטרי · אנגלית אקדמית</div>' +
+      '<h1>אימון אוצר<br>מילים <em>חכם</em></h1>' +
+      '<p>' + VOCAB.length + ' מילים מתקדמות ו-' + IDIOMS.length + ' ביטויים, בארבעה מצבי תרגול.</p>' +
+    '</div>' +
+    '<div class="stat-strip">' +
+      '<div class="stat-card"><b>' + VOCAB.length + '</b><span>מילים במאגר</span></div>' +
+      '<div class="stat-card"><b>' + knownVocab + '</b><span>סומנו כידועות</span></div>' +
+      '<div class="stat-card"><b>' + triviaAcc + '%</b><span>דיוק בחידון</span></div>' +
+    '</div>' +
+    '<div class="section-title" style="margin-top:26px;"><span class="swatch"></span>מצבי משחק</div>' +
+    '<div class="mode-grid">' +
+      modeCard('trivia', '01 / תרגום', ICONS.trivia, 'חידון תרגום', 'בחרו את התרגום הנכון למילה באנגלית.', progress.scores.trivia.total + ' שאלות') +
+      modeCard('complete', '02 / השלמה', ICONS.complete, 'השלמת משפטים', 'השלימו את המילה החסרה במשפט.', progress.scores.complete.total + ' שאלות') +
+      modeCard('rephrase', '03 / ניסוח', ICONS.rephrase, 'ניסוח מחדש', 'בחרו את המשפט בעל אותה משמעות.', progress.scores.rephrase.total + ' שאלות') +
+      modeCard('swipe', '04 / כרטיסיות', ICONS.swipe, 'כרטיסיות', 'החליקו ימינה אם ידעתם, שמאלה אם לא.', knownVocab + '/' + VOCAB.length + ' ידועות') +
+    '</div>' +
+    '<div class="home-footer">כלי תרגול אישי שנבנה מרשימת המילים שלך · ההתקדמות נשמרת בדפדפן שלך בלבד</div>' +
+  '</main>';
+
+  app.querySelectorAll('[data-go]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var target = btn.getAttribute('data-go');
+      if(target==='swipe') startSwipe('vocab', false);
+      else if(target==='trivia') startTrivia();
+      else if(target==='complete') startCompletion();
+      else if(target==='rephrase') startRephrase();
+    });
+  });
+}
+function modeCard(id, num, icon, title, desc, progText){
+  return '<button class="mode-card" data-go="' + id + '">' +
+    '<span class="catalog-tab"></span>' +
+    '<span class="num">' + num + '</span>' +
+    '<span class="ico">' + icon + '</span>' +
+    '<h3>' + title + '</h3>' +
+    '<p>' + desc + '</p>' +
+    '<span class="prog">' + progText + '</span>' +
+  '</button>';
+}
+
+/* ================= TRIVIA ================= */
+var trivia = null;
+function startTrivia(){
+  trivia = {pool:'vocab'};
+  newTriviaQuestion();
+  go('trivia');
+}
+function newTriviaQuestion(){
+  var pool = trivia.pool==='vocab' ? VOCAB : IDIOMS;
+  var correct = pick(pool);
+  var distractors = [], tries = 0;
+  while(distractors.length < 3 && tries < 80){
+    var cand = pick(pool);
+    if(cand.en !== correct.en && cand.he !== correct.he && !distractors.some(function(d){return d.he===cand.he;})){
+      distractors.push(cand);
+    }
+    tries++;
+  }
+  trivia.correct = correct;
+  trivia.options = shuffle([correct].concat(distractors));
+  trivia.answered = false;
+}
+function renderTrivia(){
+  var sc = progress.scores.trivia;
+  var acc = pct(sc.correct, sc.total);
+  app.innerHTML =
+    topbar('חידון תרגום', '<span class="tb-stat">רצף ' + sc.streak + '</span>') +
+    '<main>' +
+      '<div class="pool-toggle">' +
+        '<button data-pool="vocab" class="' + (trivia.pool==='vocab'?'active':'') + '">מילים</button>' +
+        '<button data-pool="idioms" class="' + (trivia.pool==='idioms'?'active':'') + '">ביטויים</button>' +
+      '</div>' +
+      '<div class="progress-row">' +
+        '<div class="progress-track"><div class="progress-fill" style="width:' + acc + '%"></div></div>' +
+        '<div class="progress-num">' + sc.correct + '/' + sc.total + ' &middot; ' + acc + '%</div>' +
+      '</div>' +
+      '<div class="quiz-card" id="quizCard">' +
+        '<div class="quiz-label">מהו התרגום הנכון למילה?</div>' +
+        '<div class="quiz-word">' + esc(trivia.correct.en) + '</div>' +
+        '<div class="options" id="optionsWrap">' +
+          trivia.options.map(function(o,i){
+            return '<button class="option-btn" data-idx="' + i + '"><span class="opt-text">' + esc(o.he) + '</span><span class="badge"></span></button>';
+          }).join('') +
+        '</div>' +
+        '<div class="feedback-row hidden" id="feedbackRow">' +
+          '<div class="reveal-note" id="revealNote"></div>' +
+          '<button class="next-btn" id="nextBtn">הבא &rsaquo;</button>' +
+        '</div>' +
+      '</div>' +
+    '</main>';
+  bindTrivia();
+}
+function bindTrivia(){
+  bindBack();
+  app.querySelectorAll('.pool-toggle button').forEach(function(b){
+    b.addEventListener('click', function(){
+      trivia.pool = b.getAttribute('data-pool');
+      newTriviaQuestion();
+      renderTrivia();
+    });
+  });
+  app.querySelectorAll('.option-btn').forEach(function(b){
+    b.addEventListener('click', function(){ onTriviaAnswer(parseInt(b.getAttribute('data-idx'),10)); });
+  });
+  var nb = document.getElementById('nextBtn');
+  if(nb) nb.addEventListener('click', function(){ newTriviaQuestion(); renderTrivia(); });
+}
+function onTriviaAnswer(idx){
+  if(trivia.answered) return;
+  trivia.answered = true;
+  var chosen = trivia.options[idx];
+  var isCorrect = chosen.he === trivia.correct.he;
+  var sc = progress.scores.trivia;
+  sc.total++;
+  if(isCorrect){ sc.correct++; sc.streak++; sc.best = Math.max(sc.best, sc.streak); } else sc.streak = 0;
+  saveProgress();
+
+  app.querySelectorAll('.option-btn').forEach(function(b,i){
+    b.disabled = true;
+    var badge = b.querySelector('.badge');
+    if(trivia.options[i].he === trivia.correct.he){ b.classList.add('correct'); if(badge) badge.innerHTML='&#10003;'; }
+    else if(i===idx){ b.classList.add('wrong'); if(badge) badge.innerHTML='&#10007;'; }
+  });
+  document.getElementById('feedbackRow').classList.remove('hidden');
+  document.getElementById('revealNote').innerHTML = isCorrect
+    ? 'נכון! <b>' + esc(trivia.correct.en) + '</b> = ' + esc(trivia.correct.he)
+    : 'התשובה הנכונה: <b>' + esc(trivia.correct.he) + '</b>';
+  showStamp(document.getElementById('quizCard'), isCorrect);
+  var tbStat = document.querySelector('.tb-stat');
+  if(tbStat) tbStat.textContent = 'רצף ' + sc.streak;
+}
+
+/* ================= SENTENCE COMPLETION ================= */
+var completion = null;
+function startCompletion(){
+  completion = {};
+  newCompletionQuestion();
+  go('complete');
+}
+function newCompletionQuestion(){
+  var correct = pick(SENT);
+  var samePos = SENT.filter(function(e){ return e.pos===correct.pos && e.en!==correct.en; });
+  var distractors = shuffle(samePos).slice(0,3);
+  if(distractors.length < 3){
+    var used = distractors.concat([correct]);
+    var others = shuffle(SENT.filter(function(e){ return used.indexOf(e)===-1; })).slice(0, 3-distractors.length);
+    distractors = distractors.concat(others);
+  }
+  completion.correct = correct;
+  completion.options = shuffle([correct].concat(distractors));
+  completion.answered = false;
+}
+function renderCompletion(){
+  var sc = progress.scores.complete;
+  var acc = pct(sc.correct, sc.total);
+  var parts = sentenceParts(completion.correct.sentence);
+  app.innerHTML =
+    topbar('השלמת משפטים', '<span class="tb-stat">רצף ' + sc.streak + '</span>') +
+    '<main>' +
+      '<div class="progress-row">' +
+        '<div class="progress-track"><div class="progress-fill" style="width:' + acc + '%"></div></div>' +
+        '<div class="progress-num">' + sc.correct + '/' + sc.total + ' &middot; ' + acc + '%</div>' +
+      '</div>' +
+      '<div class="quiz-card" id="quizCard">' +
+        '<div class="quiz-label">השלימו את המילה החסרה</div>' +
+        '<div class="quiz-sentence">' + esc(parts.before) + '<span class="blank">_____</span>' + esc(parts.after) + '</div>' +
+        '<div class="options" id="optionsWrap" style="margin-top:18px;">' +
+          completion.options.map(function(o,i){
+            return '<button class="option-btn" data-idx="' + i + '" data-dir="ltr"><span class="opt-text">' + esc(o.en) + '</span><span class="badge"></span></button>';
+          }).join('') +
+        '</div>' +
+        '<div class="feedback-row hidden" id="feedbackRow">' +
+          '<div class="reveal-note" id="revealNote"></div>' +
+          '<button class="next-btn" id="nextBtn">הבא &rsaquo;</button>' +
+        '</div>' +
+      '</div>' +
+    '</main>';
+  bindCompletion();
+}
+function bindCompletion(){
+  bindBack();
+  app.querySelectorAll('.option-btn').forEach(function(b){
+    b.addEventListener('click', function(){ onCompletionAnswer(parseInt(b.getAttribute('data-idx'),10)); });
+  });
+  var nb = document.getElementById('nextBtn');
+  if(nb) nb.addEventListener('click', function(){ newCompletionQuestion(); renderCompletion(); });
+}
+function onCompletionAnswer(idx){
+  if(completion.answered) return;
+  completion.answered = true;
+  var chosen = completion.options[idx];
+  var isCorrect = chosen.en === completion.correct.en;
+  var sc = progress.scores.complete;
+  sc.total++;
+  if(isCorrect){ sc.correct++; sc.streak++; sc.best = Math.max(sc.best, sc.streak); } else sc.streak = 0;
+  saveProgress();
+
+  app.querySelectorAll('.option-btn').forEach(function(b,i){
+    b.disabled = true;
+    var badge = b.querySelector('.badge');
+    if(completion.options[i].en === completion.correct.en){ b.classList.add('correct'); if(badge) badge.innerHTML='&#10003;'; }
+    else if(i===idx){ b.classList.add('wrong'); if(badge) badge.innerHTML='&#10007;'; }
+  });
+  document.getElementById('feedbackRow').classList.remove('hidden');
+  document.getElementById('revealNote').innerHTML = isCorrect
+    ? 'מדויק! <b>' + esc(completion.correct.en) + '</b> = ' + esc(completion.correct.he)
+    : 'המילה הנכונה: <b>' + esc(completion.correct.en) + '</b> (' + esc(completion.correct.he) + ')';
+  showStamp(document.getElementById('quizCard'), isCorrect);
+  var tbStat = document.querySelector('.tb-stat');
+  if(tbStat) tbStat.textContent = 'רצף ' + sc.streak;
+}
+
+/* ================= SENTENCE REPHRASING ================= */
+var rephrase = null;
+function startRephrase(){
+  rephrase = {};
+  newRephraseQuestion();
+  go('rephrase');
+}
+function newRephraseQuestion(){
+  var correct = pick(SENT);
+  var distractors = [], tries = 0;
+  while(distractors.length < 3 && tries < 80){
+    var cand = pick(SENT);
+    if(cand.en !== correct.en && !distractors.some(function(d){return d.en===cand.en;})){
+      distractors.push(cand);
+    }
+    tries++;
+  }
+  rephrase.correct = correct;
+  rephrase.options = shuffle([correct].concat(distractors));
+  rephrase.answered = false;
+}
+function renderRephrase(){
+  var sc = progress.scores.rephrase;
+  var acc = pct(sc.correct, sc.total);
+  var parts = sentenceParts(rephrase.correct.sentence);
+  app.innerHTML =
+    topbar('ניסוח מחדש', '<span class="tb-stat">רצף ' + sc.streak + '</span>') +
+    '<main>' +
+      '<div class="progress-row">' +
+        '<div class="progress-track"><div class="progress-fill" style="width:' + acc + '%"></div></div>' +
+        '<div class="progress-num">' + sc.correct + '/' + sc.total + ' &middot; ' + acc + '%</div>' +
+      '</div>' +
+      '<div class="quiz-card" id="quizCard">' +
+        '<div class="quiz-label">איזה משפט אומר בדיוק את אותו הדבר?</div>' +
+        '<div class="quiz-sentence">' + esc(parts.before) + '<strong>' + esc(parts.word) + '</strong>' + esc(parts.after) + '</div>' +
+        '<div class="options" id="optionsWrap" style="margin-top:18px;">' +
+          rephrase.options.map(function(o,i){
+            return '<button class="option-btn" data-idx="' + i + '" data-dir="ltr"><span class="opt-text">' + esc(o.paraphrase) + '</span><span class="badge"></span></button>';
+          }).join('') +
+        '</div>' +
+        '<div class="feedback-row hidden" id="feedbackRow">' +
+          '<div class="reveal-note" id="revealNote"></div>' +
+          '<button class="next-btn" id="nextBtn">הבא &rsaquo;</button>' +
+        '</div>' +
+      '</div>' +
+    '</main>';
+  bindRephrase();
+}
+function bindRephrase(){
+  bindBack();
+  app.querySelectorAll('.option-btn').forEach(function(b){
+    b.addEventListener('click', function(){ onRephraseAnswer(parseInt(b.getAttribute('data-idx'),10)); });
+  });
+  var nb = document.getElementById('nextBtn');
+  if(nb) nb.addEventListener('click', function(){ newRephraseQuestion(); renderRephrase(); });
+}
+function onRephraseAnswer(idx){
+  if(rephrase.answered) return;
+  rephrase.answered = true;
+  var chosen = rephrase.options[idx];
+  var isCorrect = chosen.en === rephrase.correct.en;
+  var sc = progress.scores.rephrase;
+  sc.total++;
+  if(isCorrect){ sc.correct++; sc.streak++; sc.best = Math.max(sc.best, sc.streak); } else sc.streak = 0;
+  saveProgress();
+
+  app.querySelectorAll('.option-btn').forEach(function(b,i){
+    b.disabled = true;
+    var badge = b.querySelector('.badge');
+    if(rephrase.options[i].en === rephrase.correct.en){ b.classList.add('correct'); if(badge) badge.innerHTML='&#10003;'; }
+    else if(i===idx){ b.classList.add('wrong'); if(badge) badge.innerHTML='&#10007;'; }
+  });
+  document.getElementById('feedbackRow').classList.remove('hidden');
+  document.getElementById('revealNote').innerHTML = isCorrect
+    ? 'בדיוק! <b>' + esc(rephrase.correct.en) + '</b> = ' + esc(rephrase.correct.he)
+    : '<b>' + esc(rephrase.correct.en) + '</b> = ' + esc(rephrase.correct.he);
+  showStamp(document.getElementById('quizCard'), isCorrect);
+  var tbStat = document.querySelector('.tb-stat');
+  if(tbStat) tbStat.textContent = 'רצף ' + sc.streak;
+}
+
+/* ================= SWIPE CARDS ================= */
+var swipeState = null;
+function startSwipe(poolKey, reviewOnly){
+  var source = poolKey==='idioms'
+    ? IDIOMS.map(function(x){ return {en:x.en, he:x.he, key:'i:'+x.en}; })
+    : VOCAB.map(function(x){ return {en:x.en, he:x.he, key:'v:'+x.en}; });
+  var deck = source;
+  if(reviewOnly){
+    deck = deck.filter(function(x){ return progress.swipe[x.key] === 'unknown'; });
+  }
+  deck = shuffle(deck);
+  swipeState = {poolKey:poolKey, deck:deck, idx:0, knownCount:0, unknownCount:0, reviewOnly: !!reviewOnly};
+  go('swipe');
+}
+function renderSwipe(){
+  if(swipeState.deck.length === 0){
+    app.innerHTML =
+      topbar('כרטיסיות', '') +
+      '<main><div class="done-wrap">' +
+        '<div class="done-badge">' + ICONS.check + '</div>' +
+        '<h2>אין כרגע כרטיסים לחזרה</h2>' +
+        '<p>סימנתם את כל המילים בקבוצה הזו כ״ידועות״. אפשר להתחיל סבב חדש על כל הרשימה.</p>' +
+        '<button class="primary-btn" id="restartAll">סבב חדש &ndash; כל המילים</button>' +
+        '<button class="ghost-btn" id="backHome2">חזרה לדף הבית</button>' +
+      '</div></main>';
+    bindBack();
+    document.getElementById('restartAll').addEventListener('click', function(){ startSwipe(swipeState.poolKey, false); });
+    document.getElementById('backHome2').addEventListener('click', function(){ go('home'); });
+    return;
+  }
+  if(swipeState.idx >= swipeState.deck.length){
+    renderSwipeDone();
+    return;
+  }
+  var item = swipeState.deck[swipeState.idx];
+  var next1 = swipeState.deck[swipeState.idx+1];
+  app.innerHTML =
+    topbar('כרטיסיות', '<span class="tb-stat">' + (swipeState.idx+1) + '/' + swipeState.deck.length + '</span>') +
+    '<main>' +
+      '<div class="pool-toggle">' +
+        '<button data-pool="vocab" class="' + (swipeState.poolKey==='vocab' && !swipeState.reviewOnly?'active':'') + '">מילים</button>' +
+        '<button data-pool="idioms" class="' + (swipeState.poolKey==='idioms' && !swipeState.reviewOnly?'active':'') + '">ביטויים</button>' +
+        '<button data-pool="review" class="' + (swipeState.reviewOnly?'active':'') + '">לחזרה בלבד</button>' +
+      '</div>' +
+      '<div class="progress-row">' +
+        '<div class="progress-track"><div class="progress-fill" style="width:' + (swipeState.idx/swipeState.deck.length*100) + '%"></div></div>' +
+      '</div>' +
+      '<div class="swipe-area">' +
+        '<div class="card-stack" id="cardStack">' +
+          (next1 ? '<div class="swipe-card" style="transform:scale(.96) translateY(10px);opacity:.55;"><span class="catalog-tab"></span><div class="word">' + esc(next1.en) + '</div></div>' : '') +
+          '<div class="swipe-card" id="activeCard">' +
+            '<span class="catalog-tab"></span>' +
+            '<span class="idx">#' + (swipeState.idx+1) + '</span>' +
+            '<div class="stamp-hint know">&#10003; ידעתי</div>' +
+            '<div class="stamp-hint dontknow">&#10007; לא ידעתי</div>' +
+            '<div class="word">' + esc(item.en) + '</div>' +
+            '<div class="translation">' + esc(item.he) + '</div>' +
+            '<div class="tap-hint">הקישו לחשיפת התרגום</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="swipe-actions">' +
+          '<button class="swipe-btn no" id="btnNo">&#10007;</button>' +
+          '<button class="swipe-btn reveal" id="btnReveal">' + ICONS.eye + '</button>' +
+          '<button class="swipe-btn yes" id="btnYes">&#10003;</button>' +
+        '</div>' +
+        '<div class="swipe-meta"><span>ידועות: ' + swipeState.knownCount + '</span><span>לחזרה: ' + swipeState.unknownCount + '</span></div>' +
+      '</div>' +
+    '</main>';
+  bindSwipe();
+}
+function bindSwipe(){
+  bindBack();
+  app.querySelectorAll('.pool-toggle button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var val = b.getAttribute('data-pool');
+      if(val === 'review') startSwipe(swipeState.poolKey, !swipeState.reviewOnly);
+      else startSwipe(val, false);
+    });
+  });
+
+  var card = document.getElementById('activeCard');
+  var btnYes = document.getElementById('btnYes');
+  var btnNo = document.getElementById('btnNo');
+  var btnReveal = document.getElementById('btnReveal');
+  if(!card) return;
+
+  var startX=0, startY=0, dx=0, dragging=false, moved=false, committing=false;
+
+  function doCommit(dir){
+    if(committing) return;
+    committing = true;
+    commitSwipeAnimated(dir, card);
+  }
+
+  function setHints(t, dir){
+    var knowHint = card.querySelector('.stamp-hint.know');
+    var noHint = card.querySelector('.stamp-hint.dontknow');
+    if(!knowHint || !noHint) return;
+    if(dir>0){ knowHint.style.opacity=t; noHint.style.opacity=0; }
+    else if(dir<0){ noHint.style.opacity=t; knowHint.style.opacity=0; }
+    else { knowHint.style.opacity=0; noHint.style.opacity=0; }
+  }
+
+  function onDown(e){
+    if(committing) return;
+    dragging = true; moved = false;
+    card.classList.add('dragging');
+    var p = e.touches ? e.touches[0] : e;
+    startX = p.clientX; startY = p.clientY;
+    if(e.pointerId !== undefined){ try{ card.setPointerCapture(e.pointerId); }catch(err){} }
+  }
+  function onMove(e){
+    if(!dragging || committing) return;
+    var p = e.touches ? e.touches[0] : e;
+    dx = p.clientX - startX;
+    var dy = p.clientY - startY;
+    if(Math.abs(dx) > 6) moved = true;
+    if(Math.abs(dx) > Math.abs(dy)){
+      card.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx/16) + 'deg)';
+      setHints(Math.min(Math.abs(dx)/90,1), dx);
+    }
+  }
+  function onUp(){
+    if(!dragging) return;
+    dragging = false;
+    card.classList.remove('dragging');
+    if(committing) return;
+    if(Math.abs(dx) > 90){
+      doCommit(dx>0 ? 'known' : 'unknown');
+    } else {
+      card.style.transform = '';
+      setHints(0,0);
+      if(!moved) card.classList.toggle('revealed');
+    }
+    dx = 0;
+  }
+
+  card.addEventListener('pointerdown', onDown);
+  card.addEventListener('pointermove', onMove);
+  card.addEventListener('pointerup', onUp);
+  card.addEventListener('pointercancel', onUp);
+
+  if(btnYes) btnYes.addEventListener('click', function(){ doCommit('known'); });
+  if(btnNo) btnNo.addEventListener('click', function(){ doCommit('unknown'); });
+  if(btnReveal) btnReveal.addEventListener('click', function(){ if(!committing) card.classList.toggle('revealed'); });
+
+  currentKeyHandler = function(e){
+    if(state.screen !== 'swipe') return;
+    if(e.key === 'ArrowRight'){ doCommit('known'); }
+    else if(e.key === 'ArrowLeft'){ doCommit('unknown'); }
+    else if(e.key === ' '){ e.preventDefault(); if(!committing) card.classList.toggle('revealed'); }
+  };
+  document.addEventListener('keydown', currentKeyHandler);
+}
+function commitSwipeAnimated(dir, card){
+  card.style.transition = 'transform .3s ease, opacity .3s ease';
+  card.style.transform = 'translateX(' + (dir==='known'?520:-520) + 'px) rotate(' + (dir==='known'?22:-22) + 'deg)';
+  card.style.opacity = '0';
+  setTimeout(function(){ commitSwipe(dir); }, 240);
+}
+function commitSwipe(dir){
+  if(!swipeState || swipeState.idx >= swipeState.deck.length) return;
+  var item = swipeState.deck[swipeState.idx];
+  if(!item) return;
+  progress.swipe[item.key] = dir;
+  if(dir==='known') swipeState.knownCount++; else swipeState.unknownCount++;
+  saveProgress();
+  swipeState.idx++;
+  renderSwipe();
+}
+function renderSwipeDone(){
+  var p = pct(swipeState.knownCount, swipeState.deck.length);
+  app.innerHTML =
+    topbar('כרטיסיות', '') +
+    '<main><div class="done-wrap">' +
+      '<div class="done-badge">' + ICONS.check + '</div>' +
+      '<h2>סיימתם את החפיסה!</h2>' +
+      '<p>עברתם על ' + swipeState.deck.length + ' כרטיסים בסבב הזה.</p>' +
+      '<div class="done-stats">' +
+        '<div class="d-card"><b>' + swipeState.knownCount + '</b><span>ידועות</span></div>' +
+        '<div class="d-card"><b>' + swipeState.unknownCount + '</b><span>לחזרה</span></div>' +
+        '<div class="d-card"><b>' + p + '%</b><span>הצלחה</span></div>' +
+      '</div>' +
+      '<button class="primary-btn" id="reviewBtn">חזרה על מה שלא ידעתי (' + swipeState.unknownCount + ')</button>' +
+      '<button class="ghost-btn" id="shuffleBtn">סבב חדש &ndash; כל המילים</button>' +
+    '</div></main>';
+  bindBack();
+  document.getElementById('reviewBtn').addEventListener('click', function(){ startSwipe(swipeState.poolKey, true); });
+  document.getElementById('shuffleBtn').addEventListener('click', function(){ startSwipe(swipeState.poolKey, false); });
+}
+
+/* ---------------- init ---------------- */
+go('home');
+
+})();
+
+</script>
+</body>
+</html>
