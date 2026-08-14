@@ -1,5 +1,5 @@
-const CACHE_NAME = "shift-scheduler-v1";
-const PRECACHE = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
+const CACHE_NAME = "shift-scheduler-v2";
+const PRECACHE = ["./clockin-index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", function (event) {
   event.waitUntil(
