@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shift Scheduler</title>
+
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#15161F" />
+<link rel="icon" href="icon-192.png" type="image/png" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Shifts" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+  :root {
+    --ink: #15161F;
+    --ink-soft: #5B5C68;
+    --ink-faint: #9A9AA6;
+    --paper: #F1F1F6;
+    --card: #FFFFFF;
+    --line: #E3E3EA;
+    --dawn: #E8963C;
+    --dawn-soft: #FBEAD3;
+    --dawn-text: #9C5F17;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  .ss-app { min-height: 100vh; }
+  .ss-display { font-family: "Space Grotesk", system-ui, sans-serif; }
+  .ss-mono { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; }
+  .ss-card { background: var(--card); border: 1px solid var(--line); }
+  .ss-input { background: var(--card); border: 1px solid var(--line); color: var(--ink); }
+  .ss-input:focus { outline: none; box-shadow: 0 0 0 2px var(--ink); }
+  .ss-btn-primary { background: var(--ink); color: #fff; }
+  .ss-btn-primary:active { background: #26273A; }
+  .ss-btn-primary:focus-visible { outline: 2px solid var(--dawn); outline-offset: 2px; }
+  .ss-pill { background: var(--card); border: 1px solid var(--line); color: var(--ink-soft); }
+  .ss-pill-active { background: var(--ink); border: 1px solid var(--ink); color: #fff; }
+  .ss-step-btn { border: 1px solid var(--line); color: var(--ink-soft); background: var(--card); }
+  .ss-step-btn:disabled { opacity: 0.35; }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-pulse { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    });
+  }
+</script>
+
+<script>
+const { useState, useMemo, useEffect, useRef } = React;
+function IconClock(props) {
+  var size = props.size || 16;
+  return /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", width: size, height: size, fill: "none", stroke: props.color || "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, /* @__PURE__ */ React.createElement("circle", { cx: "12", cy: "12", r: "9" }), /* @__PURE__ */ React.createElement("path", { d: "M12 7v5l3 2" }));
+}
+function IconUsers(props) {
+  var size = props.size || 16;
+  return /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", width: size, height: size, fill: "none", stroke: props.color || "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, /* @__PURE__ */ React.createElement("path", { d: "M8 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" }), /* @__PURE__ */ React.createElement("path", { d: "M2 20c0-3.3 2.7-6 6-6s6 2.7 6 6" }), /* @__PURE__ */ React.createElement("path", { d: "M16 6.2a3.5 3.5 0 0 1 0 6.6" }), /* @__PURE__ */ React.createElement("path", { d: "M22 20c0-2.8-2-5.2-4.7-5.8" }));
+}
+function IconChevronLeft(props) {
+  var size = props.size || 16;
+  return /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", width: size, height: size, fill: "none", stroke: props.color || "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, /* @__PURE__ */ React.createElement("path", { d: "M15 18l-6-6 6-6" }));
+}
+function IconPlus(props) {
+  var size = props.size || 16;
+  return /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", width: size, height: size, fill: "none", stroke: props.color || "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, /* @__PURE__ */ React.createElement("path", { d: "M12 5v14M5 12h14" }));
+}
+function IconMinus(props) {
+  var size = props.size || 16;
+  return /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", width: size, height: size, fill: "none", stroke: props.color || "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, /* @__PURE__ */ React.createElement("path", { d: "M5 12h14" }));
+}
+function IconArrowRight(props) {
+  var size = props.size || 16;
+  return /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", width: size, height: size, fill: "none", stroke: props.color || "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, /* @__PURE__ */ React.createElement("path", { d: "M5 12h14M13 6l6 6-6 6" }));
+}
+function IconPencil(props) {
+  var size = props.size || 16;
+  return /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", width: size, height: size, fill: "none", stroke: props.color || "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, /* @__PURE__ */ React.createElement("path", { d: "M12 20h9" }), /* @__PURE__ */ React.createElement("path", { d: "M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" }));
+}
+function IconBell(props) {
+  var size = props.size || 16;
+  return /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", width: size, height: size, fill: "none", stroke: props.color || "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, /* @__PURE__ */ React.createElement("path", { d: "M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6" }), /* @__PURE__ */ React.createElement("path", { d: "M10.3 21a1.94 1.94 0 0 0 3.4 0" }));
+}
+function IconLink(props) {
+  var size = props.size || 16;
+  return /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", width: size, height: size, fill: "none", stroke: props.color || "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, /* @__PURE__ */ React.createElement("path", { d: "M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.5 1.5" }), /* @__PURE__ */ React.createElement("path", { d: "M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.5-1.5" }));
+}
+const PALETTE = [
+  "#8C9A3E",
+  "#5F9E4E",
+  "#4A9E72",
+  "#3F9E93",
+  "#3E8FA6",
+  "#4A76C4",
+  "#6B5FC7",
+  "#8B4FC2",
+  "#B84FA0",
+  "#C24F6E"
+];
+const STORAGE_KEY = "shift-scheduler-state-v1";
+function sameDay(a, b) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+function localDateKey(date) {
+  return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+}
+function formatTime(date) {
+  return String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0");
+}
+function formatDateHeader(date) {
+  const isToday = sameDay(date, /* @__PURE__ */ new Date());
+  const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
+  const md = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return isToday ? "Today \xB7 " + md : weekday + " \xB7 " + md;
+}
+function formatShortDate(date) {
+  if (!date) return "";
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+function formatHours(h) {
+  const rounded = Math.round(h * 10) / 10;
+  return (rounded % 1 === 0 ? rounded.toFixed(0) : rounded.toFixed(1)) + "h";
+}
+function isLiveShift(shift) {
+  const now = /* @__PURE__ */ new Date();
+  return now >= shift.start && now < shift.end;
+}
+function todayStr() {
+  const d = /* @__PURE__ */ new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function encodeState(obj) {
+  try {
+    const json = JSON.stringify(obj);
+    const bytes = new TextEncoder().encode(json);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  } catch (e) {
+    return "";
+  }
+}
+function decodeState(str) {
+  try {
+    let b64 = str.replace(/-/g, "+").replace(/_/g, "/");
+    while (b64.length % 4) b64 += "=";
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const json = new TextDecoder().decode(bytes);
+    return JSON.parse(json);
+  } catch (e) {
+    return null;
+  }
+}
+function loadFromHash() {
+  try {
+    const hash = window.location.hash;
+    if (hash && hash.indexOf("#s=") === 0) {
+      return decodeState(hash.slice(3));
+    }
+  } catch (e) {
+  }
+  return null;
+}
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+const HASH_STATE = loadFromHash();
+const SAVED = HASH_STATE || loadFromStorage() || {};
+function ShiftScheduler() {
+  const [view, setView] = useState(SAVED.view || "setup");
+  const [scheduleView, setScheduleView] = useState("day");
+  const [selectedPerson, setSelectedPerson] = useState(0);
+  const [tick, setTick] = useState(0);
+  const [editingShiftId, setEditingShiftId] = useState(null);
+  const [shareUrl, setShareUrl] = useState(null);
+  const [shareCopied, setShareCopied] = useState(false);
+  const [shiftHours, setShiftHours] = useState(typeof SAVED.shiftHours === "number" ? SAVED.shiftHours : 8);
+  const [startDate, setStartDate] = useState(SAVED.startDate || todayStr());
+  const [startTime, setStartTime] = useState(SAVED.startTime || "08:00");
+  const [numDays, setNumDays] = useState(typeof SAVED.numDays === "number" ? SAVED.numDays : 7);
+  const [numPeople, setNumPeople] = useState(typeof SAVED.numPeople === "number" ? SAVED.numPeople : 3);
+  const [names, setNames] = useState(Array.isArray(SAVED.names) ? SAVED.names : ["Alex", "Sam", "Jordan"]);
+  const [overrides, setOverrides] = useState(SAVED.overrides && typeof SAVED.overrides === "object" ? SAVED.overrides : {});
+  const [notifySettings, setNotifySettings] = useState(SAVED.notifySettings && typeof SAVED.notifySettings === "object" ? SAVED.notifySettings : {});
+  const notifiedRef = useRef(/* @__PURE__ */ new Set());
+  useEffect(() => {
+    if (HASH_STATE) {
+      try {
+        window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      } catch (e) {
+      }
+    }
+  }, []);
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 6e4);
+    return () => clearInterval(id);
+  }, []);
+  useEffect(() => {
+    const state = { shiftHours, startDate, startTime, numDays, numPeople, names, view, overrides, notifySettings };
+    const timeout = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+      }
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [shiftHours, startDate, startTime, numDays, numPeople, names, view, overrides, notifySettings]);
+  function updateNumPeople(n) {
+    n = Math.max(1, Math.min(12, n));
+    setNumPeople(n);
+    setNames((prev) => {
+      const next = [...prev];
+      while (next.length < n) next.push("Person " + (next.length + 1));
+      while (next.length > n) next.pop();
+      return next;
+    });
+  }
+  function updateName(i, value) {
+    setNames((prev) => {
+      const next = [...prev];
+      next[i] = value;
+      return next;
+    });
+  }
+  function adjustShiftDuration(id, delta) {
+    setOverrides((prev) => {
+      const current = prev[id] !== void 0 ? prev[id] : shiftHours;
+      const next = Math.max(1, Math.min(24, current + delta));
+      return { ...prev, [id]: next };
+    });
+  }
+  function resetShiftOverride(id) {
+    setOverrides((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  }
+  function toggleNotify(i) {
+    setNotifySettings((prev) => {
+      const current = prev[i] || { enabled: false, leadMinutes: 30 };
+      return { ...prev, [i]: { ...current, enabled: !current.enabled } };
+    });
+    try {
+      if (typeof Notification !== "undefined" && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+    } catch (e) {
+    }
+  }
+  function updateNotifyLead(i, minutes) {
+    setNotifySettings((prev) => {
+      const current = prev[i] || { enabled: true, leadMinutes: 30 };
+      return { ...prev, [i]: { ...current, leadMinutes: minutes } };
+    });
+  }
+  function handleShare() {
+    const encoded = encodeState({ shiftHours, startDate, startTime, numDays, numPeople, names, overrides });
+    const url = window.location.origin + window.location.pathname + "#s=" + encoded;
+    setShareUrl(url);
+    setShareCopied(false);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+          setShareCopied(true);
+          setTimeout(() => setShareCopied(false), 2500);
+        }).catch(() => {
+        });
+      }
+    } catch (e) {
+    }
+  }
+  const schedule = useMemo(() => {
+    const shifts = [];
+    const totalHours = numDays * 24;
+    let current = /* @__PURE__ */ new Date(startDate + "T" + startTime + ":00");
+    if (isNaN(current.getTime())) current = /* @__PURE__ */ new Date();
+    const endBoundary = new Date(current.getTime() + totalHours * 36e5);
+    let i = 0;
+    while (current < endBoundary && i < 2e3) {
+      const duration = overrides[i] !== void 0 && overrides[i] > 0 ? overrides[i] : shiftHours;
+      const shiftStart = new Date(current);
+      const shiftEnd = new Date(current.getTime() + duration * 36e5);
+      const idx = i % names.length;
+      shifts.push({
+        id: i,
+        start: shiftStart,
+        end: shiftEnd,
+        person: names[idx] && names[idx].trim() ? names[idx] : "Person " + (idx + 1),
+        personIndex: idx
+      });
+      current = shiftEnd;
+      i++;
+    }
+    return shifts;
+  }, [shiftHours, startDate, startTime, numDays, names, overrides]);
+  const groupedByDay = useMemo(() => {
+    const groups = [];
+    const map = {};
+    schedule.forEach((shift) => {
+      const key = localDateKey(shift.start);
+      if (!map[key]) {
+        map[key] = [];
+        groups.push({ key, shifts: map[key] });
+      }
+      map[key].push(shift);
+    });
+    return groups;
+  }, [schedule]);
+  const groupedByPerson = useMemo(() => {
+    const groups = names.map(() => []);
+    schedule.forEach((shift) => {
+      if (groups[shift.personIndex]) groups[shift.personIndex].push(shift);
+    });
+    return groups;
+  }, [schedule, names]);
+  const summary = useMemo(() => {
+    return names.map((name, i) => {
+      const shifts = schedule.filter((s) => s.personIndex === i);
+      const hours = shifts.reduce((sum, s) => sum + (s.end - s.start) / 36e5, 0);
+      return {
+        name: name && name.trim() ? name : "Person " + (i + 1),
+        shiftsCount: shifts.length,
+        hours
+      };
+    });
+  }, [schedule, names]);
+  const currentShift = useMemo(() => schedule.find(isLiveShift), [schedule, tick]);
+  const activePerson = Math.min(selectedPerson, Math.max(0, names.length - 1));
+  const notifyWarning = useMemo(() => {
+    try {
+      if (typeof Notification === "undefined") return "Notifications aren't supported in this browser.";
+      if (Notification.permission === "denied") return "Notifications are blocked \u2014 check your browser's site settings to allow them.";
+    } catch (e) {
+      return "Notifications aren't available here.";
+    }
+    return null;
+  }, [tick]);
+  useEffect(() => {
+    function check() {
+      let granted = false;
+      try {
+        granted = typeof Notification !== "undefined" && Notification.permission === "granted";
+      } catch (e) {
+      }
+      if (!granted) return;
+      const now = /* @__PURE__ */ new Date();
+      schedule.forEach((shift) => {
+        const setting = notifySettings[shift.personIndex];
+        if (!setting || !setting.enabled) return;
+        const notifyAt = new Date(shift.start.getTime() - setting.leadMinutes * 6e4);
+        const key = shift.personIndex + ":" + shift.id + ":" + shift.start.getTime();
+        if (now >= notifyAt && now < shift.start && !notifiedRef.current.has(key)) {
+          notifiedRef.current.add(key);
+          sendNotification(shift, setting.leadMinutes);
+        }
+      });
+    }
+    check();
+    const id = setInterval(check, 2e4);
+    return () => clearInterval(id);
+  }, [schedule, notifySettings]);
+  function sendNotification(shift, leadMinutes) {
+    const title = shift.person + "'s shift starts in " + leadMinutes + " min";
+    const body = "Starts at " + formatTime(shift.start);
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+        navigator.serviceWorker.ready.then(function(reg) {
+          if (reg && reg.showNotification) {
+            reg.showNotification(title, { body, icon: "icon-192.png", badge: "icon-192.png" });
+          } else {
+            new Notification(title, { body });
+          }
+        }).catch(function() {
+          try {
+            new Notification(title, { body });
+          } catch (e2) {
+          }
+        });
+      } else {
+        new Notification(title, { body });
+      }
+    } catch (e) {
+    }
+  }
+  return /* @__PURE__ */ React.createElement("div", { className: "ss-app min-h-screen px-4 py-6" }, /* @__PURE__ */ React.createElement("div", { className: "max-w-md mx-auto" }, view === "setup" ? /* @__PURE__ */ React.createElement(
+    SetupView,
+    {
+      shiftHours,
+      setShiftHours,
+      startDate,
+      setStartDate,
+      startTime,
+      setStartTime,
+      numDays,
+      setNumDays,
+      numPeople,
+      updateNumPeople,
+      names,
+      updateName,
+      notifySettings,
+      toggleNotify,
+      updateNotifyLead,
+      notifyWarning,
+      onGenerate: () => setView("schedule")
+    }
+  ) : /* @__PURE__ */ React.createElement(
+    ScheduleView,
+    {
+      schedule,
+      names,
+      groupedByDay,
+      groupedByPerson,
+      summary,
+      currentShift,
+      scheduleView,
+      setScheduleView,
+      activePerson,
+      setSelectedPerson,
+      onEdit: () => {
+        setView("setup");
+        setShareUrl(null);
+      },
+      overrides,
+      editingShiftId,
+      setEditingShiftId,
+      adjustShiftDuration,
+      resetShiftOverride,
+      onShare: handleShare,
+      shareUrl,
+      shareCopied
+    }
+  )));
+}
+function Toggle(props) {
+  const { checked, onChange } = props;
+  return /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      type: "button",
+      role: "switch",
+      "aria-checked": checked,
+      onClick: onChange,
+      className: "relative rounded-full flex-shrink-0",
+      style: { width: 36, height: 20, background: checked ? "var(--ink)" : "var(--line)" }
+    },
+    /* @__PURE__ */ React.createElement("span", { className: "absolute rounded-full bg-white", style: { width: 16, height: 16, top: 2, left: checked ? 18 : 2, transition: "left 0.15s" } })
+  );
+}
+function SetupView(props) {
+  const { shiftHours, setShiftHours, startDate, setStartDate, startTime, setStartTime, numDays, setNumDays, numPeople, updateNumPeople, names, updateName, notifySettings, toggleNotify, updateNotifyLead, notifyWarning, onGenerate } = props;
+  return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "mb-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2 mb-1.5" }, /* @__PURE__ */ React.createElement("div", { className: "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", style: { background: "var(--ink)" } }, /* @__PURE__ */ React.createElement(IconClock, { size: 16, color: "#fff" })), /* @__PURE__ */ React.createElement("h1", { className: "ss-display text-xl font-semibold tracking-tight" }, "Shift Scheduler")), /* @__PURE__ */ React.createElement("p", { className: "text-sm", style: { color: "var(--ink-soft)" } }, "Build a round-the-clock rotation for your team.")), /* @__PURE__ */ React.createElement("div", { className: "ss-card rounded-2xl p-4 mb-4" }, /* @__PURE__ */ React.createElement("h2", { className: "ss-display text-sm font-semibold mb-3 flex items-center gap-1.5" }, /* @__PURE__ */ React.createElement(IconClock, { size: 14, color: "var(--ink-faint)" }), " Shift details"), /* @__PURE__ */ React.createElement("div", { className: "mb-4" }, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium block mb-2" }, "Shift length"), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 flex-wrap items-center" }, [4, 6, 8, 12].map((h) => /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      key: h,
+      type: "button",
+      onClick: () => setShiftHours(h),
+      className: "px-3 py-1.5 rounded-full text-sm font-medium " + (shiftHours === h ? "ss-pill-active" : "ss-pill")
+    },
+    h,
+    "h"
+  )), /* @__PURE__ */ React.createElement("div", { className: "ss-pill flex items-center gap-1 px-2.5 py-1 rounded-full" }, /* @__PURE__ */ React.createElement(
+    "input",
+    {
+      type: "number",
+      min: "1",
+      max: "24",
+      value: shiftHours,
+      onChange: (e) => setShiftHours(Math.max(1, Math.min(24, Number(e.target.value) || 1))),
+      className: "w-8 text-sm bg-transparent focus:outline-none",
+      style: { color: "var(--ink)" }
+    }
+  ), /* @__PURE__ */ React.createElement("span", { className: "text-sm" }, "h"))), /* @__PURE__ */ React.createElement("p", { className: "text-xs mt-2", style: { color: "var(--ink-faint)" } }, 24 % shiftHours === 0 ? 24 / shiftHours + " shifts per day, same times daily." : "Start times will drift daily since 24 isn't evenly divisible by " + shiftHours + ".")), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 gap-3 mb-4" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium block mb-1" }, "Start date"), /* @__PURE__ */ React.createElement(
+    "input",
+    {
+      type: "date",
+      value: startDate,
+      onChange: (e) => setStartDate(e.target.value),
+      className: "ss-input w-full px-3 py-2 rounded-lg text-sm"
+    }
+  )), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium block mb-1" }, "Start time"), /* @__PURE__ */ React.createElement(
+    "input",
+    {
+      type: "time",
+      value: startTime,
+      onChange: (e) => setStartTime(e.target.value),
+      className: "ss-input w-full px-3 py-2 rounded-lg text-sm"
+    }
+  ))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium block mb-2" }, "Schedule length"), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 flex-wrap" }, [7, 14, 21, 28].map((d) => /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      key: d,
+      type: "button",
+      onClick: () => setNumDays(d),
+      className: "px-3 py-1.5 rounded-full text-sm font-medium " + (numDays === d ? "ss-pill-active" : "ss-pill")
+    },
+    d,
+    " days"
+  ))))), /* @__PURE__ */ React.createElement("div", { className: "ss-card rounded-2xl p-4 mb-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between mb-3" }, /* @__PURE__ */ React.createElement("h2", { className: "ss-display text-sm font-semibold flex items-center gap-1.5" }, /* @__PURE__ */ React.createElement(IconUsers, { size: 14, color: "var(--ink-faint)" }), " Team"), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2.5" }, /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      type: "button",
+      onClick: () => updateNumPeople(numPeople - 1),
+      disabled: numPeople <= 1,
+      className: "ss-step-btn w-7 h-7 rounded-full flex items-center justify-center"
+    },
+    /* @__PURE__ */ React.createElement(IconMinus, { size: 13 })
+  ), /* @__PURE__ */ React.createElement("span", { className: "ss-mono text-sm font-semibold w-4 text-center" }, numPeople), /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      type: "button",
+      onClick: () => updateNumPeople(numPeople + 1),
+      disabled: numPeople >= 12,
+      className: "ss-step-btn w-7 h-7 rounded-full flex items-center justify-center"
+    },
+    /* @__PURE__ */ React.createElement(IconPlus, { size: 13 })
+  ))), /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, names.map((name, i) => /* @__PURE__ */ React.createElement("div", { key: i, className: "flex items-center gap-2.5" }, /* @__PURE__ */ React.createElement("span", { className: "w-2.5 h-2.5 rounded-full flex-shrink-0", style: { backgroundColor: PALETTE[i % PALETTE.length] } }), /* @__PURE__ */ React.createElement(
+    "input",
+    {
+      type: "text",
+      value: name,
+      onChange: (e) => updateName(i, e.target.value),
+      placeholder: "Person " + (i + 1),
+      className: "ss-input flex-1 min-w-0 px-3 py-2 rounded-lg text-sm"
+    }
+  ))))), /* @__PURE__ */ React.createElement("div", { className: "ss-card rounded-2xl p-4 mb-5" }, /* @__PURE__ */ React.createElement("h2", { className: "ss-display text-sm font-semibold mb-1 flex items-center gap-1.5" }, /* @__PURE__ */ React.createElement(IconBell, { size: 14, color: "var(--ink-faint)" }), " Notifications"), /* @__PURE__ */ React.createElement("p", { className: "text-xs mb-3", style: { color: "var(--ink-faint)" } }, "Alerts fire only while this app is open in a tab or installed window."), notifyWarning && /* @__PURE__ */ React.createElement("p", { className: "text-xs mb-3 px-2.5 py-2 rounded-lg", style: { color: "var(--dawn-text)", background: "var(--dawn-soft)" } }, notifyWarning), /* @__PURE__ */ React.createElement("div", null, names.map((name, i) => {
+    const setting = notifySettings[i] || { enabled: false, leadMinutes: 30 };
+    return /* @__PURE__ */ React.createElement("div", { key: i, className: "flex items-center justify-between gap-2 py-2", style: i > 0 ? { borderTop: "1px solid var(--line)" } : void 0 }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2 min-w-0" }, /* @__PURE__ */ React.createElement("span", { className: "w-2 h-2 rounded-full flex-shrink-0", style: { background: PALETTE[i % PALETTE.length] } }), /* @__PURE__ */ React.createElement("span", { className: "text-sm truncate" }, name && name.trim() ? name : "Person " + (i + 1))), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2 flex-shrink-0" }, setting.enabled && /* @__PURE__ */ React.createElement(
+      "select",
+      {
+        value: setting.leadMinutes,
+        onChange: (e) => updateNotifyLead(i, Number(e.target.value)),
+        className: "ss-input text-xs rounded-lg px-1.5 py-1"
+      },
+      /* @__PURE__ */ React.createElement("option", { value: 15 }, "15m before"),
+      /* @__PURE__ */ React.createElement("option", { value: 30 }, "30m before"),
+      /* @__PURE__ */ React.createElement("option", { value: 60 }, "1h before"),
+      /* @__PURE__ */ React.createElement("option", { value: 120 }, "2h before")
+    ), /* @__PURE__ */ React.createElement(Toggle, { checked: setting.enabled, onChange: () => toggleNotify(i) })));
+  }))), /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      onClick: onGenerate,
+      className: "ss-btn-primary w-full py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 active:scale-95 transition-transform"
+    },
+    "View 24/7 schedule ",
+    /* @__PURE__ */ React.createElement(IconArrowRight, { size: 17 })
+  ), /* @__PURE__ */ React.createElement("p", { className: "text-center text-xs mt-3", style: { color: "var(--ink-faint)" } }, "Your setup saves automatically in this browser"));
+}
+function ShiftRow(props) {
+  const { shift, primaryLabel, isEditing, onToggleEdit, isOverridden, onAdjust, onReset } = props;
+  const overnight = localDateKey(shift.end) !== localDateKey(shift.start);
+  const live = isLiveShift(shift);
+  const durationHours = (shift.end - shift.start) / 36e5;
+  return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      type: "button",
+      onClick: onToggleEdit,
+      className: "ss-card rounded-xl p-3 flex items-center justify-between gap-2 w-full text-left"
+    },
+    /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2 min-w-0" }, /* @__PURE__ */ React.createElement("p", { className: "text-sm font-medium truncate" }, primaryLabel), live && /* @__PURE__ */ React.createElement("span", { className: "ss-mono text-xs font-semibold uppercase px-1.5 py-0.5 rounded flex-shrink-0", style: { color: "var(--dawn-text)", background: "var(--dawn-soft)" } }, "Now")),
+    /* @__PURE__ */ React.createElement("span", { className: "flex items-center gap-1.5 flex-shrink-0" }, isOverridden && /* @__PURE__ */ React.createElement("span", { className: "w-1.5 h-1.5 rounded-full", style: { background: "var(--dawn)" } }), /* @__PURE__ */ React.createElement("p", { className: "ss-mono text-xs", style: { color: "var(--ink-soft)" } }, formatTime(shift.start), "\u2013", formatTime(shift.end), overnight ? " +1d" : ""), /* @__PURE__ */ React.createElement(IconPencil, { size: 12, color: "var(--ink-faint)" }))
+  ), isEditing && /* @__PURE__ */ React.createElement("div", { className: "ss-card rounded-xl p-3 mt-1.5" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between mb-2.5" }, /* @__PURE__ */ React.createElement("span", { className: "text-xs font-medium", style: { color: "var(--ink-soft)" } }, "Shift length"), isOverridden && /* @__PURE__ */ React.createElement("button", { type: "button", onClick: onReset, className: "text-xs font-medium", style: { color: "var(--dawn-text)" } }, "Reset to default")), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-3" }, /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      type: "button",
+      onClick: () => onAdjust(-1),
+      disabled: durationHours <= 1,
+      className: "ss-step-btn w-8 h-8 rounded-full flex items-center justify-center"
+    },
+    /* @__PURE__ */ React.createElement(IconMinus, { size: 14 })
+  ), /* @__PURE__ */ React.createElement("span", { className: "ss-mono text-base font-semibold flex-1 text-center" }, formatHours(durationHours)), /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      type: "button",
+      onClick: () => onAdjust(1),
+      disabled: durationHours >= 24,
+      className: "ss-step-btn w-8 h-8 rounded-full flex items-center justify-center"
+    },
+    /* @__PURE__ */ React.createElement(IconPlus, { size: 14 })
+  )), /* @__PURE__ */ React.createElement("p", { className: "text-xs mt-2", style: { color: "var(--ink-faint)" } }, "Ends ", formatTime(shift.end), " \u2014 later shifts shift to match")));
+}
+function ScheduleView(props) {
+  const { schedule, names, groupedByDay, groupedByPerson, summary, currentShift, scheduleView, setScheduleView, activePerson, setSelectedPerson, onEdit, overrides, editingShiftId, setEditingShiftId, adjustShiftDuration, resetShiftOverride, onShare, shareUrl, shareCopied } = props;
+  const shareInputRef = useRef(null);
+  useEffect(() => {
+    if (shareUrl && shareInputRef.current) {
+      shareInputRef.current.focus();
+      shareInputRef.current.select();
+    }
+  }, [shareUrl]);
+  return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between mb-3" }, /* @__PURE__ */ React.createElement("button", { onClick: onEdit, className: "flex items-center gap-1 text-sm font-medium -ml-1 px-1 py-1", style: { color: "var(--ink-soft)" } }, /* @__PURE__ */ React.createElement(IconChevronLeft, { size: 18 }), " Edit setup"), /* @__PURE__ */ React.createElement("button", { onClick: onShare, className: "flex items-center gap-1 text-sm font-medium px-1 py-1", style: { color: "var(--ink-soft)" } }, /* @__PURE__ */ React.createElement(IconLink, { size: 15 }), " Share")), /* @__PURE__ */ React.createElement("h1", { className: "ss-display text-xl font-semibold tracking-tight mb-4" }, "Your schedule"), shareUrl && /* @__PURE__ */ React.createElement("div", { className: "ss-card rounded-xl p-3 mb-4" }, /* @__PURE__ */ React.createElement("p", { className: "text-xs font-medium mb-1.5", style: { color: "var(--ink-soft)" } }, shareCopied ? "Copied to clipboard \u2014 paste it anywhere." : "Copy this link:"), /* @__PURE__ */ React.createElement(
+    "input",
+    {
+      ref: shareInputRef,
+      type: "text",
+      readOnly: true,
+      value: shareUrl,
+      onFocus: (e) => e.target.select(),
+      className: "ss-input w-full px-2 py-1.5 rounded-lg text-xs",
+      style: { fontFamily: "monospace" }
+    }
+  )), currentShift && /* @__PURE__ */ React.createElement("div", { className: "rounded-2xl p-4 mb-4 flex items-center gap-3", style: { background: "var(--ink)" } }, /* @__PURE__ */ React.createElement("span", { className: "w-2.5 h-2.5 rounded-full flex-shrink-0 animate-pulse", style: { backgroundColor: "var(--dawn)" } }), /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-w-0" }, /* @__PURE__ */ React.createElement("p", { className: "text-xs uppercase tracking-wide font-medium", style: { color: "var(--dawn)" } }, "On duty now"), /* @__PURE__ */ React.createElement("p", { className: "ss-display text-lg font-semibold text-white truncate" }, currentShift.person)), /* @__PURE__ */ React.createElement("p", { className: "ss-mono text-xs text-white text-right flex-shrink-0" }, "until", /* @__PURE__ */ React.createElement("br", null), formatTime(currentShift.end))), /* @__PURE__ */ React.createElement("p", { className: "text-sm mb-4", style: { color: "var(--ink-soft)" } }, formatShortDate(schedule[0] && schedule[0].start), " \u2013 ", formatShortDate(schedule[schedule.length - 1] && schedule[schedule.length - 1].end), " \xB7 ", schedule.length, " shifts \xB7 ", names.length, " people"), /* @__PURE__ */ React.createElement("div", { className: "flex rounded-xl p-1 mb-4", style: { background: "#E7E7EE" } }, ["day", "person", "summary"].map((v) => /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      key: v,
+      onClick: () => setScheduleView(v),
+      className: "flex-1 py-2 rounded-lg text-sm font-medium capitalize",
+      style: scheduleView === v ? { background: "#fff", color: "var(--ink)", boxShadow: "0 1px 2px rgba(0,0,0,0.06)" } : { color: "var(--ink-faint)" }
+    },
+    v
+  ))), scheduleView === "day" && /* @__PURE__ */ React.createElement("div", { className: "pb-4" }, groupedByDay.map((group) => /* @__PURE__ */ React.createElement("div", { key: group.key, className: "mb-5" }, /* @__PURE__ */ React.createElement("h3", { className: "text-xs font-semibold uppercase tracking-wide mb-2", style: { color: "var(--ink-faint)" } }, formatDateHeader(group.shifts[0].start)), /* @__PURE__ */ React.createElement("div", null, group.shifts.map((shift, idx) => {
+    const hue = PALETTE[shift.personIndex % PALETTE.length];
+    return /* @__PURE__ */ React.createElement("div", { key: shift.id, className: "flex gap-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex flex-col items-center w-4 flex-shrink-0 pt-2" }, /* @__PURE__ */ React.createElement("span", { className: "w-3 h-3 rounded-full flex-shrink-0", style: { backgroundColor: hue, boxShadow: isLiveShift(shift) ? "0 0 0 3px var(--dawn-soft)" : "0 0 0 2px #fff" } }), idx < group.shifts.length - 1 && /* @__PURE__ */ React.createElement("span", { className: "w-px flex-1 mt-1", style: { background: "var(--line)" } })), /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-w-0 pb-3" }, /* @__PURE__ */ React.createElement(
+      ShiftRow,
+      {
+        shift,
+        primaryLabel: shift.person,
+        isEditing: editingShiftId === shift.id,
+        onToggleEdit: () => setEditingShiftId(editingShiftId === shift.id ? null : shift.id),
+        isOverridden: overrides[shift.id] !== void 0,
+        onAdjust: (delta) => adjustShiftDuration(shift.id, delta),
+        onReset: () => resetShiftOverride(shift.id)
+      }
+    )));
+  }))))), scheduleView === "person" && /* @__PURE__ */ React.createElement("div", { className: "pb-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 overflow-x-auto pb-2 mb-4" }, names.map((name, i) => {
+    const hue = PALETTE[i % PALETTE.length];
+    const selected = activePerson === i;
+    return /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        key: i,
+        onClick: () => setSelectedPerson(i),
+        className: "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium flex-shrink-0 whitespace-nowrap " + (selected ? "" : "ss-pill"),
+        style: selected ? { background: hue + "1A", color: "var(--ink)", border: "1px solid " + hue } : void 0
+      },
+      /* @__PURE__ */ React.createElement("span", { className: "w-2 h-2 rounded-full flex-shrink-0", style: { backgroundColor: hue } }),
+      name && name.trim() ? name : "Person " + (i + 1)
+    );
+  })), /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, (groupedByPerson[activePerson] || []).map((shift) => /* @__PURE__ */ React.createElement(
+    ShiftRow,
+    {
+      key: shift.id,
+      shift,
+      primaryLabel: formatDateHeader(shift.start),
+      isEditing: editingShiftId === shift.id,
+      onToggleEdit: () => setEditingShiftId(editingShiftId === shift.id ? null : shift.id),
+      isOverridden: overrides[shift.id] !== void 0,
+      onAdjust: (delta) => adjustShiftDuration(shift.id, delta),
+      onReset: () => resetShiftOverride(shift.id)
+    }
+  )))), scheduleView === "summary" && /* @__PURE__ */ React.createElement("div", { className: "ss-card rounded-xl overflow-hidden mb-4" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F7FA" } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { color: "var(--ink-soft)" } }, "Name"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { color: "var(--ink-soft)" } }, "Shifts"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { color: "var(--ink-soft)" } }, "Hours"))), /* @__PURE__ */ React.createElement("tbody", null, summary.map((row, i) => {
+    const hue = PALETTE[i % PALETTE.length];
+    return /* @__PURE__ */ React.createElement("tr", { key: i, style: { borderTop: "1px solid var(--line)" } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement("span", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement("span", { className: "w-2 h-2 rounded-full flex-shrink-0", style: { backgroundColor: hue } }), row.name)), /* @__PURE__ */ React.createElement("td", { className: "ss-mono px-3 py-2 text-right", style: { color: "var(--ink-soft)" } }, row.shiftsCount), /* @__PURE__ */ React.createElement("td", { className: "ss-mono px-3 py-2 text-right", style: { color: "var(--ink-soft)" } }, formatHours(row.hours)));
+  })))));
+}
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(React.createElement(ShiftScheduler));
+</script>
+</body>
+</html>
