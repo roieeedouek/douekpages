@@ -2,7 +2,7 @@
   "name": "Shift Scheduler",
   "short_name": "Shifts",
   "description": "24/7 shift rotation scheduler with reminders",
-  "start_url": "./",
+  "start_url": "clockin-index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#F1F1F6",
