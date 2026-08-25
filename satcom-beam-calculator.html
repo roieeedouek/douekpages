@@ -89,7 +89,7 @@
     cursor:pointer; margin-bottom:8px; font-family:var(--sans);
   }
   .table-wrap { display:none; border:1px solid var(--grid); border-radius:8px; overflow-x:auto; margin-bottom:16px; }
-  table.sat-table { width:100%; border-collapse:collapse; font-family:var(--mono); font-size:12px; min-width:420px; }
+  table.sat-table { width:100%; border-collapse:collapse; font-family:var(--mono); font-size:12px; min-width:620px; }
   table.sat-table thead tr { background:#161B22; color:var(--muted); }
   table.sat-table th, table.sat-table td { padding:8px; text-align:right; }
   table.sat-table th:first-child, table.sat-table td:first-child { text-align:left; font-family:var(--sans); color:var(--text); }
@@ -192,10 +192,13 @@
     <div class="table-wrap" id="tableWrap">
       <table class="sat-table">
         <thead>
-          <tr><th>Satellite</th><th>Lon</th><th>Elev</th><th>Loss</th><th>Status</th></tr>
+          <tr><th>Satellite</th><th>Lon</th><th>Elev</th><th>Loss</th><th>RX MHz</th><th>TX MHz</th><th>Status</th></tr>
         </thead>
         <tbody id="satTableBody"></tbody>
       </table>
+      <div style="padding:6px 8px; font-size:10px; color:var(--muted); border-top:1px solid var(--grid);">
+        RX from the uploaded satellite CSV. TX (uplink) from the live per-channel database page, which only exposes part of its full catalog — "—" means none was retrieved, † means only some of that satellite's channels were.
+      </div>
     </div>
 
     <div class="footnote">
@@ -214,38 +217,41 @@
   var FLOOR_DB = -30;
   var AMBER = '#FFB020', CYAN = '#5EC8DE', RED = '#E5484D', GRID = '#232A33', BG = '#0B0E12', MUTED = '#7C8792';
 
+  // rx: downlink range from the CSV. tx: uplink range from the live per-channel database page
+  // (that page only exposes a subset of its full catalog, so tx is null where nothing was
+  // retrieved, and txPartial marks satellites where only some of the logged channels came through).
   var KNOWN_SATS = [
-    { name: "UFO 4", lon: -177.1 },
-    { name: "MUOS-1", lon: -177.0 },
-    { name: "SDS III-3", lon: -143.9 },
-    { name: "UFO 6", lon: -105.5 },
-    { name: "MUOS-2", lon: -100.0 },
-    { name: "UFO 5", lon: -99.4 },
-    { name: "Milstar DFS-6", lon: -90.0 },
-    { name: "Milstar DFS-4", lon: -67.9 },
-    { name: "Milstar DFS-1", lon: -38.9 },
-    { name: "Skynet 4F", lon: -34.0 },
-    { name: "SDS III-6", lon: -30.4 },
-    { name: "UFO 10", lon: -22.9 },
-    { name: "UFO 7", lon: -22.0 },
-    { name: "Skynet 5C", lon: -17.8 },
-    { name: "FLTSATCOM 8", lon: -15.8 },
-    { name: "MUOS-3", lon: -15.5 },
-    { name: "SDS III-2 F5", lon: -10.0 },
-    { name: "SICRAL 1B", lon: 11.8 },
-    { name: "ComSatBw-2", lon: 13.2 },
-    { name: "Skynet 5B", lon: 24.5 },
-    { name: "UFO 2", lon: 28.7 },
-    { name: "Skynet 4C", lon: 33.4 },
-    { name: "SICRAL 2", lon: 37.0 },
-    { name: "Skynet 5D", lon: 52.7 },
-    { name: "ComSatBw-1", lon: 63.0 },
-    { name: "Intelsat 22", lon: 72.0 },
-    { name: "MUOS-4", lon: 72.0 },
-    { name: "MUOS-5", lon: 75.0 },
-    { name: "UFO 11", lon: 75.6 },
-    { name: "Skynet 5A", lon: 95.0 },
-    { name: "UFO 8", lon: 172.3 }
+    { name: "UFO 4", lon: -177.1, rx: "244.0–269.8", tx: null, txPartial: false },
+    { name: "MUOS-1", lon: -177.0, rx: null, tx: null, txPartial: false },
+    { name: "SDS III-3", lon: -143.9, rx: "250.1–267.6", tx: null, txPartial: false },
+    { name: "UFO 6", lon: -105.5, rx: "244.2–270.0", tx: null, txPartial: false },
+    { name: "MUOS-2", lon: -100.0, rx: null, tx: null, txPartial: false },
+    { name: "UFO 5", lon: -99.4, rx: "243.9–269.7", tx: null, txPartial: false },
+    { name: "Milstar DFS-6", lon: -90.0, rx: null, tx: null, txPartial: false },
+    { name: "Milstar DFS-4", lon: -67.9, rx: "243.8–253.5", tx: null, txPartial: false },
+    { name: "Milstar DFS-1", lon: -38.9, rx: null, tx: null, txPartial: false },
+    { name: "Skynet 4F", lon: -34.0, rx: "257.4", tx: null, txPartial: false },
+    { name: "SDS III-6", lon: -30.4, rx: "262.7", tx: null, txPartial: false },
+    { name: "UFO 10", lon: -22.9, rx: "244.0–269.8", tx: "294.2–317.1", txPartial: false },
+    { name: "UFO 7", lon: -22.0, rx: "244.1–269.9", tx: "294.0–310.9", txPartial: true },
+    { name: "Skynet 5C", lon: -17.8, rx: "245.8–262.2", tx: "294.1", txPartial: true },
+    { name: "FLTSATCOM 8", lon: -15.8, rx: "244.0–270.0", tx: "295.9–317.1", txPartial: true },
+    { name: "MUOS-3", lon: -15.5, rx: null, tx: null, txPartial: false },
+    { name: "SDS III-2 F5", lon: -10.0, rx: "251.3–268.7", tx: null, txPartial: false },
+    { name: "SICRAL 1B", lon: 11.8, rx: "252.5–268.1", tx: "293.2–310.6", txPartial: false },
+    { name: "ComSatBw-2", lon: 13.2, rx: "243.6–259.1", tx: "300.4–312.0", txPartial: false },
+    { name: "Skynet 5B", lon: 24.5, rx: "245.8–263.5", tx: "295.0–316.6", txPartial: false },
+    { name: "UFO 2", lon: 28.7, rx: "251.8–263.8", tx: "294.7–316.9", txPartial: false },
+    { name: "Skynet 4C", lon: 33.4, rx: "246.3", tx: "295.6", txPartial: false },
+    { name: "SICRAL 2", lon: 37.0, rx: "252.2–267.3", tx: "308.1–310.2", txPartial: false },
+    { name: "Skynet 5D", lon: 52.7, rx: "246.0–262.0", tx: "298.8–316.2", txPartial: false },
+    { name: "ComSatBw-1", lon: 63.0, rx: "243.6–259.0", tx: "301.0–317.9", txPartial: false },
+    { name: "Intelsat 22", lon: 72.0, rx: "243.8–261.9", tx: "293.2–311.4", txPartial: false },
+    { name: "MUOS-4", lon: 72.0, rx: null, tx: null, txPartial: false },
+    { name: "MUOS-5", lon: 75.0, rx: null, tx: null, txPartial: false },
+    { name: "UFO 11", lon: 75.6, rx: "243.9–270.0", tx: "294.3–317.1", txPartial: false },
+    { name: "Skynet 5A", lon: 95.0, rx: "245.9–261.1", tx: "298.4–314.2", txPartial: false },
+    { name: "UFO 8", lon: 172.3, rx: "244.1–269.9", tx: null, txPartial: false }
   ];
 
   function toRad(d){ return d*Math.PI/180; }
@@ -633,7 +639,7 @@
       var status = 'out';
       if (r.el < 0) status = 'below-horizon';
       else if (rawLoss >= -3) status = 'in-beam';
-      return { name:s.name, lon:s.lon, el:r.el, loss:loss, rawLoss:rawLoss, status:status };
+      return { name:s.name, lon:s.lon, el:r.el, loss:loss, rawLoss:rawLoss, status:status, rx:s.rx, tx:s.tx, txPartial:s.txPartial };
     }).sort(function(a,b){ return a.lon-b.lon; });
 
     roBoresight.textContent = fmtLon(boresightLon);
@@ -654,11 +660,14 @@
     satPoints.forEach(function(s){
       var tr = document.createElement('tr');
       var st = statusMap[s.status];
+      var txCell = (s.tx || '—') + (s.txPartial ? ' <span title="Only some of this satellite\'s logged channels were retrieved" style="color:' + AMBER + ';">†</span>' : '');
       tr.innerHTML =
         '<td>' + s.name + '</td>' +
         '<td>' + fmtLon(s.lon) + '</td>' +
         '<td>' + fmtDeg(s.el) + '</td>' +
         '<td>' + (s.status==='below-horizon' ? '—' : s.rawLoss.toFixed(1)+' dB') + '</td>' +
+        '<td>' + (s.rx || '—') + '</td>' +
+        '<td>' + txCell + '</td>' +
         '<td><span class="pill" style="color:' + st.color + ';border:1px solid ' + st.color + '66;">' + st.label + '</span></td>';
       satTableBody.appendChild(tr);
     });
