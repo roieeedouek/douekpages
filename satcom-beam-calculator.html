@@ -197,7 +197,7 @@
         <tbody id="satTableBody"></tbody>
       </table>
       <div style="padding:6px 8px; font-size:10px; color:var(--muted); border-top:1px solid var(--grid);">
-        RX from the uploaded satellite CSV. TX (uplink) from the live per-channel database page, which only exposes part of its full catalog — "—" means none was retrieved, † means only some of that satellite's channels were.
+        Tap a row to see its individual channels. RX from the uploaded satellite CSV. TX (uplink) from the live per-channel database page, which only exposes part of its full catalog — "—" means none was retrieved, † means only some of that satellite's channels were.
       </div>
     </div>
 
@@ -253,6 +253,177 @@
     { name: "Skynet 5A", lon: 95.0, rx: "245.9–261.1", tx: "298.4–314.2", txPartial: false },
     { name: "UFO 8", lon: 172.3, rx: "244.1–269.9", tx: null, txPartial: false }
   ];
+
+  // per-channel detail retrieved from the live per-channel database page (partial coverage
+  // of the full 269-channel catalog - only satellites present here have per-channel detail;
+  // others fall back to the aggregate rx/tx range above).
+  var CHANNELS = {
+    "ComSatBw-1": [
+      { rx: 243.625, tx: 316.725, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 249.400, tx: 300.975, bw: 38, signal: "Medium", activity: null, status: "Active" },
+      { rx: 259.000, tx: 317.925, bw: 25, signal: "Weak", activity: null, status: "Active" },
+    ],
+    "ComSatBw-2": [
+      { rx: 243.625, tx: 300.400, bw: 25, signal: null, activity: null, status: "Inactive" },
+      { rx: 248.750, tx: 311.975, bw: 25, signal: "Strong", activity: null, status: "Active" },
+      { rx: 259.050, tx: 307.450, bw: 25, signal: "Medium", activity: null, status: "Active" },
+    ],
+    "FLTSATCOM 8": [
+      { rx: 243.990, tx: 317.090, bw: 6, signal: null, activity: null, status: "Active" },
+      { rx: 262.300, tx: 295.900, bw: 575, signal: "Weak", activity: null, status: "Active" },
+    ],
+    "Intelsat 22": [
+      { rx: 243.800, tx: 298.200, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 251.575, tx: 308.450, bw: 25, signal: "Medium", activity: "RU Traffic", status: "Active" },
+      { rx: 252.150, tx: 293.150, bw: 25, signal: "Weak", activity: "TRISTA", status: "Active" },
+      { rx: 252.300, tx: 293.300, bw: 25, signal: "Weak", activity: "TRISTA", status: "Active" },
+      { rx: 253.725, tx: 293.725, bw: 25, signal: "Medium", activity: "RU Traffic", status: "Active" },
+      { rx: 253.975, tx: 294.975, bw: 6, signal: "Medium", activity: null, status: "Active" },
+      { rx: 254.500, tx: 308.100, bw: 6, signal: "Medium", activity: null, status: "Active" },
+      { rx: 254.625, tx: 295.625, bw: 6, signal: "Medium", activity: null, status: "Active" },
+      { rx: 257.775, tx: 311.375, bw: 25, signal: "Weak", activity: "RUS", status: "Active" },
+      { rx: 261.600, tx: 306.975, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 261.650, tx: 309.650, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 261.750, tx: 295.400, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 261.850, tx: 300.275, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 261.900, tx: 307.750, bw: 25, signal: "Weak", activity: null, status: "Active" },
+    ],
+    "SICRAL 1B": [
+      { rx: 252.450, tx: 293.200, bw: 25, signal: "Strong", activity: null, status: "Active" },
+      { rx: 252.500, tx: 309.800, bw: 25, signal: "Strong", activity: null, status: "Active" },
+      { rx: 259.975, tx: 309.700, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 260.025, tx: 310.575, bw: 25, signal: "Strong", activity: null, status: "Active" },
+      { rx: 260.075, tx: 310.275, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 260.125, tx: 310.125, bw: 25, signal: "Strong", activity: null, status: "Active" },
+      { rx: 267.875, tx: 310.525, bw: 25, signal: null, activity: null, status: "Active" },
+      { rx: 267.950, tx: 310.075, bw: 25, signal: null, activity: "RU Traffic", status: "Active" },
+      { rx: 268.050, tx: 310.325, bw: 25, signal: null, activity: null, status: "Active" },
+    ],
+    "SICRAL 2": [
+      { rx: 252.200, tx: 310.155, bw: 25, signal: null, activity: null, status: "Active" },
+      { rx: 267.100, tx: 308.100, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 267.150, tx: 308.150, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 267.250, tx: 308.250, bw: 25, signal: "Medium", activity: null, status: "Active" },
+    ],
+    "Skynet 4C": [
+      { rx: 246.250, tx: 295.600, bw: 25, signal: "Weak", activity: null, status: "Active" },
+    ],
+    "Skynet 5A": [
+      { rx: 245.850, tx: 314.230, bw: 25, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.450, tx: 299.000, bw: 38, signal: null, activity: null, status: "Active" },
+      { rx: 257.450, tx: 305.950, bw: 25, signal: null, activity: "Romanians", status: "Active" },
+      { rx: 261.100, tx: 298.380, bw: 25, signal: "Weak", activity: null, status: "Active" },
+    ],
+    "Skynet 5B": [
+      { rx: 245.800, tx: 309.410, bw: 25, signal: "Medium", activity: "RU Traffic", status: "Active" },
+      { rx: 249.490, tx: 312.850, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 260.250, tx: 314.400, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 261.200, tx: 294.950, bw: 25, signal: "Weak", activity: "Italian", status: "Active" },
+      { rx: 261.400, tx: 316.550, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 263.400, tx: 314.400, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 263.500, tx: 315.200, bw: 25, signal: "Medium", activity: null, status: "Active" },
+    ],
+    "Skynet 5C": [
+      { rx: 253.825, tx: 294.050, bw: 25, signal: "Medium", activity: null, status: "Active" },
+    ],
+    "Skynet 5D": [
+      { rx: 245.950, tx: 313.000, bw: 25, signal: "Medium", activity: "Reserve", status: "Active" },
+      { rx: 247.450, tx: 298.800, bw: 25, signal: "Medium", activity: "Interesting", status: "Active" },
+      { rx: 257.700, tx: 316.150, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 260.900, tx: 313.050, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 262.000, tx: 314.200, bw: 25, signal: "Weak", activity: null, status: "Active" },
+    ],
+    "UFO 10": [
+      { rx: 243.995, tx: 317.095, bw: 6, signal: "Weak", activity: null, status: "Active" },
+      { rx: 258.600, tx: 294.825, bw: 28, signal: "Strong", activity: null, status: "Active" },
+      { rx: 260.575, tx: 294.175, bw: 28, signal: "Medium", activity: null, status: "Active" },
+      { rx: 260.675, tx: 294.275, bw: 25, signal: "Strong", activity: "Brazil Music", status: "Active" },
+      { rx: 261.625, tx: 295.225, bw: 25, signal: "Medium", activity: "Brazil", status: "Active" },
+      { rx: 262.075, tx: 295.675, bw: 25, signal: null, activity: null, status: "Active" },
+      { rx: 262.175, tx: 295.775, bw: 25, signal: null, activity: null, status: "Active" },
+      { rx: 265.350, tx: 306.350, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 266.850, tx: 307.850, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 268.250, tx: 309.250, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 269.750, tx: 310.750, bw: 25, signal: "Medium", activity: null, status: "Active" },
+    ],
+    "UFO 11": [
+      { rx: 243.915, tx: 317.015, bw: null, signal: "Weak", activity: null, status: "Active" },
+      { rx: 243.935, tx: 317.035, bw: 6, signal: "Medium", activity: null, status: "Active" },
+      { rx: 243.945, tx: 317.045, bw: 6, signal: null, activity: null, status: "Active" },
+      { rx: 243.955, tx: 317.055, bw: 6, signal: "Weak", activity: null, status: "Active" },
+      { rx: 243.965, tx: 317.065, bw: 6, signal: "Medium", activity: null, status: "Active" },
+      { rx: 243.975, tx: 317.075, bw: 6, signal: null, activity: null, status: "Active" },
+      { rx: 248.825, tx: 294.375, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 248.845, tx: 302.445, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 248.855, tx: 302.455, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 248.865, tx: 302.465, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 248.875, tx: 302.475, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 248.885, tx: 302.485, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 248.895, tx: 302.495, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 248.905, tx: 302.505, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 248.915, tx: 302.515, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 248.935, tx: 302.535, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 248.945, tx: 302.545, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 248.955, tx: 302.555, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 248.965, tx: 302.565, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.050, tx: 302.650, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.100, tx: 302.700, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.235, tx: 302.835, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.245, tx: 302.845, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.255, tx: 302.855, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.265, tx: 302.865, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.275, tx: 302.875, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.285, tx: 302.885, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.295, tx: 302.895, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.305, tx: 302.905, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.315, tx: 302.915, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.325, tx: 302.925, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.335, tx: 302.935, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.345, tx: 302.945, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 249.355, tx: 302.955, bw: 6, signal: "Strong", activity: null, status: "Active" },
+      { rx: 253.550, tx: 294.550, bw: 25, signal: null, activity: "MOLITVA Prayer", status: "Active" },
+      { rx: 258.650, tx: 299.650, bw: 25, signal: "Strong", activity: "Duty", status: "Active" },
+      { rx: 261.575, tx: 295.175, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 261.700, tx: 296.525, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 261.775, tx: 307.075, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 261.950, tx: 294.625, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 263.600, tx: 317.130, bw: 6, signal: "Weak", activity: null, status: "Active" },
+      { rx: 263.800, tx: 297.250, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 263.825, tx: 297.425, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 263.925, tx: 297.525, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 265.250, tx: 306.250, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 265.325, tx: 295.100, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 265.550, tx: 306.550, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 265.675, tx: 306.675, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 265.850, tx: 306.850, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 266.750, tx: 316.575, bw: 25, signal: "Medium", activity: "RU Traffic", status: "Active" },
+      { rx: 266.975, tx: 297.500, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 267.400, tx: 294.900, bw: 25, signal: "Weak", activity: "RU Traffic", status: "Active" },
+      { rx: 268.150, tx: 309.150, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 268.450, tx: 297.150, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 269.650, tx: 310.650, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 269.725, tx: 295.150, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 269.925, tx: 295.550, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 269.950, tx: 294.325, bw: 25, signal: "Weak", activity: null, status: "Active" },
+    ],
+    "UFO 2": [
+      { rx: 251.800, tx: 300.350, bw: 25, signal: "Weak", activity: "UA Ukraine", status: "Active" },
+      { rx: 253.650, tx: 294.650, bw: 25, signal: "Weak", activity: "RU Traffic", status: "Active" },
+      { rx: 257.250, tx: 316.900, bw: 25, signal: "Medium", activity: "RU Traffic", status: "Active" },
+      { rx: 258.225, tx: 299.300, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 258.450, tx: 299.450, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 263.775, tx: 297.375, bw: 25, signal: "Weak", activity: "UA Ukraine", status: "Active" },
+    ],
+    "UFO 7": [
+      { rx: 253.850, tx: 294.850, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 258.550, tx: 299.550, bw: 25, signal: "Medium", activity: null, status: "Active" },
+      { rx: 260.425, tx: 294.025, bw: 28, signal: "Medium", activity: null, status: "Active" },
+      { rx: 265.450, tx: 306.450, bw: 25, signal: "Weak", activity: null, status: "Active" },
+      { rx: 266.950, tx: 307.950, bw: 25, signal: null, activity: null, status: "Active" },
+      { rx: 268.350, tx: 309.350, bw: 25, signal: "Strong", activity: null, status: "Active" },
+      { rx: 269.850, tx: 310.850, bw: 25, signal: "Weak", activity: null, status: "Active" },
+    ],
+  };
 
   function toRad(d){ return d*Math.PI/180; }
   function toDeg(r){ return r*180/Math.PI; }
@@ -351,6 +522,7 @@
   var pointMode = 'lon';
   var tableOpen = false;
   var sweeping = false;
+  var expandedSats = new Set();
   var sweepDir = 1;
   var sweepIntervalId = null;
 
@@ -660,16 +832,59 @@
     satPoints.forEach(function(s){
       var tr = document.createElement('tr');
       var st = statusMap[s.status];
+      var channels = CHANNELS[s.name] || [];
+      var isOpen = expandedSats.has(s.name);
+      var chevron = isOpen ? '▴' : '▾';
       var txCell = (s.tx || '—') + (s.txPartial ? ' <span title="Only some of this satellite\'s logged channels were retrieved" style="color:' + AMBER + ';">†</span>' : '');
+      tr.style.cursor = 'pointer';
       tr.innerHTML =
-        '<td>' + s.name + '</td>' +
+        '<td><span style="display:inline-flex;align-items:center;gap:4px;"><span style="color:' + MUTED + ';font-size:9px;">' + chevron + '</span>' + s.name + '</span></td>' +
         '<td>' + fmtLon(s.lon) + '</td>' +
         '<td>' + fmtDeg(s.el) + '</td>' +
         '<td>' + (s.status==='below-horizon' ? '—' : s.rawLoss.toFixed(1)+' dB') + '</td>' +
         '<td>' + (s.rx || '—') + '</td>' +
         '<td>' + txCell + '</td>' +
         '<td><span class="pill" style="color:' + st.color + ';border:1px solid ' + st.color + '66;">' + st.label + '</span></td>';
+      tr.addEventListener('click', function(){
+        if (expandedSats.has(s.name)) expandedSats.delete(s.name);
+        else expandedSats.add(s.name);
+        render();
+      });
       satTableBody.appendChild(tr);
+
+      if (isOpen){
+        var detailTr = document.createElement('tr');
+        var detailTd = document.createElement('td');
+        detailTd.colSpan = 7;
+        detailTd.style.padding = '0';
+        detailTd.style.background = '#0A0D11';
+        if (channels.length > 0){
+          var html = '<table style="width:100%; font-family:var(--mono); font-size:10px;"><thead><tr style="color:' + MUTED + ';">' +
+            '<th style="text-align:right;padding:4px;font-weight:normal;">RX MHz</th>' +
+            '<th style="text-align:right;padding:4px;font-weight:normal;">TX MHz</th>' +
+            '<th style="text-align:right;padding:4px;font-weight:normal;">BW kHz</th>' +
+            '<th style="text-align:right;padding:4px;font-weight:normal;">Signal</th>' +
+            '<th style="text-align:left;padding:4px;font-weight:normal;">Activity</th>' +
+            '<th style="text-align:right;padding:4px;font-weight:normal;">Status</th>' +
+            '</tr></thead><tbody>';
+          channels.forEach(function(c){
+            html += '<tr style="border-top:1px solid ' + GRID + ';">' +
+              '<td style="text-align:right;padding:4px;color:var(--text);">' + c.rx.toFixed(3) + '</td>' +
+              '<td style="text-align:right;padding:4px;color:var(--text);">' + c.tx.toFixed(3) + '</td>' +
+              '<td style="text-align:right;padding:4px;color:' + MUTED + ';">' + (c.bw !== null ? c.bw : '—') + '</td>' +
+              '<td style="text-align:right;padding:4px;color:' + MUTED + ';">' + (c.signal !== null ? c.signal : '—') + '</td>' +
+              '<td style="text-align:left;padding:4px;color:' + MUTED + ';">' + (c.activity !== null ? c.activity : '—') + '</td>' +
+              '<td style="text-align:right;padding:4px;color:' + (c.status==='Active' ? AMBER : MUTED) + ';">' + c.status + '</td>' +
+              '</tr>';
+          });
+          html += '</tbody></table>';
+          detailTd.innerHTML = html;
+        } else {
+          detailTd.innerHTML = '<div style="padding:8px;color:' + MUTED + ';font-size:10px;">No per-channel data retrieved for this satellite from the live database page — only the aggregate RX range from the CSV is known.</div>';
+        }
+        detailTr.appendChild(detailTd);
+        satTableBody.appendChild(detailTr);
+      }
     });
 
     drawChart(pts, boresightLon, edgeLow, edgeHigh, satPoints, showSats, lo, hi);
